@@ -22,7 +22,7 @@ func Run(cfg config.Server, app *service.AppContainer) {
 }
 
 func registerTerminalRouts(router fiber.Router, app *service.AppContainer, secret []byte) {
-	terminalGroup := router.Group("/terminal") //, middlerwares.Auth(secret), middlerwares.RoleChecker("user", "admin"))
+	terminalGroup := router.Group("/terminals") //, middlerwares.Auth(secret), middlerwares.RoleChecker("user", "admin"))
 	fmt.Print(secret)
 	terminalGroup.Post("",
 		handlers.CreateTerminal(app.TerminalService()),
