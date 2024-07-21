@@ -11,11 +11,12 @@ const (
 	Sailing TerminalType = "sailing" // port
 )
 
-type Terminal struct{
+type Terminal struct {
 	gorm.Model
-	Name     string       `gorm:"type:varchar(100);not null;uniqueIndex"`
-	Type     TerminalType `gorm:"type:varchar(20);not null"`
-	City     string       `gorm:"type:varchar(100);not null"`
-	Country  string       `gorm:"type:varchar(100);not null"`
-	Paths    []Path       `gorm:"foreignKey:FromTerminalID"` 
+	Name      string       `gorm:"type:varchar(100);not null;uniqueIndex"`
+	Type      TerminalType `gorm:"type:varchar(20);not null"`
+	City      string       `gorm:"type:varchar(100);not null"`
+	Country   string       `gorm:"type:varchar(100);not null"`
+	OutgoingPaths []Path   `gorm:"foreignKey:FromTerminalID"`
+	IncomingPaths []Path   `gorm:"foreignKey:ToTerminalID"`
 }
