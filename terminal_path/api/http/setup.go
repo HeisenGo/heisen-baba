@@ -3,6 +3,7 @@ package http
 import (
 	"fmt"
 	"log"
+	"terminalpathservice/api/http/handlers"
 	"terminalpathservice/config"
 	"terminalpathservice/service"
 
@@ -13,52 +14,17 @@ func Run(cfg config.Server, app *service.AppContainer) {
 	fiberApp := fiber.New()
 	api := fiberApp.Group("/api/v1") //, middlerwares.SetUserContext())
 
-	// register global routes
-	//registerGlobalRoutes(api, app)
-
 	secret := []byte(cfg.Secret)
 	fmt.Println(api, secret)
-	// registering users APIs
-	//registerUsersAPI(api, app.UserService(), secret)
-
-	// registering orders APIs
-	//registerOrderRoutes(api, app, secret)
-
+	registerTerminalRouts(api, app, secret)
 	// run server
 	log.Fatal(fiberApp.Listen(fmt.Sprintf("%s:%d", cfg.Host, cfg.HttpPort)))
 }
 
-// func registerUsersAPI(router fiber.Router, _ *service.UserService, secret []byte) {
-// 	userGroup := router.Group("/users")//, middlerwares.Auth(secret), middlerwares.RoleChecker("user", "admin"))
-
-// 	userGroup.Get("/folan", func(c *fiber.Ctx) error {
-// 		claims := c.Locals(jwt.UserClaimKey).(*jwt.UserClaims)
-
-// 		return c.JSON(map[string]any{
-// 			"user_id": claims.UserID,
-// 			"role":    claims.Role,
-// 		})
-// 	})
-// }
-
-// func registerGlobalRoutes(router fiber.Router, app *service.AppContainer) {
-// 	router.Post("/login", handlers.LoginUser(app.AuthService()))
-// 	router.Get("/refresh", handlers.RefreshCreds(app.AuthService()))
-// }
-
-// func registerOrderRoutes(router fiber.Router, app *service.AppContainer, secret []byte) {
-// 	router = router.Group("/orders")
-
-// 	router.Get("", middlerwares.Auth(secret), userRoleChecker(), handlers.UserOrders(app.OrderService()))
-
-// 	router.Post("",
-// 		middlerwares.SetTransaction(adapter.NewGormCommiter(app.RawRBConnection())),
-// 		middlerwares.Auth(secret),
-// 		userRoleChecker(),
-// 		handlers.CreateUserOrder(app.OrderServiceFromCtx),
-// 	)
-// }
-
-// func userRoleChecker() fiber.Handler {
-// 	return middlerwares.RoleChecker("user")
-// }
+func registerTerminalRouts(router fiber.Router, app *service.AppContainer, secret []byte) {
+	terminalGroup := router.Group("/terminal") //, middlerwares.Auth(secret), middlerwares.RoleChecker("user", "admin"))
+	fmt.Print(secret)
+	terminalGroup.Post("",
+		handlers.CreateTerminal(app.TerminalService()),
+	)
+}
