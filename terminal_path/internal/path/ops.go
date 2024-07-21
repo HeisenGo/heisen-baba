@@ -25,6 +25,7 @@ func (o *Ops) Create(ctx context.Context, path *Path) error {
 	if err := path.ValidateStartAndEndCities(); err != nil {
 		return err
 	}
+	path.Type = path.FromTerminal.Type
 	return o.repo.Insert(ctx, path)
 }
 

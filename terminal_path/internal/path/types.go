@@ -31,6 +31,7 @@ type Path struct {
 	Distance       float64 // in kilometers
 	Code           string
 	Name           string
+	Type           terminal.TerminalType
 }
 
 func (p *Path) ValidateStartEndTerminalTypes() error {

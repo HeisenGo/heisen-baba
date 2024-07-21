@@ -2,18 +2,20 @@ package mappers
 
 import (
 	"terminalpathservice/internal/path"
+	"terminalpathservice/internal/terminal"
 	"terminalpathservice/pkg/adapters/storage/entities"
 	"terminalpathservice/pkg/fp"
 )
 
 func PathEntityToDomain(pathEntity entities.Path) path.Path {
 	return path.Path{
-		ID:      pathEntity.ID,
-		Name:    pathEntity.Name,
-		Code: pathEntity.Code,
-		Distance: pathEntity.Distance,
-		ToTerminalID: pathEntity.ToTerminalID,
+		ID:             pathEntity.ID,
+		Name:           pathEntity.Name,
+		Code:           pathEntity.Code,
+		Distance:       pathEntity.Distance,
+		ToTerminalID:   pathEntity.ToTerminalID,
 		FromTerminalID: pathEntity.FromTerminalID,
+		Type:           terminal.TerminalType(pathEntity.Type),
 	}
 }
 
@@ -23,10 +25,11 @@ func PathEntitiesToDomain(pathEntities []entities.Path) []path.Path {
 
 func PathDomainToEntity(p *path.Path) *entities.Path {
 	return &entities.Path{
-		ToTerminalID: p.ToTerminalID,
+		ToTerminalID:   p.ToTerminalID,
 		FromTerminalID: p.FromTerminalID,
-		Name:    p.Name,
-		Code: p.Code,
-		Distance: p.Distance,
+		Name:           p.Name,
+		Code:           p.Code,
+		Distance:       p.Distance,
+		Type:           string(p.Type),
 	}
 }
