@@ -6,7 +6,7 @@ import (
 	"terminalpathservice/pkg/fp"
 )
 
-func terminalEntityToDomain(terminalEntity entities.Terminal) terminal.Terminal {
+func TerminalEntityToDomain(terminalEntity entities.Terminal) terminal.Terminal {
 	return terminal.Terminal{
 		ID:      terminalEntity.ID,
 		Name:    terminalEntity.Name,
@@ -17,7 +17,7 @@ func terminalEntityToDomain(terminalEntity entities.Terminal) terminal.Terminal 
 }
 
 func TerminalEntitiesToDomain(terminalEntities []entities.Terminal) []terminal.Terminal {
-	return fp.Map(terminalEntities, terminalEntityToDomain)
+	return fp.Map(terminalEntities, TerminalEntityToDomain)
 }
 
 func TerminalDomainToEntity(t *terminal.Terminal) *entities.Terminal {
