@@ -2,6 +2,7 @@ package terminal
 
 import (
 	"context"
+	"terminalpathservice/internal"
 )
 
 type Ops struct {
@@ -17,6 +18,16 @@ func NewOps(repo Repo) *Ops {
 func (o *Ops) Create(ctx context.Context, terminal *Terminal) error {
 	if err := terminal.ValidateType(); err != nil {
 		return ErrInvalidType
+	}
+
+	if err := internal.ValidateName(terminal.Name, MaxStringLength); err != nil {
+		return err
+	}
+	if err := internal.ValidateName(terminal.City, MaxStringLength); err != nil {
+		return err
+	}
+	if err := internal.ValidateName(terminal.Country, MaxStringLength); err != nil {
+		return err
 	}
 	return o.repo.Insert(ctx, terminal)
 }

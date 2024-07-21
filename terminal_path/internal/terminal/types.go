@@ -3,6 +3,7 @@ package terminal
 import (
 	"context"
 	"errors"
+	
 )
 
 type TerminalType string
@@ -12,6 +13,7 @@ const (
 	Rail    TerminalType = "rail"
 	Road    TerminalType = "road"
 	Sailing TerminalType = "sailing" // port
+	MaxStringLength int = 100
 )
 
 var (
@@ -38,3 +40,5 @@ func (t *Terminal) ValidateType() error {
 	}
 	return nil
 }
+
+

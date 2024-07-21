@@ -2,6 +2,7 @@ package path
 
 import (
 	"context"
+	"terminalpathservice/internal"
 )
 
 type Ops struct {
@@ -16,6 +17,12 @@ func NewOps(repo Repo) *Ops {
 
 func (o *Ops) Create(ctx context.Context, path *Path) error {
 	if err := path.ValidateStartEndTerminalTypes(); err != nil {
+		return err
+	}
+	if err := internal.ValidateName(path.Name, MaxStringLength); err != nil {
+		return err
+	}
+	if err := path.ValidateStartAndEndCities(); err != nil {
 		return err
 	}
 	return o.repo.Insert(ctx, path)
