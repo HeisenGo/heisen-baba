@@ -1,1 +1,35 @@
 package path
+
+import (
+	"context"
+)
+
+type Ops struct {
+	repo Repo
+}
+
+func NewOps(repo Repo) *Ops {
+	return &Ops{
+		repo: repo,
+	}
+}
+
+func (o *Ops) Create(ctx context.Context, path *Path) error {
+	if err := path.ValidateStartEndTerminalTypes(); err != nil {
+		return err
+	}
+	return o.repo.Insert(ctx, path)
+}
+
+func (o *Ops) GetPathByID(ctx context.Context, id uint) (*Path, error) {
+	p, err := o.repo.GetByID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	if p == nil {
+		return nil, ErrPathNotFound
+	}
+
+	return p, nil
+}

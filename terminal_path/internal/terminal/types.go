@@ -15,8 +15,8 @@ const (
 )
 
 var (
-	ErrQuantityGreater = errors.New("quantity should not be greater than price")
-	ErrWrongOrderTime  = errors.New("wrong order time")
+	ErrInvalidType      = errors.New("terminal type is not valid. It should be one of the following: road, rail, air, sailing")
+	ErrTerminalNotFound = errors.New("terminal not found")
 )
 
 type Repo interface {
@@ -30,4 +30,11 @@ type Terminal struct {
 	Type    TerminalType
 	City    string
 	Country string
+}
+
+func (t *Terminal) ValidateType() error {
+	if t.Type != Air && t.Type != Sailing && t.Type != Road && t.Type != Rail {
+		return ErrInvalidType
+	}
+	return nil
 }

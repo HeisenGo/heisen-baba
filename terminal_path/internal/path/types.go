@@ -7,8 +7,8 @@ import (
 )
 
 var (
-	ErrQuantityGreater = errors.New("quantity should not be greater than price")
-	ErrWrongOrderTime  = errors.New("wrong order time")
+	ErrPathNotFound                 = errors.New("path not found")
+	ErrMisMatchStartEndTerminalType = errors.New("terminal types for starting and ending a path should be the same")
 )
 
 type Repo interface {
@@ -25,4 +25,11 @@ type Path struct {
 	Distance       float64 // in kilometers
 	Code           string
 	Name           string
+}
+
+func (p *Path) ValidateStartEndTerminalTypes() error {
+	if p.FromTerminal.Type != p.ToTerminal.Type {
+		return ErrMisMatchStartEndTerminalType
+	}
+	return nil
 }
