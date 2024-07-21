@@ -1,8 +1,19 @@
-url: localhost:2244/api/v1/terminals
+url: `localhost:2244/api/v1/terminals`
+
+method: POST
+
 json body sample:
+
+
+```go
 {
   "name": "West Terminal",
-	"type": "road",
-	"city": "Tehran",
-	"country": "Iran"
+  
+   "type": "road",
+ 
+   "city": "Tehran",
+ 
+   "country": "Iran"
+ 
 }
+```
