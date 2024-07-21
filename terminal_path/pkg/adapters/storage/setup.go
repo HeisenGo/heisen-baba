@@ -3,6 +3,7 @@ package storage
 import (
 	"fmt"
 	"terminalpathservice/config"
+	"terminalpathservice/pkg/adapters/storage/entities"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -14,17 +15,14 @@ func NewPostgresGormConnection(dbConfig config.DB) (*gorm.DB, error) {
 	return gorm.Open(postgres.Open(dsn), &gorm.Config{})
 }
 
-func AddExtension(db *gorm.DB) error {
-	return db.Exec(`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`).Error
-}
+// func AddExtension(db *gorm.DB) error {
+// 	return db.Exec(`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`).Error
+// }
 
 func Migrate(db *gorm.DB) error {
 	migrator := db.Migrator()
 
-	err := migrator.AutoMigrate() //&entities.User{},
-	// 	&entities.Board{}, &entities.UserBoardRole{},
-	// 	&entities.Task{}, &entities.TaskDependency{}, &entities.Board{}, &entities.UserBoardRole{}, &entities.Column{}, &entities.Notification{},
-	// 	entities.Comment{})
+	err := migrator.AutoMigrate(&entities.Terminal{}, &entities.Path{})
 	if err != nil {
 		return err
 	}

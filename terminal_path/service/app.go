@@ -47,10 +47,10 @@ func (a *AppContainer) mustInitDB() {
 
 	a.dbConn = db
 
-	err = storage.AddExtension(a.dbConn)
-	if err != nil {
-		log.Fatal("Create extension failed: ", err)
-	}
+	//err = storage.AddExtension(a.dbConn)
+	// if err != nil {
+	// 	log.Fatal("Create extension failed: ", err)
+	// }
 
 	err = storage.Migrate(a.dbConn)
 	if err != nil {
