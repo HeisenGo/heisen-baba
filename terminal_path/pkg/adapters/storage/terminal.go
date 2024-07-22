@@ -40,7 +40,7 @@ func (r *terminalRepo) GetByID(ctx context.Context, id uint) (*terminal.Terminal
 
 	err := r.db.WithContext(ctx).Model(&entities.Terminal{}).Where("id = ?", id).First(&t).Error
 	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
+		if strings.Contains(err.Error(), "record not found") {
 			return nil, nil
 		}
 		return nil, err
