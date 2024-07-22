@@ -33,9 +33,10 @@ func CreateTerminal(terminalService *service.TerminalService) fiber.Handler {
 		t := presenter.TerminalRequestToTerminal(&req)
 
 		if err := terminalService.CreateTerminal(c.UserContext(), t); err != nil {
-			if errors.Is(err, terminal.ErrInvalidType) || errors.Is(err, internal.ErrEmptyString) || errors.Is(err, internal.ErrConsecutiveSpaces) || errors.Is(err, internal.ErrExceedsMaxLength) || errors.Is(err, internal.ErrInvalidCharacters) {
+			if errors.Is(err, terminal.ErrDuplication) || errors.Is(err, terminal.ErrInvalidType) || errors.Is(err, internal.ErrEmptyString) || errors.Is(err, internal.ErrConsecutiveSpaces) || errors.Is(err, internal.ErrExceedsMaxLength) || errors.Is(err, internal.ErrInvalidCharacters) {
 				return presenter.BadRequest(c, err)
 			}
+			fmt.Print(err)
 			err := errors.New("Error")
 			// apply trace ID here .... TODO
 			return presenter.InternalServerError(c, err)

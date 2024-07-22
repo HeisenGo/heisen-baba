@@ -19,6 +19,7 @@ var (
 	ErrInvalidType      = errors.New("terminal type is not valid. It should be one of the following: road, rail, air, sailing")
 	ErrTerminalNotFound = errors.New("terminal not found")
 	ErrRecordsNotFound  = errors.New("any terminal exists")
+	ErrDuplication      = errors.New("a terminal with this name, type, city, and country already exists")
 )
 
 type Repo interface {
