@@ -44,3 +44,12 @@ func (o *Ops) GetTerminalByID(ctx context.Context, id uint) (*Terminal, error) {
 
 	return t, nil
 }
+
+func (o *Ops) CityTypeTerminals(ctx context.Context,country, city, terminalType string, page, pageSize uint) ([]Terminal, uint, error) {
+	limit := pageSize
+	offset := (page - 1) * pageSize
+
+	terminals, total, err := o.repo.GetTerminalsByCityAndType(ctx, country, city, terminalType, limit, offset)
+
+	return terminals, total, err
+}

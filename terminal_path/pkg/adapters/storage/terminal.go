@@ -42,3 +42,40 @@ func (r *terminalRepo) GetByID(ctx context.Context, id uint) (*terminal.Terminal
 	dTerminal := mappers.TerminalEntityToDomain(t)
 	return &dTerminal, nil
 }
+
+func (r *terminalRepo) GetTerminalsByCityAndType(ctx context.Context, country, city, terminalType string, limit, offset uint) ([]terminal.Terminal, uint, error) {
+	var query *gorm.DB
+	if city != "" && terminalType != "" {
+		query = r.db.WithContext(ctx).Model(&entities.Terminal{}).Where("city = ? AND type=? AND country=?", city, terminalType, country)
+	} else if city != "" && terminalType == "" {
+		query = r.db.WithContext(ctx).Model(&entities.Terminal{}).Where("city = ? AND country=?", city, country)
+	} else if city == "" && terminalType != "" {
+		query = r.db.WithContext(ctx).Model(&entities.Terminal{}).Where("type=? AND country=?", terminalType, country)
+	} else if city == "" && terminalType == "" {
+		query = r.db.WithContext(ctx).Model(&entities.Terminal{}).Where("country=?", country)
+	}
+	var total int64
+
+	if err := query.Count(&total).Error; err != nil {
+		return nil, 0, err
+	}
+
+	if offset > 0 {
+		query = query.Offset(int(offset))
+	}
+
+	if limit > 0 {
+		query = query.Limit(int(limit))
+	}
+
+	var terminals []entities.Terminal
+
+	if err := query.Find(&terminals).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, 0, terminal.ErrRecordsNotFound
+		}
+		return nil, 0, err
+	}
+
+	return mappers.TerminalEntitiesToDomain(terminals), uint(total), nil
+}

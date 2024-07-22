@@ -3,27 +3,28 @@ package terminal
 import (
 	"context"
 	"errors"
-	
 )
 
 type TerminalType string
 
 const (
-	Air     TerminalType = "ait"
-	Rail    TerminalType = "rail"
-	Road    TerminalType = "road"
-	Sailing TerminalType = "sailing" // port
-	MaxStringLength int = 100
+	Air             TerminalType = "air"
+	Rail            TerminalType = "rail"
+	Road            TerminalType = "road"
+	Sailing         TerminalType = "sailing" // port
+	MaxStringLength int          = 100
 )
 
 var (
 	ErrInvalidType      = errors.New("terminal type is not valid. It should be one of the following: road, rail, air, sailing")
 	ErrTerminalNotFound = errors.New("terminal not found")
+	ErrRecordsNotFound  = errors.New("any terminal exists")
 )
 
 type Repo interface {
 	Insert(ctx context.Context, t *Terminal) error
 	GetByID(ctx context.Context, id uint) (*Terminal, error)
+	GetTerminalsByCityAndType(ctx context.Context, city, terminalType, country string, limit, offset uint) ([]Terminal, uint, error)
 }
 
 type Terminal struct {
@@ -40,5 +41,3 @@ func (t *Terminal) ValidateType() error {
 	}
 	return nil
 }
-
-

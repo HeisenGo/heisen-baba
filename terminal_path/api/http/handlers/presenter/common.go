@@ -1,6 +1,8 @@
 package presenter
 
 import (
+	"math"
+
 	"github.com/go-playground/validator/v10"
 )
 
@@ -40,4 +42,24 @@ func GetValidator() *XValidator {
 		}
 	}
 	return appValidator
+}
+
+type PaginationResponse[T any] struct {
+	Page       uint `json:"page"`
+	PageSize   uint `json:"pageSize"`
+	TotalPages uint `json:"totalPages"`
+	Data       []T  `json:"data"`
+}
+
+func NewPagination[T any](data []T, page, pageSize, total uint) *PaginationResponse[T] {
+	totalPages := uint(0)
+	if pageSize > 0 && total > 0 {
+		totalPages = uint(math.Ceil(float64(total) / float64(pageSize)))
+	}
+	return &PaginationResponse[T]{
+		Page:       page,
+		PageSize:   pageSize,
+		TotalPages: totalPages,
+		Data:       data,
+	}
 }

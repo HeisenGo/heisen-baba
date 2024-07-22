@@ -7,24 +7,24 @@ import (
 
 type TerminalRequest struct {
 	ID      uint   `json:"terminal_id"`
-	Name    string `json:"name"`
-	Type    string `json:"type"`
-	City    string `json:"city"`
-	Country string `json:"country"`
+	Name    string `json:"name" validate:"required"`
+	Type    string `json:"type" validate:"required"`
+	City    string `json:"city" validate:"required"`
+	Country string `json:"country" validate:"required"`
 }
 
-func TerminalToTerminalRequest(t terminal.Terminal) TerminalRequest {
-	return TerminalRequest{
+
+func TerminalToTerminalGetResponse(t terminal.Terminal) TerminalGetResponse {
+	return TerminalGetResponse{
 		ID:      t.ID,
 		Name:    t.Name,
 		Type:    string(t.Type),
 		City:    t.City,
-		Country: t.Country,
 	}
 }
 
-func TerminalsToTerminalRequest(terminals []terminal.Terminal) []TerminalRequest {
-	return fp.Map(terminals, TerminalToTerminalRequest)
+func TerminalsToTerminalResponse(terminals []terminal.Terminal) []TerminalGetResponse {
+	return fp.Map(terminals, TerminalToTerminalGetResponse)
 }
 
 func TerminalRequestToTerminal(terminalReq *TerminalRequest) *terminal.Terminal {
@@ -34,5 +34,33 @@ func TerminalRequestToTerminal(terminalReq *TerminalRequest) *terminal.Terminal 
 		Type:    terminal.TerminalType(terminalReq.Type),
 		City:    terminalReq.City,
 		Country: terminalReq.Country,
+	}
+}
+
+type SearchTerminalByCityTypeReq struct {
+	Type string `json:"type"`
+	City string `json:"city" validate:"required"` 
+}
+
+type SearchTerminalByCityTypeRes struct{
+	ID uint `json:"terminal_id"`
+	Name string `json:"name"`
+	Type string `json:"type"`
+}
+
+type TerminalGetResponse struct {
+	ID      uint   `json:"terminal_id"`
+	Name    string `json:"name"`
+	Type    string `json:"type"`
+	City    string `json:"city"`
+}
+
+func TerminalToTerminalRequest(t terminal.Terminal) TerminalRequest {
+	return TerminalRequest{
+		ID:      t.ID,
+		Name:    t.Name,
+		Type:    string(t.Type),
+		City:    t.City,
+		Country: t.Country,
 	}
 }

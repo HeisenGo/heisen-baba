@@ -42,3 +42,17 @@ func BodyValidator[T any](req T) error {
 	}
 	return nil
 }
+
+func PageAndPageSize(c *fiber.Ctx) (int, int) {
+	page, pageSize := c.QueryInt("page"), c.QueryInt("page_size")
+	if page <= 0 {
+		page = 1
+	}
+
+	if pageSize <= 0 {
+		pageSize = 10
+	}
+
+	return page, pageSize
+}
+
