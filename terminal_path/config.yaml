@@ -9,4 +9,4 @@ db:
   pass: "123456"
   host : "localhost"
   port: 3322
-  db_name: "path"
+  db_name: "terminal_path"
