@@ -13,6 +13,10 @@ import (
 func Run(cfg config.Server, app *service.AppContainer) {
 	fiberApp := fiber.New()
 	api := fiberApp.Group("/api/v1") //, middlerwares.SetUserContext())
+	// Setup a simple health check route
+	api.Get("/health", func(c *fiber.Ctx) error {
+		return c.SendString("Service is up and running")
+	})
 
 	secret := []byte(cfg.Secret)
 	fmt.Println(api, secret)
