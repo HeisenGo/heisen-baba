@@ -8,4 +8,3 @@ dockerize:
 	rm -rf $(BIN_DIR)
 	docker compose down --remove-orphans
 	docker compose -f $(DOCKER_COMPOSE) up --build -d
-	docker ps -a
