@@ -6,7 +6,9 @@ import (
 	"terminalpathservice/config"
 	"terminalpathservice/internal/path"
 	"terminalpathservice/internal/terminal"
+	"terminalpathservice/pkg/adapters/consul"
 	"terminalpathservice/pkg/adapters/storage"
+	"terminalpathservice/pkg/ports"
 	"terminalpathservice/pkg/valuecontext"
 
 	"gorm.io/gorm"
@@ -17,6 +19,7 @@ type AppContainer struct {
 	dbConn          *gorm.DB
 	pathService     *PathService
 	terminalService *TerminalService
+	serviceRegistry *ports.IServiceRegistry
 }
 
 func NewAppContainer(cfg config.Config) (*AppContainer, error) {
@@ -25,7 +28,13 @@ func NewAppContainer(cfg config.Config) (*AppContainer, error) {
 	}
 
 	app.mustInitDB()
-	storage.Migrate(app.dbConn)
+	err := storage.Migrate(app.dbConn)
+	if err != nil {
+		log.Fatal("Migration failed: ", err)
+	}
+
+	// service registry
+	app.mustRegisterService(cfg.Server)
 
 	app.setTerminalService()
 	app.setPathService()
@@ -106,4 +115,12 @@ func (a *AppContainer) setPathService() {
 		return
 	}
 	a.pathService = NewPathService(path.NewOps(storage.NewPathRepo(a.dbConn)), terminal.NewOps(storage.NewTerminalRepo(a.dbConn)))
+}
+
+func (a *AppContainer) mustRegisterService(srvCfg config.Server) {
+	registry := consul.NewConsul(srvCfg.ServiceRegistry.Address)
+	err := registry.RegisterService(srvCfg.ServiceHostName, srvCfg.ServiceHTTPPrefixPath, srvCfg.ServiceHTTPHealthPath, srvCfg.HttpPort)
+	if err != nil {
+		log.Fatalf("Failed to register service with Consul: %v", err)
+	}
 }
