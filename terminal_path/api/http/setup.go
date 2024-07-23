@@ -13,17 +13,21 @@ import (
 func Run(cfg config.Server, app *service.AppContainer) {
 	fiberApp := fiber.New()
 	api := fiberApp.Group("/api/v1") //, middlerwares.SetUserContext())
-	// Setup a simple health check route
-	api.Get("/health", func(c *fiber.Ctx) error {
-		return c.SendString("Service is up and running")
-	})
 
 	secret := []byte(cfg.Secret)
 	fmt.Println(api, secret)
+	registerGlobalRoutes(api)
 	registerTerminalRouts(api, app, secret)
 	registerPathRouts(api, app, secret)
 	// run server
 	log.Fatal(fiberApp.Listen(fmt.Sprintf("%s:%d", cfg.Host, cfg.HttpPort)))
+}
+
+func registerGlobalRoutes(router fiber.Router) {
+	// Setup a simple health check route
+	router.Get("/health", func(c *fiber.Ctx) error {
+		return c.SendString("Service is up and running")
+	})
 }
 
 func registerTerminalRouts(router fiber.Router, app *service.AppContainer, secret []byte) {
