@@ -42,7 +42,7 @@ func (p *Path) ValidateStartEndTerminalTypes() error {
 }
 
 func (p *Path) ValidateStartAndEndCities() error {
-	if p.FromTerminal.City == p.ToTerminal.City && p.Distance < MinDistance {
+	if p.FromTerminal.City == p.ToTerminal.City {
 		return ErrSameCitiesTerminals
 	}
 	return nil

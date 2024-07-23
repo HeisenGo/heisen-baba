@@ -3,6 +3,7 @@ package storage
 import (
 	"context"
 	"errors"
+	"strings"
 	"terminalpathservice/internal/terminal"
 	"terminalpathservice/pkg/adapters/storage/entities"
 	"terminalpathservice/pkg/adapters/storage/mappers"
@@ -20,8 +21,13 @@ func NewTerminalRepo(db *gorm.DB) terminal.Repo {
 
 func (r *terminalRepo) Insert(ctx context.Context, t *terminal.Terminal) error {
 	terminalEntity := mappers.TerminalDomainToEntity(t)
-	if err := r.db.WithContext(ctx).Save(&terminalEntity).Error; err != nil {
-		return err
+
+	result := r.db.WithContext(ctx).Save(&terminalEntity)
+	if result.Error != nil {
+		if strings.Contains(result.Error.Error(), "duplicate key") {
+			return terminal.ErrDuplication
+		}
+		return result.Error
 	}
 
 	t.ID = terminalEntity.ID
@@ -34,7 +40,7 @@ func (r *terminalRepo) GetByID(ctx context.Context, id uint) (*terminal.Terminal
 
 	err := r.db.WithContext(ctx).Model(&entities.Terminal{}).Where("id = ?", id).First(&t).Error
 	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
+		if strings.Contains(err.Error(), "record not found") {
 			return nil, nil
 		}
 		return nil, err
