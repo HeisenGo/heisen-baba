@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"errors"
-	"fmt"
 	"terminalpathservice/api/http/handlers/presenter"
 	"terminalpathservice/internal"
 	"terminalpathservice/internal/terminal"
@@ -36,7 +35,6 @@ func CreateTerminal(terminalService *service.TerminalService) fiber.Handler {
 			if errors.Is(err, terminal.ErrDuplication) || errors.Is(err, terminal.ErrInvalidType) || errors.Is(err, internal.ErrEmptyString) || errors.Is(err, internal.ErrConsecutiveSpaces) || errors.Is(err, internal.ErrExceedsMaxLength) || errors.Is(err, internal.ErrInvalidCharacters) {
 				return presenter.BadRequest(c, err)
 			}
-			fmt.Print(err)
 			err := errors.New("Error")
 			// apply trace ID here .... TODO
 			return presenter.InternalServerError(c, err)
@@ -70,14 +68,12 @@ func CityTerminals(terminalService *service.TerminalService) fiber.Handler {
 			err := errors.New("Error")
 			return SendError(c, err, status)
 		}
-		fmt.Println(terminals)
 		data := presenter.NewPagination(
 			presenter.TerminalsToTerminalResponse(terminals),
 			uint(page),
 			uint(pageSize),
 			total,
 		)
-		fmt.Println(data)
 		return presenter.OK(c, "Terminals fetched successfully", data)
 	}
 }
