@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"errors"
+	"fmt"
 	"terminalpathservice/api/http/handlers/presenter"
 	"terminalpathservice/internal"
 	"terminalpathservice/internal/terminal"
@@ -112,5 +113,36 @@ func PatchTerminal(terminalService *service.TerminalService) fiber.Handler {
 		}
 		res := presenter.TerminalToTerminalRequest(*changedTerminal)
 		return presenter.Created(c, "Terminal updated successfully", res)
+	}
+}
+
+func DeleteTerminal(terminalService *service.TerminalService) fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		// userClaims, ok := c.Locals(UserClaimKey).(*jwt.UserClaims)
+		// if !ok {
+		// 	return SendError(c, errWrongClaimType, fiber.StatusBadRequest)
+		// }
+		terminalID, err := c.ParamsInt("terminalID")
+		if err != nil {
+			return SendError(c, errWrongIDType, fiber.StatusBadRequest)
+		}
+
+		if terminalID < 0 {
+			return SendError(c, errWrongIDType, fiber.StatusBadRequest)
+		}
+
+		deletedTerminal, err := terminalService.DeleteTerminal(c.UserContext(), uint(terminalID))
+
+		if err != nil {
+			if errors.Is(err, terminal.ErrCanNotDelete) || errors.Is(err, terminal.ErrTerminalNotFound) {
+				return presenter.BadRequest(c, err)
+			}
+			fmt.Println(err)
+			err := errors.New("Error")
+			// trace ID : TODO
+			return presenter.InternalServerError(c, err)
+		}
+		res := presenter.TerminalToTerminalRequest(*deletedTerminal)
+		return presenter.Created(c, "Terminal deleted successfully", res)
 	}
 }
