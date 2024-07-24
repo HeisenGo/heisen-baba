@@ -27,6 +27,23 @@ localhost:2244/api/v1/terminals?country=Iran&city=Qazvin
 localhost:2244/api/v1/terminals?country=Iran&city=Qazvin&type=air
 ```
 
+**Terminal Patch**
+```localhost:2244/api/v1/terminals/5```
+
+```go
+{
+  "name": "tt", //optional
+	"type": "rail", // optional
+	"city": "Hamedan", // optional
+	"country": "Iran" //optional
+}
+
+```
+**Terminal Delete**
+
+``` localhost:2244/api/v1/terminals/3 ```
+
+
 **PATH**
 ```
 localhost:2244/api/v1/paths
