@@ -137,7 +137,6 @@ func DeleteTerminal(terminalService *service.TerminalService) fiber.Handler {
 			if errors.Is(err, terminal.ErrCanNotDelete) || errors.Is(err, terminal.ErrTerminalNotFound) {
 				return presenter.BadRequest(c, err)
 			}
-			fmt.Println(err)
 			err := errors.New("Error")
 			// trace ID : TODO
 			return presenter.InternalServerError(c, err)
