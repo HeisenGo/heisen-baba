@@ -47,3 +47,14 @@ localhost:2244/api/v1/paths
 }
 
 ```
+
+**GET**
+```
+localhost:2244/api/v1/paths
+
+localhost:2244/api/v1/paths?from=Tehran
+
+localhost:2244/api/v1/paths?from=Tehran&to=Zanjan
+
+localhost:2244/api/v1/paths?from=Tehran&to=Zanjan&type=road
+```

@@ -3,6 +3,7 @@ package storage
 import (
 	"context"
 	"errors"
+	"strings"
 	"terminalpathservice/internal/path"
 	"terminalpathservice/pkg/adapters/storage/entities"
 	"terminalpathservice/pkg/adapters/storage/mappers"
@@ -41,4 +42,45 @@ func (r *pathRepo) GetByID(ctx context.Context, id uint) (*path.Path, error) {
 	}
 	dPath := mappers.PathEntityToDomain(p)
 	return &dPath, nil
+}
+
+func (r *pathRepo) GetPathsByOriginDestinationType(ctx context.Context, originCity, destinationCity, pathType string, limit, offset uint) ([]path.Path, uint, error) {
+	var paths []entities.Path
+	var total int64
+
+	query := r.db.WithContext(ctx).Model(&entities.Path{}).
+		Preload("FromTerminal").
+		Preload("ToTerminal")
+
+		// Build the query based on provided parameters
+	if originCity != "" {
+		query = query.Joins("JOIN terminals AS from_terminal ON paths.from_terminal_id = from_terminal.id").
+			Where("from_terminal.city = ?", originCity)
+	}
+	if destinationCity != "" {
+		query = query.Joins("JOIN terminals AS to_terminal ON paths.to_terminal_id = to_terminal.id").
+			Where("to_terminal.city = ?", destinationCity)
+	}
+	if pathType != "" {
+		query = query.Where("paths.type = ?", pathType)
+	}
+	if err := query.Count(&total).Error; err != nil {
+		return nil, 0, err
+	}
+
+	if offset > 0 {
+		query = query.Offset(int(offset))
+	}
+	if limit > 0 {
+		query = query.Limit(int(limit))
+	}
+
+	if err := query.Find(&paths).Error; err != nil {
+		if strings.Contains(err.Error(), "record not found") {
+			return nil, 0, path.ErrRecordsNotFound
+		}
+		return nil, 0, err
+	}
+	print(paths)
+	return mappers.PathEntitiesToDomain(paths), uint(total), nil
 }

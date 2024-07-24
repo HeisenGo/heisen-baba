@@ -45,3 +45,34 @@ func CreatePath(pathService *service.PathService) fiber.Handler {
 		return presenter.Created(c, "Path created successfully", res)
 	}
 }
+
+func GetPathsByOriginDestinationType(pathService *service.PathService) fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		// userClaims, ok := c.Locals(UserClaimKey).(*jwt.UserClaims)
+		// if !ok {
+		// 	return SendError(c, errWrongClaimType, fiber.StatusBadRequest)
+		// }
+		//query parameter
+		page, pageSize := PageAndPageSize(c)
+		originCity := c.Query("from")
+		destinationCity := c.Query("to")
+		pathType := c.Query("type")
+
+		paths, total, err := pathService.GetPathsByOriginDestinationType(c.UserContext(), originCity, destinationCity, pathType, uint(page), uint(pageSize))
+		if err != nil {
+			status := fiber.StatusInternalServerError
+			if errors.Is(err, terminal.ErrRecordsNotFound) {
+				status = fiber.StatusBadRequest
+			}
+			err := errors.New("Error")
+			return SendError(c, err, status)
+		}
+		data := presenter.NewPagination(
+			presenter.PathsToPathResponse(paths),
+			uint(page),
+			uint(pageSize),
+			total,
+		)
+		return presenter.OK(c, "Paths fetched successfully", data)
+	}
+}

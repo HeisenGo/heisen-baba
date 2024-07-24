@@ -14,11 +14,13 @@ var (
 	ErrPathNotFound                 = errors.New("path not found")
 	ErrMisMatchStartEndTerminalType = errors.New("terminal types for starting and ending a path should be the same")
 	ErrSameCitiesTerminals          = errors.New("same city terminals with less than 90 km DistanceKM")
+	ErrRecordsNotFound              = errors.New("any path exists")
 )
 
 type Repo interface {
 	GetByID(ctx context.Context, id uint) (*Path, error)
 	Insert(ctx context.Context, p *Path) error
+	GetPathsByOriginDestinationType(ctx context.Context, originCity, destinationCity, pathType string, limit, offset uint) ([]Path, uint, error)
 }
 
 type Path struct {

@@ -8,18 +8,23 @@ import (
 )
 
 func PathEntityToDomain(pathEntity entities.Path) path.Path {
+	fromTerminal := TerminalEntityToDomain(pathEntity.FromTerminal)
+	toTerminal := TerminalEntityToDomain(pathEntity.ToTerminal)
 	return path.Path{
 		ID:             pathEntity.ID,
 		Name:           pathEntity.Name,
 		Code:           pathEntity.Code,
 		DistanceKM:     pathEntity.DistanceKM,
 		ToTerminalID:   pathEntity.ToTerminalID,
+		ToTerminal:     &toTerminal,
 		FromTerminalID: pathEntity.FromTerminalID,
+		FromTerminal:   &fromTerminal,
 		Type:           terminal.TerminalType(pathEntity.Type),
 	}
 }
 
 func PathEntitiesToDomain(pathEntities []entities.Path) []path.Path {
+
 	return fp.Map(pathEntities, PathEntityToDomain)
 }
 

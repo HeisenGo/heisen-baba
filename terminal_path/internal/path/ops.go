@@ -41,3 +41,13 @@ func (o *Ops) GetPathByID(ctx context.Context, id uint) (*Path, error) {
 
 	return p, nil
 }
+
+func (o *Ops) GetPathsByOriginDestinationType(ctx context.Context, originCity, destinationCity, pathType string, page, pageSize uint) ([]Path, uint, error) {
+	limit := pageSize
+	offset := (page - 1) * pageSize
+
+	terminals, total, err := o.repo.GetPathsByOriginDestinationType(ctx, originCity, destinationCity, pathType, limit, offset)
+
+	return terminals, total, err
+
+}

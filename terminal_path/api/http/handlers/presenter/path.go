@@ -14,24 +14,36 @@ type PathRequest struct {
 }
 
 type PathResponse struct {
-	ID         uint    `json:"id"`
-	DistanceKM float64 `json:"DistanceKM"` // in kilometers
-	Code       string  `json:"code"`
-	Name       string  `json:"name"`
-	Type       string  `json:"type"`
+	ID               uint    `json:"id"`
+	DistanceKM       float64 `json:"DistanceKM"` // in kilometers
+	Code             string  `json:"code"`
+	Name             string  `json:"name"`
+	Type             string  `json:"type"`
+	FromCountry      string  `json:"from_country"`
+	FromCity         string  `json:"from"`
+	FromTerminalName string  `json:"from_terminal"`
+	ToCountry        string  `json:"to_country"`
+	ToCity           string  `json:"to"`
+	ToTerminalName   string  `json:"to_terminal"`
 }
 
 func PathToPathResponse(p path.Path) PathResponse {
 	return PathResponse{
-		ID:         p.ID,
-		DistanceKM: p.DistanceKM, // in kilometers
-		Code:       p.Code,
-		Name:       p.Name,
-		Type:       string(p.Type),
+		ID:               p.ID,
+		DistanceKM:       p.DistanceKM, // in kilometers
+		Code:             p.Code,
+		Name:             p.Name,
+		Type:             string(p.Type),
+		FromCountry:      p.FromTerminal.Country,
+		ToCountry:        p.ToTerminal.Country,
+		FromCity:         p.FromTerminal.City,
+		ToCity:           p.ToTerminal.City,
+		FromTerminalName: p.FromTerminal.Name,
+		ToTerminalName:   p.ToTerminal.Name,
 	}
 }
 
-func PathsToPathRequests(paths []path.Path) []PathResponse {
+func PathsToPathResponse(paths []path.Path) []PathResponse {
 	return fp.Map(paths, PathToPathResponse)
 }
 

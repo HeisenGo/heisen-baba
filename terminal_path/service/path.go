@@ -38,3 +38,7 @@ func (s *PathService) CreatePath(ctx context.Context, path *path.Path) error {
 	}
 	return s.pathOps.Create(ctx, path)
 }
+
+func (s *PathService) GetPathsByOriginDestinationType(ctx context.Context, originCity, destinationCity, pathType string, page, pageSize uint) ([]path.Path, uint, error) {
+	return s.pathOps.GetPathsByOriginDestinationType(ctx, originCity, destinationCity, pathType, page, pageSize)
+}
