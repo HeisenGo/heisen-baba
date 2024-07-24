@@ -23,11 +23,24 @@ func (s *TerminalService) GetTerminalsOfCity(ctx context.Context, country, city,
 	return s.terminalOps.CityTypeTerminals(ctx, country, city, terminalType, page, pageSize)
 }
 
-func (s *TerminalService) PatchTerminal(ctx context.Context, updatedTerminal *terminal.Terminal) (*terminal.Terminal,error) {
+func (s *TerminalService) PatchTerminal(ctx context.Context, updatedTerminal *terminal.Terminal) (*terminal.Terminal, error) {
 	originalTerminal, err := s.terminalOps.GetTerminalByID(ctx, updatedTerminal.ID)
 	if err != nil {
 		return nil, err
 	}
 	er := s.terminalOps.PatchTerminal(ctx, updatedTerminal, originalTerminal)
 	return originalTerminal, er
+}
+
+func (s *TerminalService) DeleteTerminal(ctx context.Context, terminalID uint) (*terminal.Terminal, error) {
+
+	terminal, err := s.terminalOps.GetTerminalByID(ctx, terminalID)
+	if err != nil {
+		return nil, err
+	}
+	err = s.terminalOps.Delete(ctx, terminalID)
+	if err != nil {
+		return nil, err
+	}
+	return terminal, nil
 }
