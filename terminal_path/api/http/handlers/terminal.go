@@ -77,3 +77,40 @@ func CityTerminals(terminalService *service.TerminalService) fiber.Handler {
 		return presenter.OK(c, "Terminals fetched successfully", data)
 	}
 }
+
+func PatchTerminal(terminalService *service.TerminalService) fiber.Handler {
+	return func(c *fiber.Ctx) error {
+
+		var req presenter.UpdateTerminalRequest
+
+		if err := c.BodyParser(&req); err != nil {
+			return SendError(c, err, fiber.StatusBadRequest)
+		}
+
+		// userClaims, ok := c.Locals(UserClaimKey).(*jwt.UserClaims)
+		// if !ok {
+		// 	return SendError(c, errWrongClaimType, fiber.StatusBadRequest)
+		// }
+		terminalID, err := c.ParamsInt("terminalID")
+		if err != nil {
+			return SendError(c, errWrongIDType, fiber.StatusBadRequest)
+		}
+
+		if terminalID < 0 {
+			return SendError(c, errWrongIDType, fiber.StatusBadRequest)
+		}
+
+		updatedTerminal := presenter.UpdateTerminalToTerminal(&req, uint(terminalID))
+		changedTerminal, err := terminalService.PatchTerminal(c.UserContext(), updatedTerminal)
+
+		if err != nil {
+			if errors.Is(err, terminal.ErrFailedToUpdate) || errors.Is(err, terminal.ErrTerminalNotFound) || errors.Is(err, terminal.ErrCanNotUpdate) {
+				return presenter.BadRequest(c, err)
+			}
+			// trace ID : TODO
+			return presenter.InternalServerError(c, err)
+		}
+		res := presenter.TerminalToTerminalRequest(*changedTerminal)
+		return presenter.Created(c, "Terminal updated successfully", res)
+	}
+}
