@@ -12,7 +12,7 @@ func PathEntityToDomain(pathEntity entities.Path) path.Path {
 		ID:             pathEntity.ID,
 		Name:           pathEntity.Name,
 		Code:           pathEntity.Code,
-		Distance:       pathEntity.Distance,
+		DistanceKM:     pathEntity.DistanceKM,
 		ToTerminalID:   pathEntity.ToTerminalID,
 		FromTerminalID: pathEntity.FromTerminalID,
 		Type:           terminal.TerminalType(pathEntity.Type),
@@ -29,7 +29,7 @@ func PathDomainToEntity(p *path.Path) *entities.Path {
 		FromTerminalID: p.FromTerminalID,
 		Name:           p.Name,
 		Code:           p.Code,
-		Distance:       p.Distance,
+		DistanceKM:     p.DistanceKM,
 		Type:           string(p.Type),
 	}
 }

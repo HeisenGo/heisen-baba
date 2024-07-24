@@ -13,7 +13,7 @@ const (
 var (
 	ErrPathNotFound                 = errors.New("path not found")
 	ErrMisMatchStartEndTerminalType = errors.New("terminal types for starting and ending a path should be the same")
-	ErrSameCitiesTerminals          = errors.New("same city terminals with less than 90 km distance")
+	ErrSameCitiesTerminals          = errors.New("same city terminals with less than 90 km DistanceKM")
 )
 
 type Repo interface {
@@ -27,7 +27,7 @@ type Path struct {
 	ToTerminalID   uint
 	FromTerminal   *terminal.Terminal
 	ToTerminal     *terminal.Terminal
-	Distance       float64 // in kilometers
+	DistanceKM     float64 // in kilometers
 	Code           string
 	Name           string
 	Type           terminal.TerminalType
