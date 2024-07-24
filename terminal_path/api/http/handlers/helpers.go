@@ -11,9 +11,10 @@ import (
 
 //const UserClaimKey = jwt.UserClaimKey
 
-// var (
-// 	errWrongClaimType = errors.New("wrong claim type")
-// )
+var (
+	errWrongClaimType = errors.New("wrong claim type")
+	errWrongIDType    = errors.New("wrong type for id")
+)
 
 type ServiceFactory[T any] func(context.Context) T
 
@@ -55,4 +56,3 @@ func PageAndPageSize(c *fiber.Ctx) (int, int) {
 
 	return page, pageSize
 }
-
