@@ -26,14 +26,14 @@ func ValidateName(name string, maxLength int) error {
 		return ErrExceedsMaxLength
 	}
 
-	
 	// Check for consecutive spaces
 	if strings.Contains(name, "  ") {
 		return ErrConsecutiveSpaces
 	}
 
 	// Additional check: name should start and end with a letter or number
-	if !regexp.MustCompile(`^[a-zA-Z0-9].*[a-zA-Z0-9]$`).MatchString(name) {
+	var validBoardName = regexp.MustCompile(`^[a-zA-Z0-9 ._-]{1,100}$`)
+	if !validBoardName.MatchString(name) {
 		return ErrInvalidCharacters
 	}
 
