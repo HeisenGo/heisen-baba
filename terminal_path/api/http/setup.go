@@ -38,6 +38,8 @@ func registerTerminalRouts(router fiber.Router, app *service.AppContainer, secre
 	)
 
 	terminalGroup.Get("", handlers.CityTerminals(app.TerminalService()))
+
+	terminalGroup.Patch("", handlers.PatchTerminal(app.TerminalService()))
 }
 
 func registerPathRouts(router fiber.Router, app *service.AppContainer, secret []byte) {
