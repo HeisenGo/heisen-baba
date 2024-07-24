@@ -4,7 +4,6 @@ import (
 	"errors"
 	"regexp"
 	"strings"
-	"unicode"
 )
 
 var (
@@ -27,24 +26,10 @@ func ValidateName(name string, maxLength int) error {
 		return ErrExceedsMaxLength
 	}
 
-	// Check for invalid characters
-	invalidChars := []rune{';', '\'', '"', '-', '=', '*', '/', '\\', '<', '>', '(', ')', '{', '}', '[', ']'}
-	for _, char := range invalidChars {
-		if strings.ContainsRune(name, char) {
-			return ErrInvalidCharacters
-		}
-	}
-
+	
 	// Check for consecutive spaces
 	if strings.Contains(name, "  ") {
 		return ErrConsecutiveSpaces
-	}
-
-	// Check if the name contains only printable characters
-	for _, char := range name {
-		if !unicode.IsPrint(char) {
-			return ErrInvalidCharacters
-		}
 	}
 
 	// Additional check: name should start and end with a letter or number
