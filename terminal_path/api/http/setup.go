@@ -40,6 +40,7 @@ func registerTerminalRouts(router fiber.Router, app *service.AppContainer, secre
 	terminalGroup.Get("", handlers.CityTerminals(app.TerminalService()))
 
 	terminalGroup.Patch(":terminalID", handlers.PatchTerminal(app.TerminalService()))
+	terminalGroup.Delete(":terminalID", handlers.DeleteTerminal(app.TerminalService()))
 }
 
 func registerPathRouts(router fiber.Router, app *service.AppContainer, secret []byte) {
