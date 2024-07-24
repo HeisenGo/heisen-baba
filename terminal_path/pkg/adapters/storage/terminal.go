@@ -2,6 +2,7 @@ package storage
 
 import (
 	"context"
+	"fmt"
 	"strings"
 	"terminalpathservice/internal/terminal"
 	"terminalpathservice/pkg/adapters/storage/entities"
@@ -83,4 +84,68 @@ func (r *terminalRepo) GetTerminalsByCityAndType(ctx context.Context, country, c
 	}
 
 	return mappers.TerminalEntitiesToDomain(terminals), uint(total), nil
+}
+
+func (r *terminalRepo) PatchTerminal(ctx context.Context, updatedTerminal, originalTerminal *terminal.Terminal) error {
+	canUpdate, err := r.canUpdateTerminal(ctx, updatedTerminal.ID)
+	if err != nil {
+		return err
+	}
+
+	if !canUpdate {
+		if updatedTerminal.Type != "" || updatedTerminal.City != "" || updatedTerminal.Country != "" {
+			return terminal.ErrCanNotUpdate
+		}
+	}
+
+	// Prepare a map to hold the fields to be updated
+	updates := make(map[string]interface{})
+
+	// Add fields to the map if they are provided in the request
+	if updatedTerminal.Name != "" {
+		updates["name"] = updatedTerminal.Name
+		originalTerminal.Name = updatedTerminal.Name
+		updates["normalized_name"] = entities.NormalizeName(updates["name"].(string))
+	}
+
+	if updatedTerminal.Type != "" {
+		updates["type"] = updatedTerminal.Type
+		originalTerminal.Type = updatedTerminal.Type
+	}
+	if updatedTerminal.City != "" {
+		updates["city"] = updatedTerminal.City
+		originalTerminal.City = updatedTerminal.City
+	}
+	if updatedTerminal.Country != "" {
+		updates["country"] = updatedTerminal.Country
+		originalTerminal.Country = updatedTerminal.Country
+	}
+
+	if err := r.db.Model(&entities.Terminal{}).Where("id = ?", updatedTerminal.ID).Updates(updates).Error; err != nil {
+		if strings.Contains(err.Error(), "duplicate key") {
+			return terminal.ErrDuplication
+		}
+		return terminal.ErrFailedToUpdate
+	}
+
+	return nil
+}
+
+func (r *terminalRepo) canUpdateTerminal(ctx context.Context, terminalID uint) (bool, error) {
+	var count int64
+
+	// Count paths where the terminal is either the start or the end terminal
+	if err := r.db.WithContext(ctx).Model(&entities.Path{}).
+		Where("from_terminal_id = ? OR to_terminal_id = ?", terminalID, terminalID).
+		Count(&count).Error; err != nil {
+		return false, fmt.Errorf("failed to count paths: %v", err)
+	}
+
+	// If there are no such paths, the terminal can be updated
+	if count == 0 {
+		return true, nil
+	}
+
+	// If there are paths, determine if the terminal can be updated based on business logic
+	return false, nil
 }
