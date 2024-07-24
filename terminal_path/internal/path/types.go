@@ -8,7 +8,6 @@ import (
 
 const (
 	MaxStringLength = 100
-	MinDistance     = 90
 )
 
 var (
