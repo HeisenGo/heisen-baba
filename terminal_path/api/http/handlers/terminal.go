@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"errors"
-	"fmt"
 	"terminalpathservice/api/http/handlers/presenter"
 	"terminalpathservice/internal"
 	"terminalpathservice/internal/terminal"
