@@ -20,13 +20,15 @@ var (
 	ErrTerminalNotFound = errors.New("terminal not found")
 	ErrRecordsNotFound  = errors.New("any terminal exists")
 	ErrDuplication      = errors.New("a terminal with this name, type, city, and country already exists")
+	ErrFailedToUpdate   = errors.New("failed to update terminal ")
+	ErrCanNotUpdate     = errors.New("terminal cannot be updated due to existing paths")
 )
 
 type Repo interface {
 	Insert(ctx context.Context, t *Terminal) error
 	GetByID(ctx context.Context, id uint) (*Terminal, error)
 	GetTerminalsByCityAndType(ctx context.Context, city, terminalType, country string, limit, offset uint) ([]Terminal, uint, error)
-}
+	PatchTerminal(ctx context.Context, updatedTerminal, originalTerminal *Terminal) error}
 
 type Terminal struct {
 	ID      uint

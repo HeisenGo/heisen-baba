@@ -45,11 +45,35 @@ func (o *Ops) GetTerminalByID(ctx context.Context, id uint) (*Terminal, error) {
 	return t, nil
 }
 
-func (o *Ops) CityTypeTerminals(ctx context.Context,country, city, terminalType string, page, pageSize uint) ([]Terminal, uint, error) {
+func (o *Ops) CityTypeTerminals(ctx context.Context, country, city, terminalType string, page, pageSize uint) ([]Terminal, uint, error) {
 	limit := pageSize
 	offset := (page - 1) * pageSize
 
 	terminals, total, err := o.repo.GetTerminalsByCityAndType(ctx, country, city, terminalType, limit, offset)
 
 	return terminals, total, err
+}
+
+func (o *Ops) PatchTerminal(ctx context.Context, updatedTerminal, originalTerminal *Terminal) error {
+	if updatedTerminal.Type != "" {
+		if err := updatedTerminal.ValidateType(); err != nil {
+			return ErrInvalidType
+		}
+	}
+	if updatedTerminal.Name != "" {
+		if err := internal.ValidateName(updatedTerminal.Name, MaxStringLength); err != nil {
+			return err
+		}
+	}
+	if updatedTerminal.City != "" {
+		if err := internal.ValidateName(updatedTerminal.City, MaxStringLength); err != nil {
+			return err
+		}
+	}
+	if updatedTerminal.Country != "" {
+		if err := internal.ValidateName(updatedTerminal.Country, MaxStringLength); err != nil {
+			return err
+		}
+	}
+	return o.repo.PatchTerminal(ctx, updatedTerminal, originalTerminal)
 }
