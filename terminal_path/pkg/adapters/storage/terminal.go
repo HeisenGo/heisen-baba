@@ -2,7 +2,6 @@ package storage
 
 import (
 	"context"
-	"errors"
 	"strings"
 	"terminalpathservice/internal/terminal"
 	"terminalpathservice/pkg/adapters/storage/entities"
@@ -77,7 +76,7 @@ func (r *terminalRepo) GetTerminalsByCityAndType(ctx context.Context, country, c
 	var terminals []entities.Terminal
 
 	if err := query.Find(&terminals).Error; err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
+		if strings.Contains(err.Error(), "record not found") {
 			return nil, 0, terminal.ErrRecordsNotFound
 		}
 		return nil, 0, err
