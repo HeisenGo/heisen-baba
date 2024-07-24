@@ -12,7 +12,7 @@ import (
 //const UserClaimKey = jwt.UserClaimKey
 
 var (
-	errWrongClaimType = errors.New("wrong claim type")
+	//errWrongClaimType = errors.New("wrong claim type")
 	errWrongIDType    = errors.New("wrong type for id")
 )
 
