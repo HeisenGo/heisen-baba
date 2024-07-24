@@ -77,3 +77,7 @@ func (o *Ops) PatchTerminal(ctx context.Context, updatedTerminal, originalTermin
 	}
 	return o.repo.PatchTerminal(ctx, updatedTerminal, originalTerminal)
 }
+
+func (o *Ops) Delete(ctx context.Context, terminalID uint) error {
+	return o.repo.Delete(ctx, terminalID)
+}
