@@ -13,7 +13,7 @@ const (
 var (
 	ErrPathNotFound                 = errors.New("path not found")
 	ErrMisMatchStartEndTerminalType = errors.New("terminal types for starting and ending a path should be the same")
-	ErrSameCitiesTerminals          = errors.New("same city terminals with less than 90 km DistanceKM")
+	ErrSameCitiesTerminals          = errors.New("same city terminals")
 	ErrRecordsNotFound              = errors.New("any path exists")
 	ErrDuplication                  = errors.New("a path with this code already exists")
 )
