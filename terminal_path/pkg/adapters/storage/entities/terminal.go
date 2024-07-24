@@ -16,9 +16,6 @@ type Terminal struct {
 	Country        string `gorm:"type:varchar(100);not null;index:idx_normalized_name_type_city_country,unique,priority:4"`
 	OutgoingPaths  []Path `gorm:"foreignKey:FromTerminalID"`
 	IncomingPaths  []Path `gorm:"foreignKey:ToTerminalID"`
-
-	// Composite unique constraint
-	//UniqueTerminal string `gorm:"uniqueIndex:idx_normalized_name_type_city_country"`
 }
 
 func NormalizeName(name string) string {
