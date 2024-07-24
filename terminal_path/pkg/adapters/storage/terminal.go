@@ -146,6 +146,25 @@ func (r *terminalRepo) canUpdateTerminal(ctx context.Context, terminalID uint) (
 		return true, nil
 	}
 
-	// If there are paths, determine if the terminal can be updated based on business logic
 	return false, nil
+}
+
+func (r *terminalRepo) Delete(ctx context.Context, terminalID uint) error {
+	// check if there jis a path related to this terminal:
+	var path entities.Path
+	result := r.db.WithContext(ctx).Where("from_terminal_id = ? OR to_terminal_id = ?", terminalID, terminalID).First(&path)
+	if result.Error!=nil{
+		if strings.Contains(result.Error.Error(), "record not found") {
+			// Delete the terminal
+			if err := r.db.WithContext(ctx).Delete(&entities.Terminal{}, terminalID).Error; err != nil {
+				return fmt.Errorf("%w %w", terminal.ErrDeleteTerminal, err)
+			}else{
+				return nil
+			}
+		}
+		return fmt.Errorf("internal Error %w", result.Error)
+	}
+
+	return terminal.ErrCanNotDelete
+
 }
