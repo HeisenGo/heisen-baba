@@ -33,7 +33,7 @@ func CreatePath(pathService *service.PathService) fiber.Handler {
 		p := presenter.PathRequestToPath(&req)
 
 		if err := pathService.CreatePath(c.UserContext(), p); err != nil {
-			if errors.Is(err, path.ErrMisMatchStartEndTerminalType) || errors.Is(err, path.ErrSameCitiesTerminals) || errors.Is(err, terminal.ErrTerminalNotFound) || errors.Is(err, internal.ErrEmptyString) || errors.Is(err, internal.ErrConsecutiveSpaces) || errors.Is(err, internal.ErrExceedsMaxLength) || errors.Is(err, internal.ErrInvalidCharacters) {
+			if errors.Is(err, path.ErrDuplication) || errors.Is(err, path.ErrMisMatchStartEndTerminalType) || errors.Is(err, path.ErrSameCitiesTerminals) || errors.Is(err, terminal.ErrTerminalNotFound) || errors.Is(err, internal.ErrEmptyString) || errors.Is(err, internal.ErrConsecutiveSpaces) || errors.Is(err, internal.ErrExceedsMaxLength) || errors.Is(err, internal.ErrInvalidCharacters) {
 				return presenter.BadRequest(c, err)
 			}
 			err := errors.New("Error")

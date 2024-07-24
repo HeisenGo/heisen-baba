@@ -22,6 +22,9 @@ func NewPathRepo(db *gorm.DB) path.Repo {
 func (r *pathRepo) Insert(ctx context.Context, p *path.Path) error {
 	pathEntity := mappers.PathDomainToEntity(p)
 	if err := r.db.WithContext(ctx).Save(&pathEntity).Error; err != nil {
+		if strings.Contains(err.Error(), "duplicate key") {
+			return path.ErrDuplication
+		}
 		return err
 	}
 
