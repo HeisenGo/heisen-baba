@@ -79,6 +79,7 @@ func (a *AppContainer) TerminalServiceFromCtx(ctx context.Context) *TerminalServ
 
 	return NewTerminalService(
 		terminal.NewOps(storage.NewTerminalRepo(gc)),
+		path.NewOps(storage.NewPathRepo(gc)),
 	)
 }
 
@@ -86,7 +87,7 @@ func (a *AppContainer) setTerminalService() {
 	if a.terminalService != nil {
 		return
 	}
-	a.terminalService = NewTerminalService(terminal.NewOps(storage.NewTerminalRepo(a.dbConn)))
+	a.terminalService = NewTerminalService(terminal.NewOps(storage.NewTerminalRepo(a.dbConn)), path.NewOps(storage.NewPathRepo(a.dbConn)))
 }
 
 func (a *AppContainer) PathService() *PathService {
