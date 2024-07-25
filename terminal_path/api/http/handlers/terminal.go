@@ -59,7 +59,7 @@ func CityTerminals(terminalService *service.TerminalService) fiber.Handler {
 		if country == "" {
 			return SendError(c, errors.New("country is required"), fiber.StatusBadRequest)
 		}
-		terminals, total, err := terminalService.GetTerminalsOfCity(c.UserContext(), country, city, terminalType, uint(page), uint(pageSize))
+		terminals, total, err := terminalService.GetTerminals(c.UserContext(), country, city, terminalType, uint(page), uint(pageSize))
 		if err != nil {
 			status := fiber.StatusInternalServerError
 			if errors.Is(err, terminal.ErrRecordsNotFound) {
