@@ -43,7 +43,27 @@ func PathToPathResponse(p path.Path) PathResponse {
 	}
 }
 
-func PathsToPathResponse(paths []path.Path) []PathResponse {
+type UpdatePathRequest struct {
+	ID             uint    `json:"terminal_id"`
+	Name           string  `json:"name"`
+	Code           string  `json:"code"`
+	DistanceKM     float64 `json:"distance_km"`
+	FromTerminalID uint    `json:"from_terminal_id"`
+	ToTerminalID   uint    `json:"to_terminal_id"`
+}
+
+func UpdatePathReqToPath(p *UpdatePathRequest, id uint) *path.Path {
+	return &path.Path{
+		ID:             id,
+		Name:           p.Name,
+		FromTerminalID: p.FromTerminalID,
+		ToTerminalID:   p.ToTerminalID,
+		DistanceKM:     p.DistanceKM,
+		Code:           p.Code,
+	}
+}
+
+func BatchPathsToPathResponse(paths []path.Path) []PathResponse {
 	return fp.Map(paths, PathToPathResponse)
 }
 
