@@ -126,7 +126,7 @@ func (o *Ops) PatchPath(ctx context.Context, updatedPath, originalPath *Path, ha
 			return err
 		}
 	}
-	if updatedPath.Code != ""{
+	if updatedPath.Code != "" {
 		if err := internal.ValidateName(updatedPath.Code, MaxCodeLength); err != nil {
 			return err
 		}
@@ -139,4 +139,12 @@ func (o *Ops) Delete(ctx context.Context, pathID uint, hasUnfinishedTrip bool) e
 		return ErrCanNotDelete
 	}
 	return o.repo.Delete(ctx, pathID)
+}
+
+func (o *Ops) AreTherePathRelatedToTerminalID(ctx context.Context, terminalID uint) (bool, error) {
+	return o.repo.AreTherePathRelatedToTerminalID(ctx, terminalID)
+}
+
+func (o *Ops) IsTherePathRelatedToTerminalID(ctx context.Context, terminalID uint) (bool, error) {
+	return o.repo.IsTherePathRelatedToTerminalID(ctx, terminalID)
 }

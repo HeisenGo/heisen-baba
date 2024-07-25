@@ -34,6 +34,8 @@ type Repo interface {
 	PatchPath(ctx context.Context, updatedPath, originalPath *Path) error
 	Delete(ctx context.Context, pathID uint) error
 	GetFullPathByID(ctx context.Context, id uint) (*Path, error)
+	AreTherePathRelatedToTerminalID(ctx context.Context, terminalID uint) (bool, error)
+	IsTherePathRelatedToTerminalID(ctx context.Context, terminalID uint) (bool, error)
 }
 
 type Path struct {

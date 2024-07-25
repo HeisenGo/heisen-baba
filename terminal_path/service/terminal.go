@@ -2,16 +2,19 @@ package service
 
 import (
 	"context"
+	"terminalpathservice/internal/path"
 	"terminalpathservice/internal/terminal"
 )
 
 type TerminalService struct {
 	terminalOps *terminal.Ops
+	pathOps     *path.Ops
 }
 
-func NewTerminalService(terminalOps *terminal.Ops) *TerminalService {
+func NewTerminalService(terminalOps *terminal.Ops, pathOps *path.Ops) *TerminalService {
 	return &TerminalService{
 		terminalOps: terminalOps,
+		pathOps:     pathOps,
 	}
 }
 
@@ -24,23 +27,42 @@ func (s *TerminalService) GetTerminalsOfCity(ctx context.Context, country, city,
 }
 
 func (s *TerminalService) PatchTerminal(ctx context.Context, updatedTerminal *terminal.Terminal) (*terminal.Terminal, error) {
+	// exists?
 	originalTerminal, err := s.terminalOps.GetTerminalByID(ctx, updatedTerminal.ID)
 	if err != nil {
 		return nil, err
+	}
+	canUpdate, err := s.pathOps.AreTherePathRelatedToTerminalID(ctx, updatedTerminal.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	if !canUpdate {
+		if updatedTerminal.Type != "" || updatedTerminal.City != "" || updatedTerminal.Country != "" {
+			return nil, terminal.ErrCanNotUpdate
+		}
 	}
 	er := s.terminalOps.PatchTerminal(ctx, updatedTerminal, originalTerminal)
 	return originalTerminal, er
 }
 
 func (s *TerminalService) DeleteTerminal(ctx context.Context, terminalID uint) (*terminal.Terminal, error) {
-
-	terminal, err := s.terminalOps.GetTerminalByID(ctx, terminalID)
+	// exists?
+	t, err := s.terminalOps.GetTerminalByID(ctx, terminalID)
 	if err != nil {
 		return nil, err
+	}
+	// has any related path?
+	isTherePath, err := s.pathOps.IsTherePathRelatedToTerminalID(ctx, terminalID)
+	if err != nil {
+		return nil, err
+	}
+	if isTherePath {
+		return nil, terminal.ErrCanNotDelete
 	}
 	err = s.terminalOps.Delete(ctx, terminalID)
 	if err != nil {
 		return nil, err
 	}
-	return terminal, nil
+	return t, nil
 }

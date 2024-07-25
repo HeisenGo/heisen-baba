@@ -179,3 +179,36 @@ func (r *pathRepo) Delete(ctx context.Context, pathID uint) error {
 	return nil
 
 }
+
+
+func (r *pathRepo) AreTherePathRelatedToTerminalID(ctx context.Context, terminalID uint) (bool, error) {
+	var count int64
+
+	// Count paths where the terminal is either the start or the end terminal
+	if err := r.db.WithContext(ctx).Model(&entities.Path{}).
+		Where("from_terminal_id = ? OR to_terminal_id = ?", terminalID, terminalID).
+		Count(&count).Error; err != nil {
+		return false, fmt.Errorf("failed to count paths: %v", err)
+	}
+
+	// If there are no such paths, the terminal can be updated
+	if count == 0 {
+		return true, nil
+	}
+
+	return false, nil
+}
+
+func (r *pathRepo) IsTherePathRelatedToTerminalID(ctx context.Context, terminalID uint) (bool, error){
+	var path entities.Path
+	result := r.db.WithContext(ctx).Where("from_terminal_id = ? OR to_terminal_id = ?", terminalID, terminalID).First(&path)
+	if result.Error != nil {
+		if strings.Contains(result.Error.Error(), "record not found") {
+			// can Delete the terminal
+			return false, nil
+		}
+		return true, fmt.Errorf("internal Error %w", result.Error)
+	}
+	// path found
+	return true, nil
+}

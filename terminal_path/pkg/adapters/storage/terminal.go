@@ -102,17 +102,6 @@ func (r *terminalRepo) GetTerminalsByCityAndType(ctx context.Context, country, c
 }
 
 func (r *terminalRepo) PatchTerminal(ctx context.Context, updatedTerminal, originalTerminal *terminal.Terminal) error {
-	canUpdate, err := r.canUpdateTerminal(ctx, updatedTerminal.ID)
-	if err != nil {
-		return err
-	}
-
-	if !canUpdate {
-		if updatedTerminal.Type != "" || updatedTerminal.City != "" || updatedTerminal.Country != "" {
-			return terminal.ErrCanNotUpdate
-		}
-	}
-
 	// Prepare a map to hold the fields to be updated
 	updates := make(map[string]interface{})
 
@@ -146,40 +135,14 @@ func (r *terminalRepo) PatchTerminal(ctx context.Context, updatedTerminal, origi
 	return nil
 }
 
-func (r *terminalRepo) canUpdateTerminal(ctx context.Context, terminalID uint) (bool, error) {
-	var count int64
-
-	// Count paths where the terminal is either the start or the end terminal
-	if err := r.db.WithContext(ctx).Model(&entities.Path{}).
-		Where("from_terminal_id = ? OR to_terminal_id = ?", terminalID, terminalID).
-		Count(&count).Error; err != nil {
-		return false, fmt.Errorf("failed to count paths: %v", err)
-	}
-
-	// If there are no such paths, the terminal can be updated
-	if count == 0 {
-		return true, nil
-	}
-
-	return false, nil
-}
-
 func (r *terminalRepo) Delete(ctx context.Context, terminalID uint) error {
-	// check if there jis a path related to this terminal:
-	var path entities.Path
-	result := r.db.WithContext(ctx).Where("from_terminal_id = ? OR to_terminal_id = ?", terminalID, terminalID).First(&path)
-	if result.Error != nil {
-		if strings.Contains(result.Error.Error(), "record not found") {
-			// Delete the terminal
-			if err := r.db.WithContext(ctx).Delete(&entities.Terminal{}, terminalID).Error; err != nil {
-				return fmt.Errorf("%w %w", terminal.ErrDeleteTerminal, err)
-			} else {
-				return nil
-			}
-		}
-		return fmt.Errorf("internal Error %w", result.Error)
-	}
+	// check if there jis a path related to this terminal in business logic
 
-	return terminal.ErrCanNotDelete
+	// Delete the terminal
+	if err := r.db.WithContext(ctx).Delete(&entities.Terminal{}, terminalID).Error; err != nil {
+		return fmt.Errorf("%w %w", terminal.ErrDeleteTerminal, err)
+	} else {
+		return nil
+	}
 
 }
