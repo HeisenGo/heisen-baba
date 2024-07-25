@@ -24,6 +24,7 @@ var (
 	ErrCanNotUpdate     = errors.New("terminal cannot be updated due to existing paths")
 	ErrDeleteTerminal   = errors.New("error deleting terminal")
 	ErrCanNotDelete     = errors.New("terminal cannot be deleted due to existing paths")
+	ErrFailedToRestore = errors.New("failed to restore the soft-deleted terminal")
 )
 
 type Repo interface {

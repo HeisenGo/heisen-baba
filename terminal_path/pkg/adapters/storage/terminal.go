@@ -25,11 +25,26 @@ func (r *terminalRepo) Insert(ctx context.Context, t *terminal.Terminal) error {
 	result := r.db.WithContext(ctx).Save(&terminalEntity)
 	if result.Error != nil {
 		if strings.Contains(result.Error.Error(), "duplicate key") {
-			return terminal.ErrDuplication
+
+			var existingTerminal entities.Terminal
+			// Search for the soft-deleted record with the same unique constraints
+			if r.db.WithContext(ctx).Unscoped().Where("name = ? AND type = ? AND city = ? AND country = ?", t.Name, t.Type, t.City, t.Country).First(&existingTerminal).Error == nil {
+				// Check if the record is soft-deleted
+				if existingTerminal.DeletedAt.Valid {
+					// Restore the soft-deleted record
+					existingTerminal.DeletedAt = gorm.DeletedAt{}
+					if err := r.db.WithContext(ctx).Save(&existingTerminal).Error; err != nil {
+						return fmt.Errorf("%w %w", terminal.ErrFailedToRestore, err)
+					}
+					t.ID = existingTerminal.ID
+					return nil
+				}
+
+				return terminal.ErrDuplication
+			}
 		}
 		return result.Error
 	}
-
 	t.ID = terminalEntity.ID
 
 	return nil
@@ -153,12 +168,12 @@ func (r *terminalRepo) Delete(ctx context.Context, terminalID uint) error {
 	// check if there jis a path related to this terminal:
 	var path entities.Path
 	result := r.db.WithContext(ctx).Where("from_terminal_id = ? OR to_terminal_id = ?", terminalID, terminalID).First(&path)
-	if result.Error!=nil{
+	if result.Error != nil {
 		if strings.Contains(result.Error.Error(), "record not found") {
 			// Delete the terminal
 			if err := r.db.WithContext(ctx).Delete(&entities.Terminal{}, terminalID).Error; err != nil {
 				return fmt.Errorf("%w %w", terminal.ErrDeleteTerminal, err)
-			}else{
+			} else {
 				return nil
 			}
 		}
