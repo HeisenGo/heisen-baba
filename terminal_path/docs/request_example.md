@@ -75,3 +75,25 @@ localhost:2244/api/v1/paths?from=Tehran&to=Zanjan
 
 localhost:2244/api/v1/paths?from=Tehran&to=Zanjan&type=road
 ```
+
+**Patch Path**
+```localhost:2244/api/v1/paths/3```
+
+```go
+{
+  "from_terminal_id":14, //optional
+
+ "to_terminal_id":18, //optional
+
+"distance_km":810,  //optional
+
+"code":"TMR1", //optional
+
+"name":"updated tehran mashhad road 1" //optional
+}
+```
+
+**delete Path**
+```
+localhost:2244/api/v1/paths/4
+```
