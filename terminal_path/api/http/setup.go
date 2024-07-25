@@ -49,5 +49,8 @@ func registerPathRouts(router fiber.Router, app *service.AppContainer, secret []
 	pathGroup.Post("",
 		handlers.CreatePath(app.PathService()),
 	)
+	pathGroup.Get(":pathID", handlers.GetFullPathByID(app.PathService()))
 	pathGroup.Get("", handlers.GetPathsByOriginDestinationType(app.PathService()))
+	pathGroup.Patch(":pathID", handlers.PatchPath(app.PathService()))
+	pathGroup.Delete(":pathID", handlers.DeletePath(app.PathService()))
 }
