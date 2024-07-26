@@ -77,6 +77,35 @@ Updates a path based on the pathID path parameter. If the path has existing unfi
 Deletes a path based on the pathID path parameter. If there are any existing unfinished trips, it cannot be deleted.
 
 
+## Terminal City Country Validation
+When creating a new terminal or update it, it is indeed a good practice to validate the city and country to ensure data integrity and consistency. We have a couple of options for how to implement this validation using the data from a CSV file whih was provided by **[[simplemaps](https://simplemaps.com/data/world-cities)]**.We filtered the data to only have ascii_city and country. Here are the two main approaches we could use, along with their pros and cons:
+
+### Option 1: Using a Separate SQLite Database
+**Advantages:**
+
+- Separation of Concerns: Keeps the city and country data separate from your main application database, which can be cleaner and more modular.
+- Independent Updates: Allows you to update the city and country data independently without affecting the main application database.
+- Reduced Risk: Any errors or issues in the city/country database do not directly impact the primary database operations.
+
+**Disadvantages:**
+
+- Additional Complexity: Requires maintaining and managing an additional database.
+- Slight Performance Overhead: Additional database queries to validate city and country, which could slightly impact performance.
+
+### Option 2: Integrating into the Main Database (Terminal Path DB)
+**Advantages:**
+
+- Single Source of Truth: All related data is in one place, simplifying database management and queries.
+- Simpler Application Logic: No need to manage connections to multiple databases.
+- Potential Performance Gains: Validation queries are within the same database, potentially reducing latency.
+  
+**Disadvantages:**
+
+- Coupling of Data: City and country data changes can potentially affect the main application database.
+- Increased Database Size: The main database grows larger with the additional city and country data.
+- Complex Migrations: Schema changes for city/country data may require careful handling to avoid disrupting the main database.
+
+We decided to use **option 1**. cleaning and importing data to sqlight_db is performed using a separate code by python then we integrrated it into config and used the sqlite_db in our app in validation process in internal/terminal/ops.go
 
 
 
