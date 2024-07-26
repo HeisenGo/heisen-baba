@@ -3,6 +3,7 @@ package terminal
 import (
 	"context"
 	"terminalpathservice/internal"
+	"terminalpathservice/pkg/db_helper"
 )
 
 type Ops struct {
@@ -23,12 +24,15 @@ func (o *Ops) Create(ctx context.Context, terminal *Terminal) error {
 	if err := internal.ValidateName(terminal.Name, MaxStringLength); err != nil {
 		return err
 	}
-	if err := internal.ValidateName(terminal.City, MaxStringLength); err != nil {
+
+	possibleCityCountry, err := db_helper.ValidateCityCountry(terminal.City, terminal.Country)
+	if err != nil {
 		return err
 	}
-	if err := internal.ValidateName(terminal.Country, MaxStringLength); err != nil {
-		return err
+	if !possibleCityCountry {
+		return ErrCityCountryDoNotExist
 	}
+
 	return o.repo.Insert(ctx, terminal)
 }
 
@@ -65,14 +69,34 @@ func (o *Ops) PatchTerminal(ctx context.Context, updatedTerminal, originalTermin
 			return err
 		}
 	}
-	if updatedTerminal.City != "" {
-		if err := internal.ValidateName(updatedTerminal.City, MaxStringLength); err != nil {
+	if updatedTerminal.City != "" && updatedTerminal.Country == "" {
+		updatedTerminal.Country = originalTerminal.Country
+		possibleCityCountry, err := db_helper.ValidateCityCountry(updatedTerminal.City, updatedTerminal.Country)
+		if err != nil {
 			return err
 		}
+		if !possibleCityCountry {
+			return ErrCityCountryDoNotExist
+		}
 	}
-	if updatedTerminal.Country != "" {
-		if err := internal.ValidateName(updatedTerminal.Country, MaxStringLength); err != nil {
+	if updatedTerminal.City == "" && updatedTerminal.Country != "" {
+		updatedTerminal.City = originalTerminal.City
+		possibleCityCountry, err := db_helper.ValidateCityCountry(updatedTerminal.City, updatedTerminal.Country)
+		if err != nil {
 			return err
+		}
+		if !possibleCityCountry {
+			return ErrCityCountryDoNotExist
+		}
+	}
+
+	if updatedTerminal.City != "" && updatedTerminal.Country != "" {
+		possibleCityCountry, err := db_helper.ValidateCityCountry(updatedTerminal.City, updatedTerminal.Country)
+		if err != nil {
+			return err
+		}
+		if !possibleCityCountry {
+			return ErrCityCountryDoNotExist
 		}
 	}
 	return o.repo.PatchTerminal(ctx, updatedTerminal, originalTerminal)

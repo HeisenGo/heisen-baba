@@ -3,6 +3,7 @@ package config
 type Config struct {
 	Server Server `mapstructure:"server"`
 	DB     DB     `mapstructure:"db"`
+	SQLite SQLite `mapstructure:"sqlite"` // New field for SQLite configuration
 }
 
 type Server struct {
@@ -27,4 +28,8 @@ type DB struct {
 	Host   string `mapstructure:"host"`
 	Port   int    `mapstructure:"port"`
 	DBName string `mapstructure:"db_name"`
+}
+
+type SQLite struct {
+	Path string `mapstructure:"path"`
 }

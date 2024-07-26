@@ -32,7 +32,7 @@ func CreateTerminal(terminalService *service.TerminalService) fiber.Handler {
 		t := presenter.TerminalRequestToTerminal(&req)
 
 		if err := terminalService.CreateTerminal(c.UserContext(), t); err != nil {
-			if errors.Is(err, terminal.ErrDuplication) || errors.Is(err, terminal.ErrInvalidType) || errors.Is(err, internal.ErrEmptyString) || errors.Is(err, internal.ErrConsecutiveSpaces) || errors.Is(err, internal.ErrExceedsMaxLength) || errors.Is(err, internal.ErrInvalidCharacters) {
+			if errors.Is(err, terminal.ErrCityCountryDoNotExist) || errors.Is(err, terminal.ErrDuplication) || errors.Is(err, terminal.ErrInvalidType) || errors.Is(err, internal.ErrEmptyString) || errors.Is(err, internal.ErrConsecutiveSpaces) || errors.Is(err, internal.ErrExceedsMaxLength) || errors.Is(err, internal.ErrInvalidCharacters) {
 				return presenter.BadRequest(c, err)
 			}
 			err := errors.New("Error")
@@ -104,7 +104,7 @@ func PatchTerminal(terminalService *service.TerminalService) fiber.Handler {
 		changedTerminal, err := terminalService.PatchTerminal(c.UserContext(), updatedTerminal)
 
 		if err != nil {
-			if errors.Is(err, terminal.ErrFailedToUpdate) || errors.Is(err, terminal.ErrTerminalNotFound) || errors.Is(err, terminal.ErrCanNotUpdate) {
+			if errors.Is(err, terminal.ErrCityCountryDoNotExist) || errors.Is(err, terminal.ErrFailedToUpdate) || errors.Is(err, terminal.ErrTerminalNotFound) || errors.Is(err, terminal.ErrCanNotUpdate) {
 				return presenter.BadRequest(c, err)
 			}
 			// trace ID : TODO
