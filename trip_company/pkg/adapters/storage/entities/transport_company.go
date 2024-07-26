@@ -12,7 +12,6 @@ type TransportCompany struct {
 	Address     string `gorm:"type:varchar(255)"`
 	PhoneNumber string `gorm:"type:varchar(20)"`
 	Email       string `gorm:"type:varchar(100);uniqueIndex"`
-	IsActive    bool   `gorm:"default:true"`
 	// relationships
 	Employees   []Employee `gorm:"foreignKey:TransportCompanyID"`
 	Trips       []Trip `gorm:"foreignKey:TransportCompanyID"`
