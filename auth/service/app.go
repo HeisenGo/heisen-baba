@@ -3,6 +3,7 @@ package service
 import (
 	"authservice/config"
 	"authservice/internal/user"
+	"authservice/pkg/adapters/consul"
 	"authservice/pkg/adapters/storage"
 	"log"
 
@@ -22,9 +23,20 @@ func NewAppContainer(cfg config.Config) (*AppContainer, error) {
 
 	app.mustInitDB()
 
+	// service registry
+	app.mustRegisterService(cfg.Server)
+
 	app.setAuthService()
 	
 	return app, nil
+}
+
+func (a *AppContainer) mustRegisterService(srvCfg config.Server) {
+	registry := consul.NewConsul(srvCfg.ServiceRegistry.Address)
+	err := registry.RegisterService(srvCfg.ServiceHostName, srvCfg.ServiceHTTPPrefixPath, srvCfg.ServiceHTTPHealthPath, srvCfg.HTTPPort)
+	if err != nil {
+		log.Fatalf("Failed to register service with Consul: %v", err)
+	}
 }
 
 func (a *AppContainer) RawDBConnection() *gorm.DB {
