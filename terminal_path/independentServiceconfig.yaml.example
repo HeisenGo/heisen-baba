@@ -10,5 +10,3 @@ db:
   host : "localhost"
   port: 3322
   db_name: "terminal_path"
-sqlite:
-  path: "./db_helper/worldcities.db"
