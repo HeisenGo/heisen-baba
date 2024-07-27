@@ -22,7 +22,7 @@ func Run(cfg config.Server, app *service.AppContainer) {
 	secret := []byte(cfg.Secret)
 	fmt.Println(api, secret)
 	registerGlobalRoutes(api)
-	registerTransportCompanyRoutes(api, app, secret, createGroupLogger("boards"))
+	registerTransportCompanyRoutes(api, app, secret, createGroupLogger("companies"))
 	//registerPathRouts(api, app, secret)
 	// run server
 	log.Fatal(fiberApp.Listen(fmt.Sprintf("%s:%d", cfg.Host, cfg.HttpPort)))
