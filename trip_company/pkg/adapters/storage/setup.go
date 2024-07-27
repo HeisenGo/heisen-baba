@@ -3,6 +3,7 @@ package storage
 import (
 	"fmt"
 	"tripcompanyservice/config"
+	"tripcompanyservice/pkg/adapters/storage/entities"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -21,7 +22,7 @@ func AddExtension(db *gorm.DB) error {
 func Migrate(db *gorm.DB) error {
 	migrator := db.Migrator()
 
-	err := migrator.AutoMigrate()
+	err := migrator.AutoMigrate(&entities.TransportCompany{})
 	if err != nil {
 		return err
 	}
