@@ -20,4 +20,7 @@
 # Go workspace file
 go.work
 go.work.sum
+.vscode
 .idea
+**/config.yaml
+

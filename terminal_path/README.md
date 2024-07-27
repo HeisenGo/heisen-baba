@@ -11,6 +11,4 @@ after setting up your database run:
 go run cmd/main.go --config config.yaml
 ```
 
-for more info about implementation check docs/terminal_path_doc.md.
-
-### Terminal_Path **[[link](https://github.com/HeisenGo/heisen-baba/blob/feature/terminal-path/terminal_path/docs/terminal_path_doc.md)]**
+for more info about implementation check **[[docs](https://github.com/HeisenGo/heisen-baba/blob/feature/terminal-path/terminal_path/docs/terminal_path_doc.md)]** folder
