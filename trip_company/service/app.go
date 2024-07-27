@@ -1,19 +1,22 @@
 package service
 
 import (
+	"context"
 	"log"
 	"tripcompanyservice/config"
+	"tripcompanyservice/internal/company"
 	"tripcompanyservice/pkg/adapters/consul"
 	"tripcompanyservice/pkg/adapters/storage"
 	"tripcompanyservice/pkg/ports"
+	"tripcompanyservice/pkg/valuecontext"
 
 	"gorm.io/gorm"
 )
 
 type AppContainer struct {
-	cfg    config.Config
-	dbConn *gorm.DB
-	//pathService     *PathService
+	cfg            config.Config
+	dbConn         *gorm.DB
+	companyService *TransportCompanyService
 	//terminalService *TerminalService
 	serviceRegistry *ports.IServiceRegistry
 }
@@ -31,7 +34,7 @@ func NewAppContainer(cfg config.Config) (*AppContainer, error) {
 	// service registry
 	//app.mustRegisterService(cfg.Server)
 
-	//app.setTerminalService()
+	app.setCompanyService()
 	//app.setPathService()
 	return app, nil
 }
@@ -51,7 +54,7 @@ func (a *AppContainer) mustInitDB() {
 	}
 
 	a.dbConn = db
-	
+
 	err = storage.AddExtension(a.dbConn)
 	if err != nil {
 		log.Fatal("Create extension failed: ", err)
@@ -64,34 +67,32 @@ func (a *AppContainer) mustInitDB() {
 
 }
 
-// func (a *AppContainer) TerminalService() *TerminalService {
-// 	return a.terminalService
-// }
+func (a *AppContainer) CompanyService() *TransportCompanyService {
+	return a.companyService
+}
 
-// func (a *AppContainer) TerminalServiceFromCtx(ctx context.Context) *TerminalService {
-// 	tx, ok := valuecontext.TryGetTxFromContext(ctx)
-// 	if !ok {
-// 		return a.terminalService
-// 	}
+func (a *AppContainer) CompanyServiceFromCtx(ctx context.Context) *TransportCompanyService {
+	tx, ok := valuecontext.TryGetTxFromContext(ctx)
+	if !ok {
+		return a.companyService
+	}
 
-// 	gc, ok := tx.Tx().(*gorm.DB)
-// 	if !ok {
-// 		return a.terminalService
-// 	}
+	gc, ok := tx.Tx().(*gorm.DB)
+	if !ok {
+		return a.companyService
+	}
 
-// 	return NewTerminalService(
-// 		terminal.NewOps(storage.NewTerminalRepo(gc)),
-// 		path.NewOps(storage.NewPathRepo(gc)),
-// 	)
-// }
+	return NewTransportCompanyService(
+		company.NewOps(storage.NewTransportCompanyRepo(gc)),
+	)
+}
 
-// func (a *AppContainer) setTerminalService() {
-// 	if a.terminalService != nil {
-// 		return
-// 	}
-// 	torage.NewTerminalRepo(gc)),
-// 	)
-// }
+func (a *AppContainer) setCompanyService() {
+	if a.companyService != nil {
+		return
+	}
+	a.companyService = NewTransportCompanyService(company.NewOps(storage.NewTransportCompanyRepo(a.dbConn)))
+}
 
 func (a *AppContainer) mustRegisterService(srvCfg config.Server) {
 	registry := consul.NewConsul(srvCfg.ServiceRegistry.Address)
