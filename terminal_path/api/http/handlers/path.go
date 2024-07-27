@@ -36,7 +36,7 @@ func CreatePath(pathService *service.PathService) fiber.Handler {
 			if errors.Is(err, path.ErrCodeIsImpossibleToUse) || errors.Is(err, path.ErrDuplication) || errors.Is(err, path.ErrMisMatchStartEndTerminalType) || errors.Is(err, path.ErrSameCitiesTerminals) || errors.Is(err, terminal.ErrTerminalNotFound) || errors.Is(err, internal.ErrEmptyString) || errors.Is(err, internal.ErrConsecutiveSpaces) || errors.Is(err, internal.ErrExceedsMaxLength) || errors.Is(err, internal.ErrInvalidCharacters) {
 				return presenter.BadRequest(c, err)
 			}
-			if errors.Is(err, path.ErrFailedToRestore){
+			if errors.Is(err, path.ErrFailedToRestore) {
 				return presenter.BadRequest(c, err)
 			}
 			err := errors.New("Error")
@@ -140,14 +140,14 @@ func PatchPath(pathService *service.PathService) fiber.Handler {
 		changedPath, err := pathService.PatchPath(c.UserContext(), newPath, hasUnFinishedTrips)
 
 		if err != nil {
-			if errors.Is(err, path.ErrFailedToUpdate) || errors.Is(err, path.ErrPathNotFound) || errors.Is(err,path.ErrCanNotUpdatePath) || errors.Is(err, path.ErrDuplication) || errors.Is(err, path.ErrMisMatchStartEndTerminalType) || errors.Is(err, path.ErrSameCitiesTerminals) || errors.Is(err, terminal.ErrTerminalNotFound) || errors.Is(err, internal.ErrEmptyString) || errors.Is(err, internal.ErrConsecutiveSpaces) || errors.Is(err, internal.ErrExceedsMaxLength) || errors.Is(err, internal.ErrInvalidCharacters){
+			if errors.Is(err, path.ErrFailedToUpdate) || errors.Is(err, path.ErrPathNotFound) || errors.Is(err, path.ErrCanNotUpdatePath) || errors.Is(err, path.ErrDuplication) || errors.Is(err, path.ErrMisMatchStartEndTerminalType) || errors.Is(err, path.ErrSameCitiesTerminals) || errors.Is(err, terminal.ErrTerminalNotFound) || errors.Is(err, internal.ErrEmptyString) || errors.Is(err, internal.ErrConsecutiveSpaces) || errors.Is(err, internal.ErrExceedsMaxLength) || errors.Is(err, internal.ErrInvalidCharacters) {
 				return presenter.BadRequest(c, err)
 			}
 			// trace ID : TODO
 			return presenter.InternalServerError(c, err)
 		}
 		res := presenter.PathToPathResponse(*changedPath)
-		return presenter.Created(c, "Path updated successfully", res)
+		return presenter.OK(c, "Path updated successfully", res)
 	}
 }
 
@@ -171,7 +171,7 @@ func DeletePath(pathService *service.PathService) fiber.Handler {
 		hasUnFinishedTrips := false
 		//**************************************************************
 
-		deletedPath, err := pathService.DeletePath(c.UserContext(), uint(pathID), hasUnFinishedTrips)
+		_, err = pathService.DeletePath(c.UserContext(), uint(pathID), hasUnFinishedTrips)
 
 		if err != nil {
 			if errors.Is(err, path.ErrCanNotDelete) || errors.Is(err, path.ErrPathNotFound) {
@@ -181,8 +181,6 @@ func DeletePath(pathService *service.PathService) fiber.Handler {
 			// trace ID : TODO
 			return presenter.InternalServerError(c, err)
 		}
-		res := presenter.PathToPathResponse(*deletedPath)
-		return presenter.Created(c, "Path deleted successfully", res)
+		return presenter.NoContent(c)
 	}
 }
-

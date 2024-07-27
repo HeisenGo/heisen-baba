@@ -44,7 +44,7 @@ func registerTerminalRouts(router fiber.Router, app *service.AppContainer, secre
 }
 
 func registerPathRouts(router fiber.Router, app *service.AppContainer, secret []byte) {
-	pathGroup := router.Group("/paths") //, middlerwares.Auth(secret), middlerwares.RoleChecker("user", "admin"))
+	pathGroup := router.Group("terminals/paths") //, middlerwares.Auth(secret), middlerwares.RoleChecker("user", "admin"))
 	fmt.Print(secret)
 	pathGroup.Post("",
 		handlers.CreatePath(app.PathService()),

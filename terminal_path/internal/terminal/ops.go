@@ -3,7 +3,6 @@ package terminal
 import (
 	"context"
 	"terminalpathservice/internal"
-	"terminalpathservice/pkg/db_helper"
 )
 
 type Ops struct {
@@ -25,13 +24,13 @@ func (o *Ops) Create(ctx context.Context, terminal *Terminal) error {
 		return err
 	}
 
-	possibleCityCountry, err := db_helper.ValidateCityCountry(terminal.City, terminal.Country)
-	if err != nil {
-		return err
-	}
-	if !possibleCityCountry {
-		return ErrCityCountryDoNotExist
-	}
+	//possibleCityCountry, err := db_helper.ValidateCityCountry(terminal.City, terminal.Country)
+	//if err != nil {
+	//	return err
+	//}
+	//if !possibleCityCountry {
+	//	return ErrCityCountryDoNotExist
+	//}
 
 	return o.repo.Insert(ctx, terminal)
 }
@@ -71,33 +70,33 @@ func (o *Ops) PatchTerminal(ctx context.Context, updatedTerminal, originalTermin
 	}
 	if updatedTerminal.City != "" && updatedTerminal.Country == "" {
 		updatedTerminal.Country = originalTerminal.Country
-		possibleCityCountry, err := db_helper.ValidateCityCountry(updatedTerminal.City, updatedTerminal.Country)
-		if err != nil {
-			return err
-		}
-		if !possibleCityCountry {
-			return ErrCityCountryDoNotExist
-		}
+		//possibleCityCountry, err := db_helper.ValidateCityCountry(updatedTerminal.City, updatedTerminal.Country)
+		//if err != nil {
+		//	return err
+		//}
+		//if !possibleCityCountry {
+		//	return ErrCityCountryDoNotExist
+		//}
 	}
 	if updatedTerminal.City == "" && updatedTerminal.Country != "" {
 		updatedTerminal.City = originalTerminal.City
-		possibleCityCountry, err := db_helper.ValidateCityCountry(updatedTerminal.City, updatedTerminal.Country)
-		if err != nil {
-			return err
-		}
-		if !possibleCityCountry {
-			return ErrCityCountryDoNotExist
-		}
+		//possibleCityCountry, err := db_helper.ValidateCityCountry(updatedTerminal.City, updatedTerminal.Country)
+		//if err != nil {
+		//	return err
+		//}
+		//if !possibleCityCountry {
+		//	return ErrCityCountryDoNotExist
+		//}
 	}
 
 	if updatedTerminal.City != "" && updatedTerminal.Country != "" {
-		possibleCityCountry, err := db_helper.ValidateCityCountry(updatedTerminal.City, updatedTerminal.Country)
-		if err != nil {
-			return err
-		}
-		if !possibleCityCountry {
-			return ErrCityCountryDoNotExist
-		}
+		//possibleCityCountry, err := db_helper.ValidateCityCountry(updatedTerminal.City, updatedTerminal.Country)
+		//if err != nil {
+		//	return err
+		//}
+		//if !possibleCityCountry {
+		//	return ErrCityCountryDoNotExist
+		//}
 	}
 	return o.repo.PatchTerminal(ctx, updatedTerminal, originalTerminal)
 }

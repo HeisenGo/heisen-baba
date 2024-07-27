@@ -15,7 +15,7 @@ type PathRequest struct {
 
 type PathResponse struct {
 	ID               uint    `json:"id"`
-	DistanceKM       float64 `json:"DistanceKM"` // in kilometers
+	DistanceKM       float64 `json:"distance_km"`
 	Code             string  `json:"code"`
 	Name             string  `json:"name"`
 	Type             string  `json:"type"`

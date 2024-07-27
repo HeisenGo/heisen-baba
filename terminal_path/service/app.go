@@ -8,7 +8,6 @@ import (
 	"terminalpathservice/internal/terminal"
 	"terminalpathservice/pkg/adapters/consul"
 	"terminalpathservice/pkg/adapters/storage"
-	"terminalpathservice/pkg/db_helper"
 	"terminalpathservice/pkg/ports"
 	"terminalpathservice/pkg/valuecontext"
 
@@ -35,13 +34,13 @@ func NewAppContainer(cfg config.Config) (*AppContainer, error) {
 	}
 
 	// Initialize SQLite connection for city/country validation
-	err = db_helper.InitDB(cfg.SQLite.Path)
-	if err != nil {
-		log.Fatal("Failed to initialize SQLite database: ", err)
-	}
+	//err = db_helper.InitDB(cfg.SQLite.Path)
+	//if err != nil {
+	//	log.Fatal("Failed to initialize SQLite database: ", err)
+	//}
 
 	// service registry
-	//app.mustRegisterService(cfg.Server)
+	app.mustRegisterService(cfg.Server)
 
 	app.setTerminalService()
 	app.setPathService()
