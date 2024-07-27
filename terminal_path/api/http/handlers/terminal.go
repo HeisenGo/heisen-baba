@@ -111,7 +111,7 @@ func PatchTerminal(terminalService *service.TerminalService) fiber.Handler {
 			return presenter.InternalServerError(c, err)
 		}
 		res := presenter.TerminalToTerminalRequest(*changedTerminal)
-		return presenter.Created(c, "Terminal updated successfully", res)
+		return presenter.OK(c, "Terminal updated successfully", res)
 	}
 }
 
@@ -130,7 +130,7 @@ func DeleteTerminal(terminalService *service.TerminalService) fiber.Handler {
 			return SendError(c, errWrongIDType, fiber.StatusBadRequest)
 		}
 
-		deletedTerminal, err := terminalService.DeleteTerminal(c.UserContext(), uint(terminalID))
+		_, err = terminalService.DeleteTerminal(c.UserContext(), uint(terminalID))
 
 		if err != nil {
 			if errors.Is(err, terminal.ErrCanNotDelete) || errors.Is(err, terminal.ErrTerminalNotFound) {
@@ -140,7 +140,6 @@ func DeleteTerminal(terminalService *service.TerminalService) fiber.Handler {
 			// trace ID : TODO
 			return presenter.InternalServerError(c, err)
 		}
-		res := presenter.TerminalToTerminalRequest(*deletedTerminal)
-		return presenter.Created(c, "Terminal deleted successfully", res)
+		return presenter.NoContent(c)
 	}
 }
