@@ -15,5 +15,3 @@ db:
   host : "postgres"
   port: 5432
   db_name: "terminal_path"
-sqlite_db:
-  path: "./db_helper/worldcities.db"
