@@ -10,4 +10,5 @@ type Hotel struct {
 	Country       string
 	Details       string
 	IsBlocked     bool
+	Rooms         []Room
 }
