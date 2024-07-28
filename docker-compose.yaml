@@ -13,25 +13,17 @@ services:
 
   traefik:
     restart: always
-    # The official v3 Traefik docker image
     image: traefik:v3.1
-    # Enables the web UI and tells Traefik to listen to docker
     command:
       - "--configFile=/etc/traefik/traefik.yaml"
     networks:
       - backend-network
-
     ports:
-      # The HTTP port
       - "80:80"
-      # The Web UI (enabled by --api.insecure=true)
       - "8080:8080"
     volumes:
-      # So that Traefik can listen to the Docker events
       - /var/run/docker.sock:/var/run/docker.sock
       - ./traefik/traefik.yaml:/etc/traefik/traefik.yaml
-      - ./traefik/dynamic_conf.toml:/etc/traefik/dynamic_conf.toml
-
 
   postgres:
     image: postgres:16.2-bookworm
@@ -59,6 +51,81 @@ services:
       - postgres
     networks:
       - backend-network
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:latest
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      DB_VENDOR: POSTGRES
+      DB_ADDR: postgres
+      DB_DATABASE: keycloak
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+    ports:
+      - "8082:8080"
+    networks:
+      - backend-network
+    command:
+      - start-dev
+
+  setup:
+    build:
+      context: ./keycloak
+      dockerfile: Dockerfile
+    depends_on:
+      - keycloak
+    environment:
+      - KEYCLOAK_URL=http://keycloak:8082
+    networks:
+      - backend-network
+
+  oauth2-proxy:
+    image: quay.io/oauth2-proxy/oauth2-proxy:latest
+    restart: always
+    ports:
+      - "4180:4180"
+    environment:
+#      --keycloak-group=<first_allowed_user_group>
+#      --keycloak-group=<second_allowed_user_group>
+      OAUTH2_PROXY_PROVIDER: keycloak
+      OAUTH2_PROXY_CLIENT_ID: my-client-id
+      OAUTH2_PROXY_CLIENT_SECRET: my-client-secret
+      OAUTH2_PROXY_LOGIN_URL: "http://keycloak:8080/realms/my-realm/protocol/openid-connect/auth"
+      OAUTH2_PROXY_REDEEM_URL: "http://keycloak:8080/realms/my-realm/protocol/openid-connect/token"
+      OAUTH2_PROXY_PROFILE_URL: "http://keycloak:8080/realms/my-realm/protocol/openid-connect/userinfo"
+      OAUTH2_PROXY_VALIDATE_URL: "http://keycloak:8080/realms/my-realm/protocol/openid-connect/userinfo"
+
+
+
+      OAUTH2_PROXY_COOKIE_SECRET: jIWoAJss6XtfgZJkCyMGCUAHcN4kAxP9keHVxppYezc=
+      OAUTH2_PROXY_EMAIL_DOMAINS: "*"
+      OAUTH2_PROXY_KEYCLOAK_REALM: my-realm
+      OAUTH2_PROXY_KEYCLOAK_AUTH_URL: http://keycloak:8080/realms/my-realm/protocol/openid-connect/auth
+      OAUTH2_PROXY_KEYCLOAK_TOKEN_URL: http://keycloak:8080/realms/my-realm/protocol/openid-connect/token
+      OAUTH2_PROXY_KEYCLOAK_USER_INFO_URL: http://keycloak:8080/realms/my-realm/protocol/openid-connect/userinfo
+    networks:
+      - backend-network
+
+#  jaeger:
+#    image: jaegertracing/all-in-one:1.36
+#    ports:
+#      - "5775:5775"   # Agent (UDP)
+#      - "5778:5778"   # Agent (HTTP)
+#      - "14250:14250" # Agent (gRPC)
+#      - "14268:14268" # Collector (HTTP)
+#      - "14250:14250" # Collector (gRPC)
+#      - "16686:16686" # UI
+#    networks:
+#      - backend-network
+#
+#  otel-collector:
+#    image: otel/opentelemetry-collector:0.55.0
+#    volumes:
+#      - ./otel-collector-config.yaml:/otel-local-config.yaml
+#    command: ["--config", "/otel-local-config.yaml"]
+#    networks:
+#      - backend-network
 
 networks:
   backend-network:

@@ -13,6 +13,7 @@ require (
 )
 
 require (
+	github.com/Nerzal/gocloak/v13 v13.9.0 // indirect
 	github.com/andybalholm/brotli v1.0.5 // indirect
 	github.com/armon/go-metrics v0.4.1 // indirect
 	github.com/fatih/color v1.14.1 // indirect
@@ -20,6 +21,8 @@ require (
 	github.com/gabriel-vasile/mimetype v1.4.3 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
+	github.com/go-resty/resty/v2 v2.7.0 // indirect
+	github.com/golang-jwt/jwt/v5 v5.0.0 // indirect
 	github.com/google/uuid v1.5.0 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect
@@ -44,10 +47,13 @@ require (
 	github.com/mattn/go-runewidth v0.0.15 // indirect
 	github.com/mitchellh/go-homedir v1.1.0 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
+	github.com/opentracing/opentracing-go v1.2.0 // indirect
 	github.com/pelletier/go-toml/v2 v2.2.2 // indirect
+	github.com/pkg/errors v0.9.1 // indirect
 	github.com/rivo/uniseg v0.2.0 // indirect
 	github.com/sagikazarmark/locafero v0.4.0 // indirect
 	github.com/sagikazarmark/slog-shim v0.1.0 // indirect
+	github.com/segmentio/ksuid v1.0.4 // indirect
 	github.com/sourcegraph/conc v0.3.0 // indirect
 	github.com/spf13/afero v1.11.0 // indirect
 	github.com/spf13/cast v1.6.0 // indirect

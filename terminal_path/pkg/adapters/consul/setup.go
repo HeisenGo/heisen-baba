@@ -32,6 +32,12 @@ func (c *Consul) RegisterService(serviceHostName, servicePrefixPath, serviceHTTP
 			serviceHostName,
 			fmt.Sprintf("traefik.http.routers.%s_router.rule=PathPrefix(`%s`)", serviceHostName, servicePrefixPath),
 			fmt.Sprintf("traefik.http.services.%s.loadbalancer.server.port=%v", serviceHostName, serviceHTTPPort),
+			fmt.Sprintf("traefik.http.middlewares.auth-middleware.forwardauth.address=http://oauth2-proxy:4180/oauth2/auth"),
+			fmt.Sprintf("traefik.http.middlewares.auth-middleware.forwardauth.trustForwardHeader=true"),
+			fmt.Sprintf("traefik.http.middlewares.auth-middleware.forwardauth.authResponseHeaders=X-Auth-User, X-Secret"),
+			fmt.Sprintf("traefik.http.middlewares.auth-middleware.forwardauth.authRequestHeaders=Accept,X-CustomHeader"),
+			fmt.Sprintf("traefik.http.middlewares.auth-middleware.forwardauth.addAuthCookiesToResponse=Session-Cookie,State-Cookie"),
+			fmt.Sprintf("traefik.http.routers.%s_router.middlewares=auth-middleware", serviceHostName),
 		},
 		Check: &consulAPI.AgentServiceCheck{
 			HTTP:     HTTPHealthURL,

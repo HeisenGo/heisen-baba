@@ -13,7 +13,6 @@ api:
 providers:
   consulCatalog:
     endpoint:
-#      warning: change it for development mode: loclhost:8500
       address: "consul:8500"
 
 log:
@@ -22,3 +21,12 @@ log:
 
 accessLog:
   filePath: "logs/access.log"
+
+#tracing:
+#  serviceName: traefik
+#  otlp:
+#    http:
+#      endpoint: "http://otel-collector:55680/v1/traces"
+#  jaeger:
+#    collector:
+#      endpoint: "http://otel-collector:55680/v1/traces"
