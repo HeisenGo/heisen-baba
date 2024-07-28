@@ -1,8 +1,6 @@
 package entities
 
 import (
-	"time"
-
 	"gorm.io/gorm"
 )
 
@@ -12,35 +10,52 @@ type User struct {
 	Username     string `gorm:"uniqueIndex;not null"`
 	Email        string `gorm:"uniqueIndex;not null"`
 	PasswordHash string `gorm:"not null"`
-	CreatedAt    time.Time
-	UpdatedAt    time.Time
-	Roles        []Role    `gorm:"many2many:user_roles;"`
-	Companies    []Company `gorm:"many2many:user_companies;"`
+	IsSuperAdmin bool   `gorm:"not null; default:false"`
+	IsAdmin      bool   `gorm:"not null; default:false"`
+	Roles        []Role `gorm:"many2many:user_roles;"`
+	IsBlocked    bool   `gorm:"not null; default:false"`
 }
 
 type Role struct {
-	ID          uint   `gorm:"primaryKey"`
+	gorm.Model
 	Name        string `gorm:"uniqueIndex;not null"`
 	Description string
 	Permissions []Permission `gorm:"many2many:role_permissions;"`
 }
 
 type Permission struct {
-	ID          uint   `gorm:"primaryKey"`
+	gorm.Model
 	Name        string `gorm:"uniqueIndex;not null"`
 	Description string
 }
 
-type Company struct {
-	ID        uint   `gorm:"primaryKey"`
-	Name      string `gorm:"not null"`
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	Users     []User `gorm:"many2many:user_companies;"`
+type CompanyUserRole struct {
+	gorm.Model
+	UserID    uint   `gorm:"not null"`
+	CompanyID uint   `gorm:"not null"`
+	Role      string `gorm:"not null"`
 }
 
-type UserCompany struct {
-	UserID    uint   `gorm:"primaryKey"`
-	CompanyID uint   `gorm:"primaryKey"`
-	Role      string `gorm:"not null"`
+type HotelUserRole struct {
+	gorm.Model
+	UserID  uint   `gorm:"not null"`
+	HotelID uint   `gorm:"not null"`
+	Role    string `gorm:"not null"`
+}
+
+type AgencyUserRole struct {
+	gorm.Model
+	UserID   uint   `gorm:"not null"`
+	AgencyID uint   `gorm:"not null"`
+	Role     string `gorm:"not null"`
+}
+
+type UserRole struct {
+	UserID uint `gorm:"primaryKey"`
+	RoleID uint `gorm:"primaryKey"`
+}
+
+type RolePermission struct {
+	RoleID       uint `gorm:"primaryKey"`
+	PermissionID uint `gorm:"primaryKey"`
 }
