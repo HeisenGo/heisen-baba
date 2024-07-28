@@ -22,57 +22,42 @@ type User struct {
 }
 
 type Role struct {
-	CreatedAt   time.Time
-	UpdatedAt   time.Time
-	DeletedAt   gorm.DeletedAt `gorm:"index"`
-	ID          uuid.UUID      `gorm:"type:uuid;default:uuid_generate_v4();primaryKey"`
-	Name        string         `gorm:"uniqueIndex;not null"`
+	gorm.Model
+	Name        string `gorm:"uniqueIndex;not null"`
 	Description string
 	Permissions []Permission `gorm:"many2many:role_permissions;"`
 }
 
 type Permission struct {
-	CreatedAt   time.Time
-	UpdatedAt   time.Time
-	DeletedAt   gorm.DeletedAt `gorm:"index"`
-	ID          uuid.UUID      `gorm:"type:uuid;default:uuid_generate_v4();primaryKey"`
-	Name        string         `gorm:"uniqueIndex;not null"`
+	gorm.Model
+	Name        string `gorm:"uniqueIndex;not null"`
 	Description string
 }
 
 type CompanyUserRole struct {
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	DeletedAt gorm.DeletedAt `gorm:"index"`
-	ID        uuid.UUID      `gorm:"type:uuid;default:uuid_generate_v4();primaryKey"`
-	uuid.UUID `gorm:"type:uuid;not null"`
-	CompanyID uint   `gorm:"not null"`
-	Role      string `gorm:"not null"`
+	gorm.Model
+	UserID    uuid.UUID `gorm:"type:uuid;not null"`
+	CompanyID uint      `gorm:"not null"`
+	Role      string    `gorm:"not null"`
 }
 
 type HotelUserRole struct {
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	DeletedAt gorm.DeletedAt `gorm:"index"`
-	ID        uuid.UUID      `gorm:"type:uuid;default:uuid_generate_v4();primaryKey"`
-	UserID uuid.UUID `gorm:"type:uuid;not null"`
-	HotelID   uint           `gorm:"not null"`
-	Role      string         `gorm:"not null"`
+	gorm.Model
+	UserID  uuid.UUID `gorm:"type:uuid;not null"`
+	HotelID uint      `gorm:"not null"`
+	Role    string    `gorm:"not null"`
 }
 
 type AgencyUserRole struct {
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	DeletedAt gorm.DeletedAt `gorm:"index"`
-	ID        uuid.UUID      `gorm:"type:uuid;default:uuid_generate_v4();primaryKey"`
-	UserID     uuid.UUID `gorm:"type:uuid;not null"`
+	gorm.Model
+	UserID    uuid.UUID      `gorm:"type:uuid;not null"`
 	AgencyID  uint           `gorm:"not null"`
 	Role      string         `gorm:"not null"`
 }
 
 type UserRole struct {
-	UserID  uuid.UUID `gorm:"type:uuid;not null"`
-	RoleID uint `gorm:"primaryKey"`
+	UserID uuid.UUID `gorm:"type:uuid;not null"`
+	RoleID uint      `gorm:"primaryKey"`
 }
 
 type RolePermission struct {
