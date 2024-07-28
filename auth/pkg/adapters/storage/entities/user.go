@@ -71,11 +71,11 @@ type AgencyUserRole struct {
 }
 
 type UserRole struct {
-	UserID  uuid.UUID `gorm:"type:uuid;not null; primaryKey"`
+	UserID  uuid.UUID `gorm:"type:uuid;not null"`
 	RoleID uint `gorm:"primaryKey"`
 }
 
 type RolePermission struct {
-	RoleID        uuid.UUID `gorm:"type:uuid;not null; primaryKey"`
+	RoleID       uint `gorm:"primaryKey"`
 	PermissionID uint `gorm:"primaryKey"`
 }
