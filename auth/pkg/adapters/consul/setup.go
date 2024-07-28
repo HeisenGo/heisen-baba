@@ -46,3 +46,41 @@ func (c *Consul) RegisterService(serviceHostName, servicePrefixPath, serviceHTTP
 	}
 	return nil
 }
+
+
+package consul
+
+import (
+    "fmt"
+    "log"
+
+    "github.com/hashicorp/consul/api"
+)
+
+func RegisterService(serviceName, serviceID, address string, port int) error {
+    config := api.DefaultConfig()
+    client, err := api.NewClient(config)
+    if err != nil {
+        return fmt.Errorf("failed to create Consul client: %v", err)
+    }
+
+    registration := &api.AgentServiceRegistration{
+        ID:      serviceID,
+        Name:    serviceName,
+        Port:    port,
+        Address: address,
+        Check: &api.AgentServiceCheck{
+            HTTP:     fmt.Sprintf("http://%s:%d/health", address, port),
+            Interval: "10s",
+            Timeout:  "5s",
+        },
+    }
+
+    err = client.Agent().ServiceRegister(registration)
+    if err != nil {
+        return fmt.Errorf("failed to register service: %v", err)
+    }
+
+    log.Printf("Service registered with Consul: %s", serviceName)
+    return nil
+}
