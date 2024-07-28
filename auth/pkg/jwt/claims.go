@@ -8,6 +8,7 @@ import (
 type UserClaims struct {
 	jwt2.RegisteredClaims
 	UserID   uuid.UUID
-	Role     string
+	IsAdmin  bool
+	Roles    []string
 	Sections []string
 }
