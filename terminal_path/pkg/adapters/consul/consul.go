@@ -46,3 +46,18 @@ func (c *Consul) RegisterService(serviceHostName, servicePrefixPath, serviceHTTP
 	}
 	return nil
 }
+
+func (c *Consul) DiscoverService(serviceName string) (port int, ip string, err error) {
+	consulConfig := consulAPI.DefaultConfig()
+	consulConfig.Address = c.Address
+	consulClient, err := consulAPI.NewClient(consulConfig)
+	if err != nil {
+		return 0, "", err
+	}
+	services, _, err := consulClient.Catalog().Service(serviceName, "", nil)
+	if err != nil {
+		return 0, "", err
+	}
+	service := services[0]
+	return service.ServicePort, service.ServiceAddress, nil
+}
