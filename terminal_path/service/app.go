@@ -6,9 +6,11 @@ import (
 	"terminalpathservice/config"
 	"terminalpathservice/internal/path"
 	"terminalpathservice/internal/terminal"
+	"terminalpathservice/pkg/adapters/clients/grpc"
 	"terminalpathservice/pkg/adapters/consul"
 	"terminalpathservice/pkg/adapters/storage"
 	"terminalpathservice/pkg/ports"
+	"terminalpathservice/pkg/ports/clients/clients"
 	"terminalpathservice/pkg/valuecontext"
 
 	"gorm.io/gorm"
@@ -19,7 +21,8 @@ type AppContainer struct {
 	dbConn          *gorm.DB
 	pathService     *PathService
 	terminalService *TerminalService
-	serviceRegistry *ports.IServiceRegistry
+	serviceRegistry ports.IServiceRegistry
+	authClient      clients.IAuthClient
 }
 
 func NewAppContainer(cfg config.Config) (*AppContainer, error) {
@@ -41,6 +44,7 @@ func NewAppContainer(cfg config.Config) (*AppContainer, error) {
 
 	// service registry
 	app.mustRegisterService(cfg.Server)
+	app.setAuthClient(cfg.Server.ServiceRegistry.AuthServiceName)
 
 	app.setTerminalService()
 	app.setPathService()
@@ -72,6 +76,10 @@ func (a *AppContainer) TerminalService() *TerminalService {
 	return a.terminalService
 }
 
+func (a *AppContainer) AuthClient() clients.IAuthClient {
+	return a.authClient
+}
+
 func (a *AppContainer) TerminalServiceFromCtx(ctx context.Context) *TerminalService {
 	tx, ok := valuecontext.TryGetTxFromContext(ctx)
 	if !ok {
@@ -94,6 +102,13 @@ func (a *AppContainer) setTerminalService() {
 		return
 	}
 	a.terminalService = NewTerminalService(terminal.NewOps(storage.NewTerminalRepo(a.dbConn)), path.NewOps(storage.NewPathRepo(a.dbConn)))
+}
+
+func (a *AppContainer) setAuthClient(authServiceName string) {
+	if a.authClient != nil {
+		return
+	}
+	a.authClient = grpc.NewGRPCAuthClient(a.serviceRegistry, authServiceName)
 }
 
 func (a *AppContainer) PathService() *PathService {
@@ -130,4 +145,5 @@ func (a *AppContainer) mustRegisterService(srvCfg config.Server) {
 	if err != nil {
 		log.Fatalf("Failed to register service with Consul: %v", err)
 	}
+	a.serviceRegistry = registry
 }

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"terminalpathservice/api/http/handlers"
+	"terminalpathservice/api/http/middlewares"
 	"terminalpathservice/config"
 	"terminalpathservice/service"
 
@@ -14,11 +15,9 @@ func Run(cfg config.Server, app *service.AppContainer) {
 	fiberApp := fiber.New()
 	api := fiberApp.Group("/api/v1") //, middlerwares.SetUserContext())
 
-	secret := []byte(cfg.Secret)
-	fmt.Println(api, secret)
 	registerGlobalRoutes(api)
-	registerTerminalRouts(api, app, secret)
-	registerPathRouts(api, app, secret)
+	registerTerminalRouts(api, app)
+	registerPathRouts(api, app)
 	// run server
 	log.Fatal(fiberApp.Listen(fmt.Sprintf("%s:%d", cfg.Host, cfg.HttpPort)))
 }
@@ -30,10 +29,10 @@ func registerGlobalRoutes(router fiber.Router) {
 	})
 }
 
-func registerTerminalRouts(router fiber.Router, app *service.AppContainer, secret []byte) {
+func registerTerminalRouts(router fiber.Router, app *service.AppContainer) {
 	terminalGroup := router.Group("/terminals") //, middlerwares.Auth(secret), middlerwares.RoleChecker("user", "admin"))
-	fmt.Print(secret)
 	terminalGroup.Post("",
+		middlewares.Auth(app.AuthClient()),
 		handlers.CreateTerminal(app.TerminalService()),
 	)
 
@@ -43,9 +42,8 @@ func registerTerminalRouts(router fiber.Router, app *service.AppContainer, secre
 	terminalGroup.Delete(":terminalID", handlers.DeleteTerminal(app.TerminalService()))
 }
 
-func registerPathRouts(router fiber.Router, app *service.AppContainer, secret []byte) {
+func registerPathRouts(router fiber.Router, app *service.AppContainer) {
 	pathGroup := router.Group("terminals/paths") //, middlerwares.Auth(secret), middlerwares.RoleChecker("user", "admin"))
-	fmt.Print(secret)
 	pathGroup.Post("",
 		handlers.CreatePath(app.PathService()),
 	)

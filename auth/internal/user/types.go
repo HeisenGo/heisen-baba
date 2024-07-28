@@ -26,13 +26,12 @@ type Repo interface {
 
 type User struct {
 	ID           uuid.UUID
-	Username     string
 	Email        string
 	Password     string
 	IsSuperAdmin bool
 	IsAdmin      bool
-	Roles        []Role
-	IsBlocked    bool
+	//Roles        []Role
+	IsBlocked bool
 }
 
 func (u *User) SetPassword(password string) {
@@ -88,21 +87,21 @@ func LowerCaseEmail(email string) string {
 	return strings.ToLower(email)
 }
 
-type Role struct {
-	ID          uint
-	Name        string `gorm:"uniqueIndex;not null"`
-	Description string
-	Permissions []Permission `gorm:"many2many:role_permissions;"`
-}
-
-type Permission struct {
-	ID          uint
-	Name        string `gorm:"uniqueIndex;not null"`
-	Description string
-}
-
-type RolePermission struct {
-	ID           uint
-	RoleID       uint
-	PermissionID uint
-}
+//type Role struct {
+//	ID          uint
+//	Name        string `gorm:"uniqueIndex;not null"`
+//	Description string
+//	Permissions []Permission `gorm:"many2many:role_permissions;"`
+//}
+//
+//type Permission struct {
+//	ID          uint
+//	Name        string `gorm:"uniqueIndex;not null"`
+//	Description string
+//}
+//
+//type RolePermission struct {
+//	ID           uint
+//	RoleID       uint
+//	PermissionID uint
+//}

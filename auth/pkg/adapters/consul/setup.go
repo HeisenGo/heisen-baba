@@ -21,7 +21,7 @@ func (c *Consul) RegisterService(serviceHostName, servicePrefixPath, serviceHTTP
 		return err
 	}
 
-	HTTPHealthURL := fmt.Sprintf("http://%s:%v/%s", serviceHostName, serviceHTTPPort, serviceHTTPHealthPath)
+	GRPCHealthURL := fmt.Sprintf("%s:%v", serviceHostName, serviceHTTPPort)
 	// Register service with Consul
 	registration := &consulAPI.AgentServiceRegistration{
 		ID:      fmt.Sprintf("%s-service-id", serviceHostName),
@@ -34,7 +34,7 @@ func (c *Consul) RegisterService(serviceHostName, servicePrefixPath, serviceHTTP
 			fmt.Sprintf("traefik.http.services.%s.loadbalancer.server.port=%v", serviceHostName, serviceHTTPPort),
 		},
 		Check: &consulAPI.AgentServiceCheck{
-			HTTP:     HTTPHealthURL,
+			GRPC:     GRPCHealthURL,
 			Interval: "10s",
 			Timeout:  "1s",
 		},

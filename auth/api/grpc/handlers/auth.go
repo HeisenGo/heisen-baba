@@ -8,6 +8,7 @@ import (
 	"context"
 	"errors"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/health/grpc_health_v1"
 	"google.golang.org/grpc/status"
 )
 
@@ -51,8 +52,8 @@ func (a *GRPCAuthHandler) GetUserByToken(ctx context.Context, req *protobufs.Get
 		return nil, status.Errorf(codes.InvalidArgument, err.Error())
 	}
 	return &protobufs.GetUserByTokenResponse{
-		UserId: claim.UserID.String(),
-		Roles:  claim.Roles,
+		UserId:  claim.UserID.String(),
+		IsAdmin: claim.IsAdmin,
 	}, nil
 }
 
@@ -66,4 +67,15 @@ func (a *GRPCAuthHandler) RefreshToken(ctx context.Context, req *protobufs.Refre
 		return nil, status.Errorf(codes.Unauthenticated, err.Error())
 	}
 	return &protobufs.LoginResponse{Token: authToken.AuthorizationToken, RefreshToken: req.RefreshToken}, nil
+}
+
+type HealthServer struct {
+	grpc_health_v1.HealthServer
+}
+
+// Check implements Health.Check
+func (s *HealthServer) Check(ctx context.Context, req *grpc_health_v1.HealthCheckRequest) (*grpc_health_v1.HealthCheckResponse, error) {
+	return &grpc_health_v1.HealthCheckResponse{
+		Status: grpc_health_v1.HealthCheckResponse_SERVING,
+	}, nil
 }
