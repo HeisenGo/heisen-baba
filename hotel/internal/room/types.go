@@ -8,6 +8,9 @@ import (
 
 type Repo interface {
 	CreateRoom(ctx context.Context, room *Room) (*Room, error)
+	GetByID(ctx context.Context, id uint) (*Room, error)
+	UpdateRoom(ctx context.Context, room *Room) (*Room, error)
+	DeleteRoom(ctx context.Context, id uint) error
 }
 
 type Room struct {
@@ -22,7 +25,7 @@ type Room struct {
 }
 
 var (
-	ErrInvalidName      = errors.New("invalid city or country name : only alphabetic will be accepted")
+	ErrInvalidName = errors.New("invalid room name: must be 1-100 characters long and can only contain alphanumeric characters, spaces, hyphens, underscores, and periods")
 )
 
 func ValidateRoomName(name string) error {

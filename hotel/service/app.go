@@ -70,5 +70,5 @@ func (a *AppContainer) setRoomService() {
 	if a.roomService != nil {
 		return
 	}
-	a.roomService = NewRoomService(hotel.NewOps(storage.NewHotelRepo(a.dbConn)),room.NewOps(storage.NewRoomRepo(a.dbConn)) )
+	a.roomService = NewRoomService(room.NewOps(storage.NewRoomRepo(a.dbConn)))
 }

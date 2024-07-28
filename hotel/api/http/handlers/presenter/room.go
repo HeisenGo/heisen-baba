@@ -1,54 +1,53 @@
 package presenter
 
-import (
-	"hotel/pkg/adapters/storage/entities"
+import "hotel/internal/room"
 
-)
-
-type CreateRoomRequest struct {
-	HotelID uint               `json:"hotel_id"`
-	Rooms []CreateRoomItem `json:"rooms"`
+type CreateRoomReq struct {
+	HotelID     uint   `json:"hotel_id"`
+	Name        string `json:"name"`
+	AgencyPrice uint64 `json:"agency_price"`
+	UserPrice   uint64 `json:"user_price"`
+	Facilities  string `json:"facilities"`
+	Capacity    uint8  `json:"capacity"`
+	IsAvailable bool   `json:"is_available"`
 }
 
-type CreateRoomsItem struct {
-	Name string `json:"name"`
+type RoomResp struct {
+	ID          uint   `json:"id"`
+	HotelID     uint   `json:"hotel_id"`
+	Name        string `json:"name"`
+	AgencyPrice uint64 `json:"agency_price"`
+	UserPrice   uint64 `json:"user_price"`
+	Facilities  string `json:"facilities"`
+	Capacity    uint8  `json:"capacity"`
+	IsAvailable bool   `json:"is_available"`
 }
 
-type CreateRoomsResponse struct {
-	Data    []RoomResponseItem `json:"data"`
-	Message string               `json:"message"`
-}
-
-func CreateRoomsRequestToEntities(req CreateRoomRequest, maxOrder uint) []entities.Room {
-	rooms := make([]entities.Room, len(req.Rooms))
-	for i, room := range req.Rooms {
-		rooms[i] = entities.Room{
-			Name:     room.Name,
-			HotelID:  req.HotelID,
-		}
-	}
-	return rooms
-}
-
-func EntitiesToCreateColumnsResponse(columns []entities.Column) CreateColumnsResponse {
-	respItems := make([]ColumnResponseItem, len(columns))
-	for i, col := range columns {
-		respItems[i] = ColumnResponseItem{
-			ID:    col.ID,
-			Name:  col.Name,
-			Order: col.OrderNum,
-		}
-	}
-	return CreateColumnsResponse{
-		Data:    respItems,
-		Message: "Columns successfully created.",
+func CreateRoomRequest(req *CreateRoomReq) *room.Room {
+	return &room.Room{
+		HotelID:     req.HotelID,
+		Name:        req.Name,
+		AgencyPrice: req.AgencyPrice,
+		UserPrice:   req.UserPrice,
+		Facilities:  req.Facilities,
+		Capacity:    req.Capacity,
+		IsAvailable: req.IsAvailable,
 	}
 }
 
-func EntityToColumnResponse(c column.Column) ColumnResponseItem {
-	return ColumnResponseItem{
-		ID:    c.ID,
-		Name:  c.Name,
-		Order: c.OrderNum,
+func RoomToCreateRoomResponse(r *room.Room) *RoomResp {
+	return &RoomResp{
+		ID:          r.ID,
+		HotelID:     r.HotelID,
+		Name:        r.Name,
+		AgencyPrice: r.AgencyPrice,
+		UserPrice:   r.UserPrice,
+		Facilities:  r.Facilities,
+		Capacity:    r.Capacity,
+		IsAvailable: r.IsAvailable,
 	}
+}
+
+func RoomToFullRoomResponse(r *room.Room) *RoomResp {
+	return RoomToCreateRoomResponse(r)
 }

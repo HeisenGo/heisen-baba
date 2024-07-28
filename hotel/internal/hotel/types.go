@@ -9,6 +9,9 @@ import (
 
 type Repo interface {
 	CreateHotel(ctx context.Context, hotel *Hotel) error
+	GetByID(ctx context.Context, id uint) (*Hotel, error)
+	UpdateHotel(ctx context.Context, hotel *Hotel) error
+	DeleteHotel(ctx context.Context, id uint) error
 }
 
 type Hotel struct {
@@ -36,7 +39,7 @@ func ValidateHotelName(name string) error {
 }
 
 func ValidateName(name string) error {
-	var validName = regexp.MustCompile(`^[a-zA-Z]+$`)
+	var validName = regexp.MustCompile(`^[a-zA-Z\s]+$`)
 	if !validName.MatchString(name) {
 		return ErrInvalidName
 	}

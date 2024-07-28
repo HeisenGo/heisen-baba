@@ -4,7 +4,7 @@ import (
 	"hotel/internal/hotel"
 	"hotel/internal/room"
 	"hotel/pkg/adapters/storage/entities"
-		"hotel/pkg/fp"
+	"hotel/pkg/fp"
 )
 
 func HotelEntityToDomain(hotelEntity entities.Hotel) hotel.Hotel {

@@ -2,40 +2,31 @@ package service
 
 import (
 	"context"
-	"hotel/internal/hotel"
 	"hotel/internal/room"
-	"hotel/pkg/adapters/storage/entities"
-	"hotel/pkg/adapters/storage/mappers"
 )
 
-
 type RoomService struct {
-	roomOps           *room.Ops
-	hotelOps         *hotel.Ops
+	roomOps room.Repo
 }
 
-func NewRoomService(hotelOps *hotel.Ops, roomOps *room.Ops) *RoomService {
+func NewRoomService(roomOps room.Repo) *RoomService {
 	return &RoomService{
-		hotelOps: hotelOps,
-		roomOps:         roomOps,
+		roomOps: roomOps,
 	}
 }
 
-func (s *RoomService) CreateRoom(ctx context.Context,hotelID uint,userPrice,agencyPrice uint64,capacity uint8, name,facilities string ,isAvailable bool) (*entities.Room, error) {
-	room := &room.Room{
-		Name:     name,
-		HotelID:  hotelID,
-		UserPrice: userPrice,
-		AgencyPrice: agencyPrice,
-		Facilities: facilities,
-		Capacity: capacity,
-		IsAvailable: isAvailable,
-	}
+func (s *RoomService) CreateRoom(ctx context.Context, r *room.Room) (*room.Room, error) {
+	return s.roomOps.CreateRoom(ctx, r)
+}
 
-	createdRoom,err := s.roomOps.CreateRoom(ctx, room)
-	if err != nil {
-		return nil , err
-	}
-	roomentity := mappers.RoomDomainToEntity(createdRoom)
-	return roomentity ,nil
+func (s *RoomService) GetRoom(ctx context.Context, id uint) (*room.Room, error) {
+	return s.roomOps.GetByID(ctx, id)
+}
+
+func (s *RoomService) UpdateRoom(ctx context.Context, r *room.Room) (*room.Room, error) {
+	return s.roomOps.UpdateRoom(ctx, r)
+}
+
+func (s *RoomService) DeleteRoom(ctx context.Context, id uint) error {
+	return s.roomOps.DeleteRoom(ctx, id)
 }

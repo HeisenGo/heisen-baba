@@ -20,8 +20,8 @@ func RoomEntityToDomain(roomEntity entities.Room) room.Room {
 	}
 }
 
-func RoomDomainToEntity(r *room.Room) *entities.Room {
-	return &entities.Room{
+func RoomDomainToEntity(r room.Room) entities.Room {
+	return entities.Room{
 		Model: gorm.Model{
 			ID: r.ID,
 		},

@@ -25,7 +25,7 @@ type FullHotelResponse struct {
 	City      string      `json:"city" example:"Los Angles"`
 	Country   string      `json:"country" example:"United States America"`
 	Details   string      `json:"details" example:"5 Star Beach Palm Hotel"`
-	IsBlocked bool        `json:"is_blocked" example:"blocked or not"`
+	IsBlocked bool        `json:"is_blocked" example:"false"`
 	Rooms     []room.Room `json:"rooms"`
 }
 
@@ -84,5 +84,17 @@ func HotelToCreateHotelResponse(h *hotel.Hotel) *CreateHotelResponse {
 		Country: h.Country,
 		Details: h.Details,
 		Rooms:   rooms,
+	}
+}
+
+func HotelToFullHotelResponse(h *hotel.Hotel) *FullHotelResponse {
+	return &FullHotelResponse{
+		ID:        h.ID,
+		Name:      h.Name,
+		City:      h.City,
+		Country:   h.Country,
+		Details:   h.Details,
+		IsBlocked: h.IsBlocked,
+		Rooms:     h.Rooms,
 	}
 }
