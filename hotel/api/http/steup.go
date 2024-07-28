@@ -25,15 +25,15 @@ func Run(cfg config.Config, app *service.AppContainer) {
 func registerHotelRoutes(router fiber.Router, app *service.AppContainer) {
 	router = router.Group("/hotels")
 	router.Post("", middlewares.SetUserContext(), handlers.CreateHotel(app.HotelService()))
-	router.Get("/:id", middlewares.SetUserContext(), handlers.GetHotel(app.HotelService()))
-	router.Put("/:id", middlewares.SetUserContext(), handlers.UpdateHotel(app.HotelService()))
-	router.Delete("/:id", middlewares.SetUserContext(), handlers.DeleteHotel(app.HotelService()))
+	router.Get("", middlewares.SetUserContext(), handlers.GetHotels(app.HotelService()))
+	router.Get("/owner", middlewares.SetUserContext(), handlers.GetHotelsByOwnerID(app.HotelService()))
 }
 
 func registerRoomRoutes(router fiber.Router, app *service.AppContainer) {
 	router = router.Group("/rooms")
 	router.Post("", middlewares.SetUserContext(), handlers.CreateRoom(app.RoomService()))
-	router.Get("/:id", middlewares.SetUserContext(), handlers.GetRoom(app.RoomService()))
+	router.Get("", middlewares.SetUserContext(), handlers.GetRooms(app.RoomService()))
+	router.Get("/:id", middlewares.SetUserContext(), handlers.GetRooms(app.RoomService()))
 	router.Put("/:id", middlewares.SetUserContext(), handlers.UpdateRoom(app.RoomService()))
 	router.Delete("/:id", middlewares.SetUserContext(), handlers.DeleteRoom(app.RoomService()))
 }

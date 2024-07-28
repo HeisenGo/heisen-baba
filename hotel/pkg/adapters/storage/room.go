@@ -29,13 +29,24 @@ func (r *roomRepo) CreateRoom(ctx context.Context, rm *room.Room) (*room.Room, e
 	return rm, nil
 }
 
-func (r *roomRepo) GetByID(ctx context.Context, id uint) (*room.Room, error) {
-	var roomEntity entities.Room
-	if err := r.db.WithContext(ctx).First(&roomEntity, id).Error; err != nil {
-		return nil, err
+func (r *roomRepo) GetRooms(ctx context.Context, page, pageSize int) ([]room.Room, int, error) {
+	var roomEntities []entities.Room
+	var total int64
+
+	query := r.db.WithContext(ctx).Model(&entities.Room{})
+
+	query.Count(&total)
+
+	if err := query.Offset((page - 1) * pageSize).Limit(pageSize).Find(&roomEntities).Error; err != nil {
+		return nil, 0, err
 	}
-	roomDomain := mappers.RoomEntityToDomain(roomEntity)
-	return &roomDomain, nil
+
+	rooms := make([]room.Room, len(roomEntities))
+	for i, roomEntity := range roomEntities {
+		rooms[i] = mappers.RoomEntityToDomain(roomEntity)
+	}
+
+	return rooms, int(total), nil
 }
 
 func (r *roomRepo) UpdateRoom(ctx context.Context, rm *room.Room) (*room.Room, error) {

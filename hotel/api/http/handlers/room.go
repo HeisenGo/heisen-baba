@@ -15,8 +15,8 @@ import (
 // @Produce json
 // @Param room body presenter.CreateRoomReq true "Room to create"
 // @Success 201 {object} presenter.RoomResp
-// @Failure 400 {object} map[string]interface{} "error: bad request"
-// @Failure 500 {object} map[string]interface{} "error: internal server error"
+// @Failure 400 {object} presenter.Response "error: bad request"
+// @Failure 500 {object} presenter.Response "error: internal server error"
 // @Router /rooms [post]
 func CreateRoom(roomService *service.RoomService) fiber.Handler {
 	return func(c *fiber.Ctx) error {
@@ -35,31 +35,34 @@ func CreateRoom(roomService *service.RoomService) fiber.Handler {
 		return presenter.Created(c, "Room created successfully", res)
 	}
 }
-// GetRoom gets a room by ID
-// @Summary Get a room by ID
-// @Description Get a room by ID
+// GetRooms gets a paginated list of rooms
+// @Summary Get rooms
+// @Description Get paginated list of rooms
 // @Tags rooms
 // @Produce json
-// @Param id path int true "Room ID"
+// @Param page query int false "Page number"
+// @Param page_size query int false "Page size"
 // @Success 200 {object} presenter.RoomResp
-// @Failure 400 {object} map[string]interface{} "error: bad request"
-// @Failure 500 {object} map[string]interface{} "error: internal server error"
-// @Router /rooms/{id} [get]
-func GetRoom(roomService *service.RoomService) fiber.Handler {
-	return func(c *fiber.Ctx) error {
-		roomID, err := strconv.ParseUint(c.Params("id"), 10, 64)
-		if err != nil {
-			return presenter.BadRequest(c, err)
-		}
+// @Failure 500 {object} presenter.Response
+// @Router /rooms [get]
+func GetRooms(roomService *service.RoomService) fiber.Handler {
+    return func(c *fiber.Ctx) error {
+        page := c.QueryInt("page", 1)
+        pageSize := c.QueryInt("page_size", 10)
 
-		r, err := roomService.GetRoom(c.UserContext(), uint(roomID))
-		if err != nil {
-			return presenter.NotFound(c, err)
-		}
+        rooms, total, err := roomService.GetRooms(c.UserContext(), page, pageSize)
+        if err != nil {
+            return presenter.InternalServerError(c, err)
+        }
 
-		res := presenter.RoomToFullRoomResponse(r)
-		return presenter.OK(c, "Room Fetched Successfully", res)
-	}
+        res := make([]presenter.RoomResp, len(rooms))
+        for i, room := range rooms {
+            res[i] = *presenter.RoomToFullRoomResponse(&room) // Dereference the pointer here
+        }
+
+        pagination := presenter.NewPagination(res, uint(page), uint(pageSize), uint(total))
+        return presenter.OK(c, "Rooms retrieved successfully", pagination)
+    }
 }
 // UpdateRoom updates a room by ID
 // @Summary Update a room by ID
@@ -70,9 +73,9 @@ func GetRoom(roomService *service.RoomService) fiber.Handler {
 // @Param id path int true "Room ID"
 // @Param room body presenter.CreateRoomReq true "Room to update"
 // @Success 200 {object} presenter.RoomResp
-// @Failure 400 {object} map[string]interface{} "error: bad request"
-// @Failure 404 {object} map[string]interface{} "error: bad request"
-// @Failure 500 {object} map[string]interface{} "error: internal server error"
+// @Failure 400 {object} presenter.Response "error: bad request"
+// @Failure 404 {object} presenter.Response "error: bad request"
+// @Failure 500 {object} presenter.Response "error: internal server error"
 // @Router /rooms/{id} [put]
 func UpdateRoom(roomService *service.RoomService) fiber.Handler {
 	return func(c *fiber.Ctx) error {
@@ -104,8 +107,8 @@ func UpdateRoom(roomService *service.RoomService) fiber.Handler {
 // @Produce json
 // @Param id path int true "Room ID"
 // @Success 204 "No Content"
-// @Failure 404 {object} map[string]interface{} "error: bad request"
-// @Failure 500 {object} map[string]interface{} "error: internal server error"
+// @Failure 404 {object} presenter.Response "error: bad request"
+// @Failure 500 {object} presenter.Response "error: internal server error"
 // @Router /rooms/{id} [delete]
 func DeleteRoom(roomService *service.RoomService) fiber.Handler {
 	return func(c *fiber.Ctx) error {

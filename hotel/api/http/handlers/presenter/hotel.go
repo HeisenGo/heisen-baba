@@ -18,7 +18,11 @@ type HotelResp struct {
 	ID   uint   `json:"id"`
 	Name string `json:"name"`
 }
-
+type HotelFilters struct {
+	City     string
+	Country  string
+	Capacity int
+}
 type FullHotelResponse struct {
 	ID        uint        `json:"hotel_id" example:"12"`
 	Name      string      `json:"name" example:"myhotel"`

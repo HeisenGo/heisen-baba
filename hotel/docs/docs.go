@@ -19,6 +19,62 @@ const docTemplate = `{
     "basePath": "{{.BasePath}}",
     "paths": {
         "/hotels": {
+            "get": {
+                "description": "Get paginated list of hotels with filters",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "hotels"
+                ],
+                "summary": "Get hotels",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "City",
+                        "name": "city",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Country",
+                        "name": "country",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Room capacity",
+                        "name": "capacity",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page number",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page size",
+                        "name": "page_size",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/presenter.FullHotelResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/presenter.Response"
+                        }
+                    }
+                }
+            },
             "post": {
                 "description": "Create a new hotel",
                 "consumes": [
@@ -52,37 +108,47 @@ const docTemplate = `{
                     "400": {
                         "description": "error: bad request",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/presenter.Response"
                         }
                     },
                     "500": {
                         "description": "error: internal server error",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/presenter.Response"
                         }
                     }
                 }
             }
         },
-        "/hotels/{id}": {
+        "/hotels/owner": {
             "get": {
-                "description": "Get a hotel by ID",
+                "description": "Get hotels by owner ID",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "hotels"
                 ],
-                "summary": "Get a hotel by ID",
+                "summary": "Get hotels by owner ID",
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "Hotel ID",
-                        "name": "id",
-                        "in": "path",
+                        "description": "Owner ID",
+                        "name": "owner_id",
+                        "in": "query",
                         "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page number",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page size",
+                        "name": "page_size",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -92,22 +158,16 @@ const docTemplate = `{
                             "$ref": "#/definitions/presenter.FullHotelResponse"
                         }
                     },
-                    "400": {
-                        "description": "error: bad request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
                     "500": {
-                        "description": "error: internal server error",
+                        "description": "Internal Server Error",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/presenter.Response"
                         }
                     }
                 }
-            },
+            }
+        },
+        "/hotels/{id}": {
             "put": {
                 "description": "Update a hotel by ID",
                 "consumes": [
@@ -148,15 +208,13 @@ const docTemplate = `{
                     "400": {
                         "description": "error: bad request",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/presenter.Response"
                         }
                     },
                     "500": {
                         "description": "error: internal server error",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/presenter.Response"
                         }
                     }
                 }
@@ -186,21 +244,57 @@ const docTemplate = `{
                     "400": {
                         "description": "error: bad request",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/presenter.Response"
                         }
                     },
                     "500": {
                         "description": "error: internal server error",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/presenter.Response"
                         }
                     }
                 }
             }
         },
         "/rooms": {
+            "get": {
+                "description": "Get paginated list of rooms",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "rooms"
+                ],
+                "summary": "Get rooms",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Page number",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page size",
+                        "name": "page_size",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/presenter.RoomResp"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/presenter.Response"
+                        }
+                    }
+                }
+            },
             "post": {
                 "description": "Create a new room",
                 "consumes": [
@@ -234,62 +328,19 @@ const docTemplate = `{
                     "400": {
                         "description": "error: bad request",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/presenter.Response"
                         }
                     },
                     "500": {
                         "description": "error: internal server error",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/presenter.Response"
                         }
                     }
                 }
             }
         },
         "/rooms/{id}": {
-            "get": {
-                "description": "Get a room by ID",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "rooms"
-                ],
-                "summary": "Get a room by ID",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Room ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/presenter.RoomResp"
-                        }
-                    },
-                    "400": {
-                        "description": "error: bad request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "500": {
-                        "description": "error: internal server error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            },
             "put": {
                 "description": "Update a room by ID",
                 "consumes": [
@@ -330,22 +381,19 @@ const docTemplate = `{
                     "400": {
                         "description": "error: bad request",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/presenter.Response"
                         }
                     },
                     "404": {
                         "description": "error: bad request",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/presenter.Response"
                         }
                     },
                     "500": {
                         "description": "error: internal server error",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/presenter.Response"
                         }
                     }
                 }
@@ -375,15 +423,13 @@ const docTemplate = `{
                     "404": {
                         "description": "error: bad request",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/presenter.Response"
                         }
                     },
                     "500": {
                         "description": "error: internal server error",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/presenter.Response"
                         }
                     }
                 }
@@ -529,6 +575,21 @@ const docTemplate = `{
                 }
             }
         },
+        "presenter.Response": {
+            "type": "object",
+            "properties": {
+                "data": {},
+                "error": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "success": {
+                    "type": "boolean"
+                }
+            }
+        },
         "presenter.RoomResp": {
             "type": "object",
             "properties": {
@@ -593,7 +654,7 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
-	Host:             "127.0.0.1:8080",
+	Host:             "localhost:8080",
 	BasePath:         "/api/v1",
 	Schemes:          []string{},
 	Title:            "heisenbaba-HotelDomain",

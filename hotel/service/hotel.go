@@ -17,7 +17,11 @@ type HotelService struct {
 	hotelOps *hotel.Ops
 	roomOps  *room.Ops
 }
-
+type HotelFilters struct {
+	City     string
+	Country  string
+	Capacity int
+}
 func NewHotelService(hotelOps *hotel.Ops, roomOps *room.Ops) *HotelService {
 	return &HotelService{
 		hotelOps: hotelOps,
@@ -29,26 +33,36 @@ func (s *HotelService) CreateHotel(ctx context.Context, h *hotel.Hotel) error {
 	return s.hotelOps.Create(ctx, h)
 }
 
-func (s *HotelService) GetHotel(ctx context.Context, id uint) (*hotel.Hotel, error) {
-	return s.hotelOps.GetByID(ctx, id)
+func (s *HotelService) GetHotels(ctx context.Context, city, country string, capacity, page, pageSize int) ([]hotel.Hotel, uint, error) {
+    return s.hotelOps.GetHotels(ctx, city, country, capacity, page, pageSize)
 }
 
-func (s *HotelService) UpdateHotel(ctx context.Context, id uint, h *hotel.Hotel) error {
-	existingHotel, err := s.hotelOps.GetByID(ctx, id)
-	if err != nil {
-		return err
-	}
-
-	// Update fields
-	existingHotel.Name = h.Name
-	existingHotel.City = h.City
-	existingHotel.Country = h.Country
-	existingHotel.Details = h.Details
-	existingHotel.IsBlocked = h.IsBlocked
-
-	return s.hotelOps.Update(ctx, existingHotel)
+func (s *HotelService) GetHotelsByOwnerID(ctx context.Context, ownerID uint, page, pageSize int) ([]hotel.Hotel, int, error) {
+	return s.hotelOps.GetHotelsByOwnerID(ctx, ownerID, page, pageSize)
 }
+func (s *HotelService) UpdateHotel(ctx context.Context, id uint, updates *hotel.Hotel) error {
+    existingHotel, err := s.hotelOps.GetHotelsByID(ctx, id)
+    if err != nil {
+        return err
+    }
 
+    // Update only the fields that are provided
+    if updates.Name != "" {
+        existingHotel.Name = updates.Name
+    }
+    if updates.City != "" {
+        existingHotel.City = updates.City
+    }
+    if updates.Country != "" {
+        existingHotel.Country = updates.Country
+    }
+    if updates.Details != "" {
+        existingHotel.Details = updates.Details
+    }
+    existingHotel.IsBlocked = updates.IsBlocked
+
+    return s.hotelOps.Update(ctx, existingHotel)
+}
 func (s *HotelService) DeleteHotel(ctx context.Context, id uint) error {
 	return s.hotelOps.Delete(ctx, id)
 }

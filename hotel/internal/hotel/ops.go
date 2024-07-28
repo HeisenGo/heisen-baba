@@ -27,9 +27,18 @@ func (o *Ops) Create(ctx context.Context, hotel *Hotel) error {
 	}
 	return o.repo.CreateHotel(ctx, hotel)
 }
+func (o *Ops) GetHotelsByID(ctx context.Context, id uint) (*Hotel, error){
+	return o.repo.GetHotelsByID(ctx,id)
+}
+func (o *Ops) GetHotels(ctx context.Context, city, country string, capacity, page, pageSize int) ([]Hotel, uint, error) {
+	// if err:= ValidateCapacity(capacity); err != nil {
+	// 	return nil,0,ErrInvalidCapacity
+	// }
+	return o.repo.GetHotels(ctx, city,country,capacity, page, pageSize)
+}
 
-func (o *Ops) GetByID(ctx context.Context, id uint) (*Hotel, error) {
-	return o.repo.GetByID(ctx, id)
+func (o *Ops) GetHotelsByOwnerID(ctx context.Context, ownerID uint, page, pageSize int) ([]Hotel, int, error) {
+	return o.repo.GetHotelsByOwnerID(ctx, ownerID, page, pageSize)
 }
 
 func (o *Ops) Update(ctx context.Context, hotel *Hotel) error {

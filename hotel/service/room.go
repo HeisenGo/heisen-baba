@@ -19,8 +19,8 @@ func (s *RoomService) CreateRoom(ctx context.Context, r *room.Room) (*room.Room,
 	return s.roomOps.CreateRoom(ctx, r)
 }
 
-func (s *RoomService) GetRoom(ctx context.Context, id uint) (*room.Room, error) {
-	return s.roomOps.GetByID(ctx, id)
+func (s *RoomService) GetRooms(ctx context.Context, page, pageSize int) ([]room.Room, int, error) {
+	return s.roomOps.GetRooms(ctx, page, pageSize)
 }
 
 func (s *RoomService) UpdateRoom(ctx context.Context, r *room.Room) (*room.Room, error) {

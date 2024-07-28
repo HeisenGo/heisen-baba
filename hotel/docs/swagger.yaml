@@ -94,6 +94,16 @@ definitions:
       userprice:
         type: integer
     type: object
+  presenter.Response:
+    properties:
+      data: {}
+      error:
+        type: string
+      message:
+        type: string
+      success:
+        type: boolean
+    type: object
   presenter.RoomResp:
     properties:
       agency_price:
@@ -132,7 +142,7 @@ definitions:
       userPrice:
         type: integer
     type: object
-host: 127.0.0.1:8080
+host: localhost:8080
 info:
   contact:
     name: HeisenGo
@@ -142,6 +152,43 @@ info:
   version: "1.0"
 paths:
   /hotels:
+    get:
+      description: Get paginated list of hotels with filters
+      parameters:
+      - description: City
+        in: query
+        name: city
+        type: string
+      - description: Country
+        in: query
+        name: country
+        type: string
+      - description: Room capacity
+        in: query
+        name: capacity
+        type: integer
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Page size
+        in: query
+        name: page_size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presenter.FullHotelResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/presenter.Response'
+      summary: Get hotels
+      tags:
+      - hotels
     post:
       consumes:
       - application/json
@@ -163,13 +210,11 @@ paths:
         "400":
           description: 'error: bad request'
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/presenter.Response'
         "500":
           description: 'error: internal server error'
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/presenter.Response'
       summary: Create a new hotel
       tags:
       - hotels
@@ -190,42 +235,12 @@ paths:
         "400":
           description: 'error: bad request'
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/presenter.Response'
         "500":
           description: 'error: internal server error'
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/presenter.Response'
       summary: Delete a hotel by ID
-      tags:
-      - hotels
-    get:
-      description: Get a hotel by ID
-      parameters:
-      - description: Hotel ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/presenter.FullHotelResponse'
-        "400":
-          description: 'error: bad request'
-          schema:
-            additionalProperties: true
-            type: object
-        "500":
-          description: 'error: internal server error'
-          schema:
-            additionalProperties: true
-            type: object
-      summary: Get a hotel by ID
       tags:
       - hotels
     put:
@@ -254,17 +269,71 @@ paths:
         "400":
           description: 'error: bad request'
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/presenter.Response'
         "500":
           description: 'error: internal server error'
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/presenter.Response'
       summary: Update a hotel by ID
       tags:
       - hotels
+  /hotels/owner:
+    get:
+      description: Get hotels by owner ID
+      parameters:
+      - description: Owner ID
+        in: query
+        name: owner_id
+        required: true
+        type: integer
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Page size
+        in: query
+        name: page_size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presenter.FullHotelResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/presenter.Response'
+      summary: Get hotels by owner ID
+      tags:
+      - hotels
   /rooms:
+    get:
+      description: Get paginated list of rooms
+      parameters:
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Page size
+        in: query
+        name: page_size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presenter.RoomResp'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/presenter.Response'
+      summary: Get rooms
+      tags:
+      - rooms
     post:
       consumes:
       - application/json
@@ -286,13 +355,11 @@ paths:
         "400":
           description: 'error: bad request'
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/presenter.Response'
         "500":
           description: 'error: internal server error'
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/presenter.Response'
       summary: Create a new room
       tags:
       - rooms
@@ -313,42 +380,12 @@ paths:
         "404":
           description: 'error: bad request'
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/presenter.Response'
         "500":
           description: 'error: internal server error'
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/presenter.Response'
       summary: Delete a room by ID
-      tags:
-      - rooms
-    get:
-      description: Get a room by ID
-      parameters:
-      - description: Room ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/presenter.RoomResp'
-        "400":
-          description: 'error: bad request'
-          schema:
-            additionalProperties: true
-            type: object
-        "500":
-          description: 'error: internal server error'
-          schema:
-            additionalProperties: true
-            type: object
-      summary: Get a room by ID
       tags:
       - rooms
     put:
@@ -377,18 +414,15 @@ paths:
         "400":
           description: 'error: bad request'
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/presenter.Response'
         "404":
           description: 'error: bad request'
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/presenter.Response'
         "500":
           description: 'error: internal server error'
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/presenter.Response'
       summary: Update a room by ID
       tags:
       - rooms

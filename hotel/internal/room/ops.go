@@ -16,16 +16,22 @@ func (o *Ops) CreateRoom(ctx context.Context, room *Room) (*Room, error) {
 	if err := ValidateRoomName(room.Name); err != nil {
 		return nil, ErrInvalidName
 	}
+	if err := ValidatePrice(uint(room.UserPrice),uint(room.AgencyPrice)); err != nil {
+		return nil, ErrPrice
+	}
 	return o.repo.CreateRoom(ctx, room)
 }
 
-func (o *Ops) GetByID(ctx context.Context, id uint) (*Room, error) {
-	return o.repo.GetByID(ctx, id)
+func (o *Ops) GetRooms(ctx context.Context, page, pageSize int) ([]Room, int, error) {
+	return o.repo.GetRooms(ctx, page, pageSize)
 }
 
 func (o *Ops) UpdateRoom(ctx context.Context, room *Room) (*Room, error) {
 	if err := ValidateRoomName(room.Name); err != nil {
 		return nil, ErrInvalidName
+	}
+	if err := ValidatePrice(uint(room.UserPrice),uint(room.AgencyPrice)); err != nil {
+		return nil, ErrPrice
 	}
 	return o.repo.UpdateRoom(ctx, room)
 }
