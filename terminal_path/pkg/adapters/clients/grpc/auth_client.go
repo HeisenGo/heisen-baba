@@ -46,7 +46,7 @@ func (g *GRPCAuthClient) GetUserByToken(token string) (*user.User, error) {
 	// Call the GetUserByToken method
 	response, err := client.GetUserByToken(ctx, request)
 	if err != nil {
-		return nil, err
+		return nil, user.ErrInvalidToken
 	}
 	domainUser, err := mappers.UserClaimsToDomain(response)
 	if err != nil {
