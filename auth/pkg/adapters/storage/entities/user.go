@@ -14,7 +14,7 @@ type User struct {
 	ID           uuid.UUID      `gorm:"type:uuid;default:uuid_generate_v4();primaryKey"`
 	Username     string         `gorm:"uniqueIndex;not null"`
 	Email        string         `gorm:"uniqueIndex;not null"`
-	PasswordHash string         `gorm:"not null"`
+	Password     string         `gorm:"not null"`
 	IsSuperAdmin bool           `gorm:"not null; default:false"`
 	IsAdmin      bool           `gorm:"not null; default:false"`
 	Roles        []Role         `gorm:"many2many:user_roles;"`
@@ -50,9 +50,9 @@ type HotelUserRole struct {
 
 type AgencyUserRole struct {
 	gorm.Model
-	UserID    uuid.UUID      `gorm:"type:uuid;not null"`
-	AgencyID  uint           `gorm:"not null"`
-	Role      string         `gorm:"not null"`
+	UserID   uuid.UUID `gorm:"type:uuid;not null"`
+	AgencyID uint      `gorm:"not null"`
+	Role     string    `gorm:"not null"`
 }
 
 type UserRole struct {
