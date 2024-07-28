@@ -24,7 +24,7 @@ func (o *Ops) Create(ctx context.Context, user *User) (*User, error) {
 	if err != nil {
 		return nil, err
 	}
-	hashedPass, err := utils.HashPassword(user.Password)
+	hashedPass, err := utils.HashPassword(user.PasswordHash)
 	if err != nil {
 		return nil, err
 	}
@@ -57,7 +57,7 @@ func (o *Ops) GetUserByEmailAndPassword(ctx context.Context, email, password str
 		return nil, ErrUserNotFound
 	}
 
-	if err := utils.CheckPasswordHash(password, user.Password); err != nil {
+	if err := utils.CheckPasswordHash(password, user.PasswordHash); err != nil {
 		return nil, ErrInvalidAuthentication
 	}
 
@@ -83,7 +83,7 @@ func validateUserRegistration(user *User) error {
 		return err
 	}
 
-	if err := ValidatePasswordWithFeedback(user.Password); err != nil {
+	if err := ValidatePasswordWithFeedback(user.PasswordHash); err != nil {
 		return err
 	}
 	return nil
