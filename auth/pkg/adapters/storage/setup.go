@@ -26,5 +26,12 @@ func Migrate(db *gorm.DB) error {
 	if err != nil {
 		return err
 	}
+
+	// Seed initial roles and permissions
+    err = seedRolesAndPermissions(db)
+    if err != nil {
+        return err
+    }
+
 	return nil
 }

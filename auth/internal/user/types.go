@@ -24,42 +24,44 @@ type Repo interface {
 	GetByEmail(ctx context.Context, email string) (*User, error)
 }
 
-type Role uint8
+// type Role uint8
 
-func (ur Role) String() string {
-	switch ur {
-	case RoleUser:
-		return "user"
-	case RoleAdmin:
-		return "admin"
-	default:
-		return "unknown"
-	}
-}
+// func (ur Role) String() string {
+// 	switch ur {
+// 	case RoleUser:
+// 		return "user"
+// 	case RoleAdmin:
+// 		return "admin"
+// 	default:
+// 		return "unknown"
+// 	}
+// }
 
-const (
-	RoleUser Role = iota + 1
-	RoleAdmin
-)
+// const (
+// 	RoleUser Role = iota + 1
+// 	RoleAdmin
+// )
 
 type User struct {
 	ID        uuid.UUID
-	FirstName string
-	LastName  string
-	Email     string
-	Password  string
-	Role      Role
+	Username     string
+	Email        string 
+	PasswordHash string 
+	IsSuperAdmin bool   
+	IsAdmin      bool   
+	Roles        []Role 
+	IsBlocked    bool
 }
 
 func (u *User) SetPassword(password string) {
-	u.Password = password
+	u.PasswordHash = password
 }
 
 func (u *User) PasswordIsValid(pass string) bool {
 	h := sha256.New()
 	h.Write([]byte(pass))
 	passSha256 := h.Sum(nil)
-	return fmt.Sprintf("%x", passSha256) == u.Password
+	return fmt.Sprintf("%x", passSha256) == u.PasswordHash
 }
 
 func ValidateEmail(email string) error {
@@ -103,3 +105,50 @@ func ValidatePasswordWithFeedback(password string) error {
 func LowerCaseEmail(email string) string {
 	return strings.ToLower(email)
 }
+
+type Role struct {
+	ID        uint
+	Name        string `gorm:"uniqueIndex;not null"`
+	Description string
+	Permissions []Permission `gorm:"many2many:role_permissions;"`
+}
+
+type Permission struct {
+	ID uint
+	Name        string `gorm:"uniqueIndex;not null"`
+	Description string
+}
+
+type CompanyUserRole struct {
+	ID uint 
+	UserID     uuid.UUID  
+	CompanyID uint   
+	Role      string 
+}
+
+type HotelUserRole struct {
+	ID uint
+	UserID   uuid.UUID   
+	HotelID uint   
+	Role    string 
+}
+
+type AgencyUserRole struct {
+	ID uint
+	UserID    uuid.UUID
+	AgencyID uint   
+	Role     string 
+}
+
+type UserRole struct {
+	ID uint
+	UserID  uuid.UUID
+	RoleID uint 
+}
+
+type RolePermission struct {
+	ID uint
+	RoleID       uint
+	PermissionID uint 
+}
+
