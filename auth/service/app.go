@@ -11,9 +11,9 @@ import (
 )
 
 type AppContainer struct {
-	cfg                 config.Config
-	dbConn              *gorm.DB
-	authService         *AuthService
+	cfg         config.Config
+	dbConn      *gorm.DB
+	authService *AuthService
 }
 
 func NewAppContainer(cfg config.Config) (*AppContainer, error) {
@@ -27,13 +27,13 @@ func NewAppContainer(cfg config.Config) (*AppContainer, error) {
 	app.mustRegisterService(cfg.Server)
 
 	app.setAuthService()
-	
+
 	return app, nil
 }
 
 func (a *AppContainer) mustRegisterService(srvCfg config.Server) {
 	registry := consul.NewConsul(srvCfg.ServiceRegistry.Address)
-	err := registry.RegisterService(srvCfg.ServiceHostName, srvCfg.ServiceHTTPPrefixPath, srvCfg.ServiceHTTPHealthPath, srvCfg.HTTPPort)
+	err := registry.RegisterService(srvCfg.ServiceHostName, srvCfg.ServiceGRPCPrefixPath, srvCfg.ServiceGRPCHealthPath, srvCfg.GRPCPort)
 	if err != nil {
 		log.Fatalf("Failed to register service with Consul: %v", err)
 	}
@@ -79,36 +79,3 @@ func (a *AppContainer) setAuthService() {
 		a.cfg.Server.TokenExpMinutes,
 		a.cfg.Server.RefreshTokenExpMinutes)
 }
-
-// func (a *AppContainer) BoardService() *BoardService {
-// 	return a.boardService
-// }
-
-// func (a *AppContainer) BoardServiceFromCtx(ctx context.Context) *BoardService {
-// 	tx, ok := valuecontext.TryGetTxFromContext(ctx)
-// 	if !ok {
-// 		return a.boardService
-// 	}
-
-// 	gc, ok := tx.Tx().(*gorm.DB)
-// 	if !ok {
-// 		return a.boardService
-// 	}
-
-// 	return NewBoardService(
-// 		user.NewOps(storage.NewUserRepo(gc)),
-// 		board.NewOps(storage.NewBoardRepo(gc)),
-// 		userboardrole.NewOps(storage.NewUserBoardRepo(gc)),
-// 		column.NewOps(storage.NewColumnRepo(gc)),
-// 		notification.NewOps(storage.NewNotificationRepo(gc)),
-// 	)
-// }
-
-
-// func (a *AppContainer) setBoardService() {
-// 	if a.boardService != nil {
-// 		return
-// 	}
-// 	a.boardService = NewBoardService(user.NewOps(storage.NewUserRepo(a.dbConn)), board.NewOps(storage.NewBoardRepo(a.dbConn)), userboardrole.NewOps(storage.NewUserBoardRepo(a.dbConn)), column.NewOps(storage.NewColumnRepo(a.dbConn)), notification.NewOps(storage.NewNotificationRepo(a.dbConn)))
-// }
-

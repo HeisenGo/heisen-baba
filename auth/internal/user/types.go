@@ -24,44 +24,26 @@ type Repo interface {
 	GetByEmail(ctx context.Context, email string) (*User, error)
 }
 
-// type Role uint8
-
-// func (ur Role) String() string {
-// 	switch ur {
-// 	case RoleUser:
-// 		return "user"
-// 	case RoleAdmin:
-// 		return "admin"
-// 	default:
-// 		return "unknown"
-// 	}
-// }
-
-// const (
-// 	RoleUser Role = iota + 1
-// 	RoleAdmin
-// )
-
 type User struct {
-	ID        uuid.UUID
+	ID           uuid.UUID
 	Username     string
-	Email        string 
-	PasswordHash string 
-	IsSuperAdmin bool   
-	IsAdmin      bool   
-	Roles        []Role 
+	Email        string
+	Password     string
+	IsSuperAdmin bool
+	IsAdmin      bool
+	Roles        []Role
 	IsBlocked    bool
 }
 
 func (u *User) SetPassword(password string) {
-	u.PasswordHash = password
+	u.Password = password
 }
 
 func (u *User) PasswordIsValid(pass string) bool {
 	h := sha256.New()
 	h.Write([]byte(pass))
 	passSha256 := h.Sum(nil)
-	return fmt.Sprintf("%x", passSha256) == u.PasswordHash
+	return fmt.Sprintf("%x", passSha256) == u.Password
 }
 
 func ValidateEmail(email string) error {
@@ -107,48 +89,20 @@ func LowerCaseEmail(email string) string {
 }
 
 type Role struct {
-	ID        uint
+	ID          uint
 	Name        string `gorm:"uniqueIndex;not null"`
 	Description string
 	Permissions []Permission `gorm:"many2many:role_permissions;"`
 }
 
 type Permission struct {
-	ID uint
+	ID          uint
 	Name        string `gorm:"uniqueIndex;not null"`
 	Description string
 }
 
-type CompanyUserRole struct {
-	ID uint 
-	UserID     uuid.UUID  
-	CompanyID uint   
-	Role      string 
-}
-
-type HotelUserRole struct {
-	ID uint
-	UserID   uuid.UUID   
-	HotelID uint   
-	Role    string 
-}
-
-type AgencyUserRole struct {
-	ID uint
-	UserID    uuid.UUID
-	AgencyID uint   
-	Role     string 
-}
-
-type UserRole struct {
-	ID uint
-	UserID  uuid.UUID
-	RoleID uint 
-}
-
 type RolePermission struct {
-	ID uint
+	ID           uint
 	RoleID       uint
-	PermissionID uint 
+	PermissionID uint
 }
-

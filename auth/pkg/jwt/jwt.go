@@ -10,7 +10,7 @@ import (
 const UserClaimKey = "User-Claims"
 
 func CreateToken(secret []byte, claims *UserClaims) (string, error) {
-	claims.Role = "user"
+	claims.Roles = []string{"user"}
 	return jwt2.NewWithClaims(jwt2.SigningMethodHS512, claims).SignedString(secret)
 }
 
@@ -40,50 +40,4 @@ func ParseToken(tokenString string, secret []byte) (*UserClaims, error) {
 	}
 
 	return claim, nil
-}
-
-
-package jwt
-
-import (
-    "time"
-
-    "github.com/dgrijalva/jwt-go"
-)
-
-var secretKey = []byte("your-secret-key") // Replace with a secure secret key
-
-type Claims struct {
-    UserID uint   `json:"user_id"`
-    Roles  []string `json:"roles"`
-    jwt.StandardClaims
-}
-
-func GenerateToken(userID uint, roles []string) (string, error) {
-    claims := &Claims{
-        UserID: userID,
-        Roles:  roles,
-        StandardClaims: jwt.StandardClaims{
-            ExpiresAt: time.Now().Add(24 * time.Hour).Unix(),
-        },
-    }
-
-    token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-    return token.SignedString(secretKey)
-}
-
-func ValidateToken(tokenString string) (*Claims, error) {
-    token, err := jwt.ParseWithClaims(tokenString, &Claims{}, func(token *jwt.Token) (interface{}, error) {
-        return secretKey, nil
-    })
-
-    if err != nil {
-        return nil, err
-    }
-
-    if claims, ok := token.Claims.(*Claims); ok && token.Valid {
-        return claims, nil
-    }
-
-    return nil, jwt.ErrSignatureInvalid
 }
