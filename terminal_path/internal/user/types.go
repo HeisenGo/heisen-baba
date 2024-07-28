@@ -1,6 +1,13 @@
 package user
 
-import "github.com/google/uuid"
+import (
+	"errors"
+	"github.com/google/uuid"
+)
+
+var (
+	ErrInvalidToken = errors.New("invalid token")
+)
 
 type User struct {
 	ID      uuid.UUID
