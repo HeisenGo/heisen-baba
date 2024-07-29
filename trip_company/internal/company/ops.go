@@ -40,3 +40,15 @@ func (o *Ops) Create(ctx context.Context, c *TransportCompany) error {
 
 	return o.repo.Insert(ctx, c)
 }
+
+func (o *Ops) GetUserTransportCompanies(ctx context.Context, ownerID uint, page, pageSize uint) ([]TransportCompany, uint, error) {
+	limit := pageSize
+	offset := (page - 1) * pageSize
+	return o.repo.GetUserTransportCompanies(ctx, ownerID, limit, offset)
+}
+
+func (o *Ops) GetTransportCompanies(ctx context.Context, page, pageSize uint) ([]TransportCompany, uint, error) {
+	limit := pageSize
+	offset := (page - 1) * pageSize
+	return o.repo.GetTransportCompanies(ctx, limit, offset)
+}

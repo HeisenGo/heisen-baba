@@ -16,13 +16,15 @@ const (
 var (
 	ErrCompanyNotFound = errors.New("company not found")
 	ErrFailedToRestore = errors.New("failed to restore company")
-	ErrDuplication     = errors.New("company with same email already exists")
+	ErrDuplication     = errors.New("company with same email/ ownerID-Name already exists")
 	ErrInvalidEmail    = errors.New("invalid email")
 )
 
 type Repo interface {
 	GetTransportCompanies(ctx context.Context, limit, offset uint) ([]TransportCompany, uint, error)
 	Insert(ctx context.Context, company *TransportCompany) error
+	GetUserTransportCompanies(ctx context.Context, ownerID uint, limit, offset uint) ([]TransportCompany, uint, error) 
+
 }
 
 type TransportCompany struct {
