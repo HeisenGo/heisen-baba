@@ -16,12 +16,12 @@ func NewOps(repo Repo) *Ops {
 }
 
 func (o *Ops) Create(ctx context.Context, c *TransportCompany) error {
-	if c.Email != "" {
-		c.Email = LowerCaseEmail(c.Email)
-		if err := ValidateEmail(c.Email); err != nil {
-			return err
-		}
-	}
+	// if c.Email != "" {
+	// 	c.Email = LowerCaseEmail(c.Email)
+	// 	if err := ValidateEmail(c.Email); err != nil {
+	// 		return err
+	// 	}
+	// }
 	if err := internal.ValidateName(c.Name, MaxNameLength); err != nil {
 		return err
 	}

@@ -10,8 +10,8 @@ type CompanyReq struct {
 	Description string `json:"desc"`
 	OwnerID     uint   `json:"owner_id" validate:"required"`
 	Address     string `json:"address"`
-	PhoneNumber string `json:"phone"`
-	Email       string `json:"email"`
+	//PhoneNumber string `json:"phone"`
+	//Email       string `json:"email"`
 	// relationships
 	//Employees   []Employee
 	//Trips       []Trip
@@ -24,8 +24,8 @@ type CompanyRes struct {
 	Description string `json:"desc"`
 	OwnerID     uint   `json:"owner_id" validate:"required"`
 	Address     string `json:"address"`
-	PhoneNumber string `json:"phone"`
-	Email       string `json:"email"`
+	//PhoneNumber string `json:"phone"`
+	//Email       string `json:"email"`
 	// relationships
 	//Employees   []Employee
 	//Trips       []Trip
@@ -39,8 +39,8 @@ func CompanyReqToCompanyDomain(req *CompanyReq) *company.TransportCompany {
 		Description: req.Description,
 		OwnerID:     req.OwnerID,
 		Address:     req.Address,
-		PhoneNumber: req.PhoneNumber,
-		Email:       req.Email,
+		//PhoneNumber: req.PhoneNumber,
+		//Email:       req.Email,
 	}
 }
 
@@ -52,8 +52,8 @@ func CompanyToCompanyRes(c company.TransportCompany) CompanyRes {
 		OwnerID:     c.OwnerID,
 		// owner: c.Owner !!!
 		Address:     c.Address,
-		PhoneNumber: c.PhoneNumber,
-		Email:       c.Email,
+		//PhoneNumber: c.PhoneNumber,
+		//Email:       c.Email,
 	}
 }
 

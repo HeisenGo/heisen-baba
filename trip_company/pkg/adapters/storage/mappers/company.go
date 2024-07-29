@@ -13,8 +13,8 @@ func CompanyEntityToDomain(companyEntity entities.TransportCompany) company.Tran
 		Description: companyEntity.Description,
 		OwnerID:     companyEntity.OwnerID,
 		Address:     companyEntity.Address,
-		PhoneNumber: companyEntity.PhoneNumber,
-		Email:       companyEntity.Email,
+		//PhoneNumber: companyEntity.PhoneNumber,
+		//Email:       companyEntity.Email,
 	}
 }
 
@@ -28,7 +28,7 @@ func CompanyDomainToEntity(c *company.TransportCompany) *entities.TransportCompa
 		Description: c.Description,
 		OwnerID:     c.OwnerID,
 		Address:     c.Address,
-		PhoneNumber: c.PhoneNumber,
-		Email:       c.Email,
+		//PhoneNumber: c.PhoneNumber,
+		//Email:       c.Email,
 	}
 }

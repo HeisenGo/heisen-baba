@@ -51,18 +51,24 @@ func (r *comapnyRepo) GetTransportCompanies(ctx context.Context, limit, offset u
 
 func (r *comapnyRepo) Insert(ctx context.Context, c *company.TransportCompany) error {
 	companyEntity := mappers.CompanyDomainToEntity(c)
-	result := r.db.WithContext(ctx).Save(&companyEntity)
+
+	// Create the new company record
+	result := r.db.WithContext(ctx).Create(&companyEntity)
 	if result.Error != nil {
 		if strings.Contains(result.Error.Error(), "duplicate key") {
-
 			var existingCompany entities.TransportCompany
 			// Search for the soft-deleted record with the same unique constraints
-			if r.db.WithContext(ctx).Unscoped().Where("name = ? AND owner_id = ? AND email = ?", c.Name, c.OwnerID, c.Email).First(&existingCompany).Error == nil {
+			query := r.db.WithContext(ctx).Unscoped().Where(
+				"(name = ? AND owner_id = ?)",
+				c.Name, c.OwnerID,
+			)
+
+			if query.First(&existingCompany).Error == nil {
 				// Check if the record is soft-deleted
 				if existingCompany.DeletedAt.Valid {
 					// Restore the soft-deleted record
 					existingCompany.DeletedAt = gorm.DeletedAt{}
-					if err := r.db.WithContext(ctx).Save(existingCompany).Error; err != nil {
+					if err := r.db.WithContext(ctx).Save(&existingCompany).Error; err != nil {
 						return fmt.Errorf("%w %w", company.ErrFailedToRestore, err)
 					}
 					c.ID = existingCompany.ID
@@ -78,6 +84,7 @@ func (r *comapnyRepo) Insert(ctx context.Context, c *company.TransportCompany) e
 	c.ID = companyEntity.ID
 
 	return nil
+
 }
 
 func (r *comapnyRepo) GetUserTransportCompanies(ctx context.Context, ownerID uint, limit, offset uint) ([]company.TransportCompany, uint, error) {

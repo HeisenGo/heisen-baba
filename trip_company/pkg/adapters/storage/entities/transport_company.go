@@ -10,11 +10,11 @@ type TransportCompany struct {
 	Description string `gorm:"type:text"`
 	OwnerID     uint   `gorm:"not null;uniqueIndex:idx_owner_name"`
 	Address     string `gorm:"type:varchar(255)"`
-	PhoneNumber string `gorm:"type:varchar(20)"`
-	Email       string `gorm:"type:varchar(100);uniqueIndex"`
-	IsBlocked   bool   `gorm:"not null; default:false"`
+	//PhoneNumber string `gorm:"type:varchar(20);uniqueIndex:idx_phone_email"`
+	//Email       string `gorm:"type:varchar(100);uniqueIndex:idx_phone_email"`
+	IsBlocked   bool   `gorm:"not null;default:false"`
 	// relationships
-	Employees   []Employee `gorm:"foreignKey:TransportCompanyID"`
-	Trips       []Trip `gorm:"foreignKey:TransportCompanyID"`
-	TechTeams   []TechTeam `gorm:"foreignKey:TransportCompanyID"`
+	Employees []Employee `gorm:"foreignKey:TransportCompanyID"`
+	Trips     []Trip     `gorm:"foreignKey:TransportCompanyID"`
+	TechTeams []TechTeam `gorm:"foreignKey:TransportCompanyID"`
 }

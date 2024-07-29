@@ -33,8 +33,8 @@ type TransportCompany struct {
 	Description string
 	OwnerID     uint
 	Address     string
-	PhoneNumber string
-	Email       string
+	//PhoneNumber string
+	//Email       string
 	// relationships
 	//Employees   []Employee
 	//Trips       []Trip
