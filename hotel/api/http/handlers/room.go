@@ -1,12 +1,13 @@
 package handlers
 
-
 import (
 	"hotel/api/http/handlers/presenter"
 	"hotel/service"
-	"github.com/gofiber/fiber/v2"
 	"strconv"
+
+	"github.com/gofiber/fiber/v2"
 )
+
 // CreateRoom creates a new room
 // @Summary Create a new room
 // @Description Create a new room
@@ -35,6 +36,7 @@ func CreateRoom(roomService *service.RoomService) fiber.Handler {
 		return presenter.Created(c, "Room created successfully", res)
 	}
 }
+
 // GetRooms gets a paginated list of rooms
 // @Summary Get rooms
 // @Description Get paginated list of rooms
@@ -46,24 +48,25 @@ func CreateRoom(roomService *service.RoomService) fiber.Handler {
 // @Failure 500 {object} presenter.Response
 // @Router /rooms [get]
 func GetRooms(roomService *service.RoomService) fiber.Handler {
-    return func(c *fiber.Ctx) error {
-        page := c.QueryInt("page", 1)
-        pageSize := c.QueryInt("page_size", 10)
+	return func(c *fiber.Ctx) error {
+		page := c.QueryInt("page", 1)
+		pageSize := c.QueryInt("page_size", 10)
 
-        rooms, total, err := roomService.GetRooms(c.UserContext(), page, pageSize)
-        if err != nil {
-            return presenter.InternalServerError(c, err)
-        }
+		rooms, total, err := roomService.GetRooms(c.UserContext(), page, pageSize)
+		if err != nil {
+			return presenter.InternalServerError(c, err)
+		}
 
-        res := make([]presenter.RoomResp, len(rooms))
-        for i, room := range rooms {
-            res[i] = *presenter.RoomToFullRoomResponse(&room) // Dereference the pointer here
-        }
+		res := make([]presenter.RoomResp, len(rooms))
+		for i, room := range rooms {
+			res[i] = *presenter.RoomToFullRoomResponse(&room) // Dereference the pointer here
+		}
 
-        pagination := presenter.NewPagination(res, uint(page), uint(pageSize), uint(total))
-        return presenter.OK(c, "Rooms retrieved successfully", pagination)
-    }
+		pagination := presenter.NewPagination(res, uint(page), uint(pageSize), uint(total))
+		return presenter.OK(c, "Rooms retrieved successfully", pagination)
+	}
 }
+
 // UpdateRoom updates a room by ID
 // @Summary Update a room by ID
 // @Description Update a room by ID
@@ -91,15 +94,15 @@ func UpdateRoom(roomService *service.RoomService) fiber.Handler {
 
 		r := presenter.CreateRoomRequest(&req)
 		r.ID = uint(roomID)
-		updatedRoom, err := roomService.UpdateRoom(c.UserContext(), r)
+		err = roomService.UpdateRoom(c.UserContext(), r)
 		if err != nil {
 			return presenter.InternalServerError(c, err)
 		}
 
-		res := presenter.RoomToCreateRoomResponse(updatedRoom)
-		return presenter.OK(c, "Room updated successfully", res)
+		return presenter.OK(c, "Room updated successfully", nil)
 	}
 }
+
 // DeleteRoom deletes a room by ID
 // @Summary Delete a room by ID
 // @Description Delete a room by ID

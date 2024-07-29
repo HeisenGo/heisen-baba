@@ -2,14 +2,15 @@ package http
 
 import (
 	"fmt"
-	"github.com/gofiber/fiber/v2"
-	"log"
 	"hotel/api/http/handlers"
 	"hotel/api/http/middlewares"
-	fiberSwagger "github.com/swaggo/fiber-swagger"
 	"hotel/config"
-	"hotel/service"
 	_ "hotel/docs"
+	"hotel/service"
+	"log"
+
+	"github.com/gofiber/fiber/v2"
+	fiberSwagger "github.com/swaggo/fiber-swagger"
 )
 
 func Run(cfg config.Config, app *service.AppContainer) {
@@ -27,6 +28,8 @@ func registerHotelRoutes(router fiber.Router, app *service.AppContainer) {
 	router.Post("", middlewares.SetUserContext(), handlers.CreateHotel(app.HotelService()))
 	router.Get("", middlewares.SetUserContext(), handlers.GetHotels(app.HotelService()))
 	router.Get("/owner", middlewares.SetUserContext(), handlers.GetHotelsByOwnerID(app.HotelService()))
+	router.Put("/:id", middlewares.SetUserContext(), handlers.UpdateHotel(app.HotelService()))
+	router.Delete("/:id", middlewares.SetUserContext(), handlers.DeleteHotel(app.HotelService()))
 }
 
 func registerRoomRoutes(router fiber.Router, app *service.AppContainer) {

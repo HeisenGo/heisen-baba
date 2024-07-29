@@ -9,8 +9,9 @@ import (
 type Repo interface {
 	CreateRoom(ctx context.Context, room *Room) (*Room, error)
 	GetRooms(ctx context.Context, page, pageSize int) ([]Room, int, error)
-	UpdateRoom(ctx context.Context, room *Room) (*Room, error)
+	UpdateRoom(ctx context.Context, room *Room) error
 	DeleteRoom(ctx context.Context, id uint) error
+	GetRoomByID(ctx context.Context, id uint) (*Room, error)
 }
 
 type Room struct {
@@ -25,12 +26,13 @@ type Room struct {
 }
 
 var (
-	ErrInvalidName = errors.New("invalid room name: must be 1-100 characters long and can only contain alphanumeric characters, spaces, hyphens, underscores, and periods")
-	ErrPrice = errors.New("user price should be bigger than agency price")
+	ErrInvalidName    = errors.New("invalid room name: must be 1-100 characters long and can only contain alphanumeric characters, spaces, hyphens, underscores, and periods")
+	ErrPrice          = errors.New("user price should be bigger than agency price")
+	ErrRecordNotFound = errors.New("record not found")
 )
-func ValidatePrice (userprice,agencyprice uint) error{
-	check:= agencyprice > userprice
-	if !check {
+
+func ValidatePrice(userprice, agencyprice uint) error {
+	if userprice <= agencyprice {
 		return ErrPrice
 	}
 	return nil

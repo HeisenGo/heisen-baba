@@ -3,6 +3,7 @@ package mappers
 import (
 	"hotel/internal/room"
 	"hotel/pkg/adapters/storage/entities"
+	"hotel/pkg/fp"
 
 	"gorm.io/gorm"
 )
@@ -33,4 +34,8 @@ func RoomDomainToEntity(r room.Room) entities.Room {
 		Capacity:    r.Capacity,
 		IsAvailable: r.IsAvailable,
 	}
+}
+
+func BatchRoomEntitiesToDomain(roomEntities []entities.Room) []room.Room {
+	return fp.Map(roomEntities, RoomEntityToDomain)
 }

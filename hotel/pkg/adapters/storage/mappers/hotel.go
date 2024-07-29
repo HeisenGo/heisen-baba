@@ -2,7 +2,6 @@ package mappers
 
 import (
 	"hotel/internal/hotel"
-	"hotel/internal/room"
 	"hotel/pkg/adapters/storage/entities"
 	"hotel/pkg/fp"
 )
@@ -11,6 +10,7 @@ func HotelEntityToDomain(hotelEntity entities.Hotel) hotel.Hotel {
 	domainRooms := BatchRoomEntitiesToDomain(hotelEntity.Rooms)
 	return hotel.Hotel{
 		ID:        hotelEntity.ID,
+		OwnerID:   hotelEntity.OwnerID,
 		Name:      hotelEntity.Name,
 		City:      hotelEntity.City,
 		Country:   hotelEntity.Country,
@@ -19,14 +19,11 @@ func HotelEntityToDomain(hotelEntity entities.Hotel) hotel.Hotel {
 		Rooms:     domainRooms,
 	}
 }
-func BatchRoomEntitiesToDomain(roomEntities []entities.Room) []room.Room {
-	return fp.Map(roomEntities, RoomEntityToDomain)
+func BatchHotelEntitiesToDomain(hotelEntities []entities.Hotel) []hotel.Hotel {
+	return fp.Map(hotelEntities, HotelEntityToDomain)
 }
-func BatchRoomDomainToEntity(roomDomain []room.Room) []entities.Room {
-	return fp.Map(roomDomain, RoomDomainToEntity)
-}
+
 func HotelDomainToEntity(h *hotel.Hotel) *entities.Hotel {
-	entitiyRooms := BatchRoomDomainToEntity(h.Rooms)
 	return &entities.Hotel{
 		Name:      h.Name,
 		City:      h.City,
@@ -34,6 +31,5 @@ func HotelDomainToEntity(h *hotel.Hotel) *entities.Hotel {
 		Details:   h.Details,
 		OwnerID:   h.OwnerID,
 		IsBlocked: h.IsBlocked,
-		Rooms:     entitiyRooms,
 	}
 }

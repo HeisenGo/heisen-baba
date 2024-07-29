@@ -23,7 +23,11 @@ func (s *RoomService) GetRooms(ctx context.Context, page, pageSize int) ([]room.
 	return s.roomOps.GetRooms(ctx, page, pageSize)
 }
 
-func (s *RoomService) UpdateRoom(ctx context.Context, r *room.Room) (*room.Room, error) {
+func (s *RoomService) GetRoomByID(ctx context.Context, id uint) (*room.Room, error) {
+	return s.roomOps.GetRoomByID(ctx, id)
+}
+
+func (s *RoomService) UpdateRoom(ctx context.Context, r *room.Room) error {
 	return s.roomOps.UpdateRoom(ctx, r)
 }
 

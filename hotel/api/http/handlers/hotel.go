@@ -24,20 +24,18 @@ func CreateHotel(hotelService *service.HotelService) fiber.Handler {
 		var req presenter.CreateHotelReq
 
 		if err := c.BodyParser(&req); err != nil {
-			return SendError(c, err, fiber.StatusBadRequest)
+			return presenter.BadRequest(c, err)
 		}
 
 		h := presenter.CreateHotelRequest(&req)
 		if err := hotelService.CreateHotel(c.UserContext(), h); err != nil {
-			if err != nil {
-				return presenter.BadRequest(c, err)
-			}
 			return presenter.InternalServerError(c, err)
 		}
 		res := presenter.HotelToCreateHotelResponse(h)
-		return presenter.Created(c, "hotel created successfully", res)
+		return presenter.Created(c, "Hotel created successfully", res)
 	}
 }
+
 // GetHotels gets a paginated list of hotels
 // @Summary Get hotels
 // @Description Get paginated list of hotels with filters
@@ -52,22 +50,29 @@ func CreateHotel(hotelService *service.HotelService) fiber.Handler {
 // @Failure 500 {object} presenter.Response
 // @Router /hotels [get]
 func GetHotels(hotelService *service.HotelService) fiber.Handler {
-    return func(c *fiber.Ctx) error {
-        city := c.Query("city")
-        country := c.Query("country")
-        capacity, _ := strconv.Atoi(c.Query("capacity"))
-        // Pagination parameters
-        page, _ := strconv.Atoi(c.Query("page", "1"))
-        pageSize, _ := strconv.Atoi(c.Query("page_size", "10"))
+	return func(c *fiber.Ctx) error {
+		city := c.Query("city")
+		country := c.Query("country")
+		capacity, _ := strconv.Atoi(c.Query("capacity"))
+		page := c.QueryInt("page", 1)
+		pageSize := c.QueryInt("page_size", 10)
 
-        hotels, total, err := hotelService.GetHotels(c.Context(), city, country, capacity, page, pageSize)
-        if err != nil {
-            return presenter.InternalServerError(c, err)
-        }
+		hotels, total, err := hotelService.GetHotels(c.UserContext(), city, country, capacity, page, pageSize)
+		if err != nil {
+			return presenter.InternalServerError(c, err)
+		}
 
-        response := presenter.NewPagination(hotels, uint(page), uint(pageSize), total)
-        return presenter.OK(c, "Hotels fetched successfully", response)
-    }
+		data := presenter.NewPagination(
+			presenter.BatchHotelsToHotelResponse(hotels),
+			uint(page),
+			uint(pageSize),
+			total,
+		)
+		if data.TotalPages == 0 {
+			return presenter.NotFound(c, fiber.ErrNotFound)
+		}
+		return presenter.OK(c, "Hotels fetched successfully", data)
+	}
 }
 
 // GetHotelsByOwnerID gets hotels by owner ID
@@ -82,24 +87,26 @@ func GetHotels(hotelService *service.HotelService) fiber.Handler {
 // @Failure 500 {object} presenter.Response
 // @Router /hotels/owner [get]
 func GetHotelsByOwnerID(hotelService *service.HotelService) fiber.Handler {
-    return func(c *fiber.Ctx) error {
-        ownerID := c.QueryInt("owner_id")
-        page := c.QueryInt("page", 1)
-        pageSize := c.QueryInt("page_size", 10)
-		
-        hotels, total, err := hotelService.GetHotelsByOwnerID(c.UserContext(), uint(ownerID), page, pageSize)
-        if err != nil {
-            return presenter.InternalServerError(c, err)
-        }
-        res := make([]presenter.FullHotelResponse, len(hotels))
-        for i, hotel := range hotels {
-            res[i] = *presenter.HotelToFullHotelResponse(&hotel) // Dereference the pointer here
-        }
-		
-        pagination := presenter.NewPagination(res, uint(page), uint(pageSize), uint(total))
-        return presenter.OK(c, "Hotels retrieved successfully", pagination)
-    }
+	return func(c *fiber.Ctx) error {
+		ownerID := c.QueryInt("owner_id")
+		page := c.QueryInt("page", 1)
+		pageSize := c.QueryInt("page_size", 10)
+
+		hotels, total, err := hotelService.GetHotelsByOwnerID(c.UserContext(), uint(ownerID), page, pageSize)
+		if err != nil {
+			return presenter.InternalServerError(c, err)
+		}
+
+		res := make([]presenter.FullHotelResponse, len(hotels))
+		for i, hotel := range hotels {
+			res[i] = presenter.HotelToFullHotelResponse(hotel)
+		}
+
+		pagination := presenter.NewPagination(res, uint(page), uint(pageSize), uint(total))
+		return presenter.OK(c, "Hotels retrieved successfully", pagination)
+	}
 }
+
 // UpdateHotel updates a hotel by ID
 // @Summary Update a hotel by ID
 // @Description Update a hotel by ID
@@ -110,30 +117,28 @@ func GetHotelsByOwnerID(hotelService *service.HotelService) fiber.Handler {
 // @Param hotel body presenter.CreateHotelReq true "Hotel to update"
 // @Success 200 {object} presenter.FullHotelResponse
 // @Failure 400 {object} presenter.Response "error: bad request"
-// @Failure 400 {object} presenter.Response "error: bad request"
 // @Failure 500 {object} presenter.Response "error: internal server error"
 // @Router /hotels/{id} [put]
 func UpdateHotel(hotelService *service.HotelService) fiber.Handler {
 	return func(c *fiber.Ctx) error {
-		id, err := c.ParamsInt("id")
+		hotelID, err := strconv.Atoi(c.Params("id"))
 		if err != nil {
 			return presenter.BadRequest(c, err)
 		}
 
-		var req presenter.CreateHotelReq
-		if err := c.BodyParser(&req); err != nil {
-			return SendError(c, err, fiber.StatusBadRequest)
+		var updateReq presenter.UpdateHotelReq
+		if err := c.BodyParser(&updateReq); err != nil {
+			return presenter.BadRequest(c, err)
 		}
 
-		h := presenter.CreateHotelRequest(&req)
-		h.ID = uint(id)
-		if err := hotelService.UpdateHotel(c.UserContext(), h.ID,h); err != nil {
+		if err := hotelService.UpdateHotel(c.UserContext(), uint(hotelID), presenter.UpdateHotelRequestToDomain(&updateReq)); err != nil {
 			return presenter.InternalServerError(c, err)
 		}
-		res := presenter.HotelToCreateHotelResponse(h)
-		return presenter.OK(c,"Hotel Updated Succssesfully",res)
+
+		return presenter.OK(c, "Hotel updated successfully", nil)
 	}
 }
+
 // DeleteHotel deletes a hotel by ID
 // @Summary Delete a hotel by ID
 // @Description Delete a hotel by ID
