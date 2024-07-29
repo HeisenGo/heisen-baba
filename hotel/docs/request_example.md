@@ -63,7 +63,7 @@
 `localhost:8080/api/v1/hotels/5`
 
 ### Delete Hotel
-**URL**: localhost:8080/api/v1/hotels/{id}
+**URL**: `localhost:8080/api/v1/hotels/{id}`
 **Method**: DELETE
 
 **Example Request:**
