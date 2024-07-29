@@ -1,6 +1,9 @@
 package presenter
 
-import "tripcompanyservice/internal/company"
+import (
+	"tripcompanyservice/internal/company"
+	"tripcompanyservice/pkg/fp"
+)
 
 type CompanyReq struct {
 	Name        string `json:"name" validate:"required"`
@@ -29,6 +32,7 @@ type CompanyRes struct {
 	//TechTeams   []TechTeam
 }
 
+
 func CompanyReqToCompanyDomain(req *CompanyReq) *company.TransportCompany {
 	return &company.TransportCompany{
 		Name:        req.Name,
@@ -51,4 +55,8 @@ func CompanyToCompanyRes(c company.TransportCompany) CompanyRes {
 		PhoneNumber: c.PhoneNumber,
 		Email:       c.Email,
 	}
+}
+
+func BatchCompaniesToCompanies(companies []company.TransportCompany) []CompanyRes{
+	return fp.Map(companies, CompanyToCompanyRes)
 }

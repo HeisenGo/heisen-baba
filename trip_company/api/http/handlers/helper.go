@@ -10,11 +10,9 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-// const UserClaimKey = jwt.UserClaimKey
-
-// var (
-// 	errWrongClaimType = errors.New("wrong claim type")
-// )
+var (
+	errWrongIDType    = errors.New("wrong type for id")
+)
 
 type ServiceFactory[T any] func(context.Context) T
 

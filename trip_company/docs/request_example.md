@@ -15,3 +15,11 @@ url: ```localhost:2245/api/v1/companies```
 }
 
 ```
+## GET companies(admin) or my companies(admin/owner)
+
+```
+localhost:2245/api/v1/companies
+```
+```
+localhost:2245/api/v1/companies/my-companies/owner_ID
+```

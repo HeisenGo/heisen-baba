@@ -10,7 +10,6 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-//
 func CreateTransportCompany(companyService *service.TransportCompanyService) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 
@@ -43,7 +42,6 @@ func CreateTransportCompany(companyService *service.TransportCompanyService) fib
 	}
 }
 
-
 func GetUserCompanies(companyService *service.TransportCompanyService) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		// userClaims, ok := c.Locals(UserClaimKey).(*jwt.UserClaims)
@@ -51,26 +49,57 @@ func GetUserCompanies(companyService *service.TransportCompanyService) fiber.Han
 		// 	return SendError(c, errWrongClaimType, fiber.StatusBadRequest)
 		// }
 		//query parameter
-		ownerID, err :=  //uuid.Parse(c.Params("ownerID"))
+		ownerID, err := c.ParamsInt("ownerID")
+		if err != nil {
+			return SendError(c, errWrongIDType, fiber.StatusBadRequest)
+		}
+
+		//ownerID, err :=  //uuid.Parse(c.Params("ownerID"))
 		// if err != nil {
 		// 	return presenter.BadRequest(c, errors.New("given owner_id format in path is not correct"))
 		// }
 		page, pageSize := PageAndPageSize(c)
 
-		boards, total, err := companyService.GetUserTransportCompanies(c.UserContext(), ownerID, uint(page), uint(pageSize))
+		companies, total, err := companyService.GetUserTransportCompanies(c.UserContext(), uint(ownerID), uint(page), uint(pageSize))
 		if err != nil {
 			status := fiber.StatusInternalServerError
-			if errors.Is(err, user.ErrUserNotFound) {
-				status = fiber.StatusBadRequest
-			}
 			return SendError(c, err, status)
 		}
 		data := presenter.NewPagination(
-			presenter.BatchBoardsToUserBoard(boards),
+			presenter.BatchCompaniesToCompanies(companies),
 			uint(page),
 			uint(pageSize),
 			total,
 		)
-		return presenter.OK(c, "boards successfully fetched.", data)
+		return presenter.OK(c, "companies successfully fetched.", data)
+	}
+}
+
+func GetCompanies(companyService *service.TransportCompanyService) fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		// userClaims, ok := c.Locals(UserClaimKey).(*jwt.UserClaims)
+		// if !ok {
+		// 	return SendError(c, errWrongClaimType, fiber.StatusBadRequest)
+		// }
+		//query parameter
+		// TODo: check it is admin!
+		//ownerID, err :=  //uuid.Parse(c.Params("ownerID"))
+		// if err != nil {
+		// 	return presenter.BadRequest(c, errors.New("given owner_id format in path is not correct"))
+		// }
+		page, pageSize := PageAndPageSize(c)
+
+		companies, total, err := companyService.GetTransportCompanies(c.UserContext(), uint(page), uint(pageSize))
+		if err != nil {
+			status := fiber.StatusInternalServerError
+			return SendError(c, err, status)
+		}
+		data := presenter.NewPagination(
+			presenter.BatchCompaniesToCompanies(companies),
+			uint(page),
+			uint(pageSize),
+			total,
+		)
+		return presenter.OK(c, "companies successfully fetched.", data)
 	}
 }

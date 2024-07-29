@@ -22,7 +22,7 @@ func Run(cfg config.Server, app *service.AppContainer) {
 	secret := []byte(cfg.Secret)
 	fmt.Println(api, secret)
 	registerGlobalRoutes(api)
-	registerTransportCompanyRoutes(api, app, secret, createGroupLogger("companies"))
+	registerTransportCompanyRoutes(api, app, createGroupLogger("companies"))
 	//registerPathRouts(api, app, secret)
 	// run server
 	log.Fatal(fiberApp.Listen(fmt.Sprintf("%s:%d", cfg.Host, cfg.HttpPort)))
@@ -69,7 +69,7 @@ func registerGlobalRoutes(router fiber.Router) {
 	})
 }
 
-func registerTransportCompanyRoutes(router fiber.Router, app *service.AppContainer, secret []byte, loggerMiddleWare fiber.Handler) {
+func registerTransportCompanyRoutes(router fiber.Router, app *service.AppContainer, loggerMiddleWare fiber.Handler) {
 	router = router.Group("/companies")
 	router.Use(loggerMiddleWare)
 
@@ -78,10 +78,14 @@ func registerTransportCompanyRoutes(router fiber.Router, app *service.AppContain
 		//middlewares.Auth(secret),
 		handlers.CreateTransportCompany(app.CompanyService()),
 	)
-	// router.Get("/my-boards",
-	// 	middlewares.Auth(secret),
-	// 	handlers.GetUserBoards(app.BoardService()),
-	// )
+	router.Get("/my-companies/:ownerID",
+		//middlewares.Auth(),
+		handlers.GetUserCompanies(app.CompanyService()),
+	)
+	router.Get("",
+		//middlewares.Auth(),
+		handlers.GetCompanies(app.CompanyService()),
+	)
 	// router.Get("/publics",
 	// 	middlewares.Auth(secret),
 	// 	middlewares.SetupCacheMiddleware(5),
