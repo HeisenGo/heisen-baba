@@ -75,7 +75,7 @@ func registerTransportCompanyRoutes(router fiber.Router, app *service.AppContain
 
 	router.Post("",
 		//middlewares.SetTransaction(adapters.NewGormCommitter(app.RawDBConnection())),
-		//middlewares.Auth(secret),
+		//middlewares.Auth(),
 		handlers.CreateTransportCompany(app.CompanyService()),
 	)
 	router.Get("/my-companies/:ownerID",
@@ -86,24 +86,15 @@ func registerTransportCompanyRoutes(router fiber.Router, app *service.AppContain
 		//middlewares.Auth(),
 		handlers.GetCompanies(app.CompanyService()),
 	)
-	// router.Get("/publics",
-	// 	middlewares.Auth(secret),
-	// 	middlewares.SetupCacheMiddleware(5),
-	// 	handlers.GetPublicBoards(app.BoardService()),
-	// )
-	// router.Get("/:boardID",
-	// 	middlewares.Auth(secret),
-	// 	handlers.GetFullBoardByID(app.BoardService()),
-	// )
 
-	// router.Delete("/:boardID",
-	// 	middlewares.Auth(secret),
-	// 	handlers.DeleteBoard(app.BoardService()),
-	// )
-
-	// router.Post("/invite", middlewares.SetTransaction(adapters.NewGormCommitter(app.RawDBConnection())),
-	// 	middlewares.Auth(secret),
-	// 	handlers.InviteToBoard(app.BoardServiceFromCtx))
+	// only owner can do this
+	router.Delete("/my-companies/:companyID",
+		handlers.DeleteCompany(app.CompanyService()),
+	)
+	// only admin can do this
+	router.Patch("/block/:companyID", //, middlewares.SetTransaction(adapters.NewGormCommitter(app.RawDBConnection())),
+		//middlewares.Auth(),
+		handlers.BlockCompany(app.CompanyService()))
 }
 
 // func registerTerminalRouts(router fiber.Router, app *service.AppContainer, secret []byte) {

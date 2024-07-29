@@ -12,15 +12,29 @@ import (
 	"gorm.io/gorm"
 )
 
-type comapnyRepo struct {
+type companyRepo struct {
 	db *gorm.DB
 }
 
 func NewTransportCompanyRepo(db *gorm.DB) company.Repo {
-	return &comapnyRepo{db}
+	return &companyRepo{db}
 }
 
-func (r *comapnyRepo) GetTransportCompanies(ctx context.Context, limit, offset uint) ([]company.TransportCompany, uint, error) {
+func (r *companyRepo) GetByID(ctx context.Context, id uint) (*company.TransportCompany, error) {
+	var t entities.TransportCompany
+
+	err := r.db.WithContext(ctx).Model(&entities.TransportCompany{}).Where("id = ?", id).First(&t).Error
+	if err != nil {
+		if strings.Contains(err.Error(), "record not found") {
+			return nil, nil
+		}
+		return nil, err
+	}
+	dC := mappers.CompanyEntityToDomain(t)
+	return &dC, nil
+}
+
+func (r *companyRepo) GetTransportCompanies(ctx context.Context, limit, offset uint) ([]company.TransportCompany, uint, error) {
 	query := r.db.WithContext(ctx).Model(&entities.TransportCompany{})
 
 	var total int64
@@ -49,7 +63,7 @@ func (r *comapnyRepo) GetTransportCompanies(ctx context.Context, limit, offset u
 	return mappers.CompanyEntitiesToDomain(companies), uint(total), nil
 }
 
-func (r *comapnyRepo) Insert(ctx context.Context, c *company.TransportCompany) error {
+func (r *companyRepo) Insert(ctx context.Context, c *company.TransportCompany) error {
 	companyEntity := mappers.CompanyDomainToEntity(c)
 
 	// Create the new company record
@@ -87,7 +101,7 @@ func (r *comapnyRepo) Insert(ctx context.Context, c *company.TransportCompany) e
 
 }
 
-func (r *comapnyRepo) GetUserTransportCompanies(ctx context.Context, ownerID uint, limit, offset uint) ([]company.TransportCompany, uint, error) {
+func (r *companyRepo) GetUserTransportCompanies(ctx context.Context, ownerID uint, limit, offset uint) ([]company.TransportCompany, uint, error) {
 	query := r.db.WithContext(ctx).Model(&entities.TransportCompany{}).Where("owner_id = ?", ownerID)
 
 	var total int64
@@ -115,3 +129,23 @@ func (r *comapnyRepo) GetUserTransportCompanies(ctx context.Context, ownerID uin
 
 	return mappers.CompanyEntitiesToDomain(companies), uint(total), nil
 }
+
+func (r *companyRepo) Delete(ctx context.Context, companyID uint) error {
+	// check if there jis a trips related to this company in business logic
+
+	// Delete the terminal
+	if err := r.db.WithContext(ctx).Delete(&entities.TransportCompany{}, companyID).Error; err != nil {
+		return fmt.Errorf("%w %w", company.ErrDeleteCompany, err)
+	} else {
+		return nil
+	}
+
+}
+
+func (r *companyRepo) BlockCompany(ctx context.Context, companyID uint, isBlocked bool) error {
+	if err := r.db.Model(&entities.TransportCompany{}).Where("id = ?", companyID).Update("is_blocked", isBlocked).Error; err != nil {
+		return fmt.Errorf("%w %w",company.ErrFailedToBlock,err)
+	}
+	return nil
+}
+

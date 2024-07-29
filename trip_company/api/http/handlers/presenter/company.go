@@ -5,6 +5,10 @@ import (
 	"tripcompanyservice/pkg/fp"
 )
 
+type BlockCompany struct{
+	IsBlocked bool `json:"is_blocked"`
+}
+
 type CompanyReq struct {
 	Name        string `json:"name" validate:"required"`
 	Description string `json:"desc"`
@@ -24,6 +28,7 @@ type CompanyRes struct {
 	Description string `json:"desc"`
 	OwnerID     uint   `json:"owner_id" validate:"required"`
 	Address     string `json:"address"`
+	IsBlocked   bool   `json:"is_blocked"`
 	//PhoneNumber string `json:"phone"`
 	//Email       string `json:"email"`
 	// relationships
@@ -39,6 +44,7 @@ func CompanyReqToCompanyDomain(req *CompanyReq) *company.TransportCompany {
 		Description: req.Description,
 		OwnerID:     req.OwnerID,
 		Address:     req.Address,
+
 		//PhoneNumber: req.PhoneNumber,
 		//Email:       req.Email,
 	}
@@ -50,6 +56,7 @@ func CompanyToCompanyRes(c company.TransportCompany) CompanyRes {
 		Name:        c.Name,
 		Description: c.Description,
 		OwnerID:     c.OwnerID,
+		IsBlocked: c.IsBlocked,
 		// owner: c.Owner !!!
 		Address:     c.Address,
 		//PhoneNumber: c.PhoneNumber,

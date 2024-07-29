@@ -36,3 +36,29 @@ func (s *TransportCompanyService) GetTransportCompanies(ctx context.Context, pag
 
 	return s.companyOps.GetTransportCompanies(ctx, page, pageSize)
 }
+
+func (s *TransportCompanyService) BlockCompany(ctx context.Context, companyID uint, isBlocked bool) (*company.TransportCompany, error) {
+	transportCompany, err := s.companyOps.GetByID(ctx, companyID)
+	if err != nil {
+		return nil, err
+	}
+
+	err = s.companyOps.BlockUnBlockCompany(ctx, companyID, isBlocked)
+	if err != nil {
+		return nil, err
+	}
+	transportCompany.IsBlocked = isBlocked
+	return transportCompany, nil
+}
+
+func (s *TransportCompanyService) DeleteCompany(ctx context.Context, companyID uint) error {
+	_, err := s.companyOps.GetByID(ctx, companyID)
+	if err != nil {
+		return err
+	}
+	err = s.companyOps.Delete(ctx, companyID)
+	if err != nil {
+		return err
+	}
+	return nil
+}

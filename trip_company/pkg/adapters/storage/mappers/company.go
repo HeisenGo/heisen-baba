@@ -13,6 +13,7 @@ func CompanyEntityToDomain(companyEntity entities.TransportCompany) company.Tran
 		Description: companyEntity.Description,
 		OwnerID:     companyEntity.OwnerID,
 		Address:     companyEntity.Address,
+		IsBlocked:   companyEntity.IsBlocked,
 		//PhoneNumber: companyEntity.PhoneNumber,
 		//Email:       companyEntity.Email,
 	}

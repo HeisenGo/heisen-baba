@@ -103,3 +103,61 @@ func GetCompanies(companyService *service.TransportCompanyService) fiber.Handler
 		return presenter.OK(c, "companies successfully fetched.", data)
 	}
 }
+
+func DeleteCompany(companyService *service.TransportCompanyService) fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		// userClaims, ok := c.Locals(UserClaimKey).(*jwt.UserClaims)
+		// if !ok {
+		// 	return SendError(c, errWrongClaimType, fiber.StatusBadRequest)
+		// }
+		//query parameter
+		// TODo: check it is admin!
+		//ownerID, err :=  //uuid.Parse(c.Params("ownerID"))
+		// if err != nil {
+		// 	return presenter.BadRequest(c, errors.New("given owner_id format in path is not correct"))
+		// }
+		companyID, err := c.ParamsInt("companyID")
+		if err!=nil{
+			return presenter.BadRequest(c, err)
+		}
+
+		//TO DO: check whether it has unfinihed trips if so do not delete that
+		err = companyService.DeleteCompany(c.UserContext(), uint(companyID))
+		if err != nil {
+			if errors.Is(err, company.ErrCompanyNotFound) {
+				return presenter.BadRequest(c, err)
+			}
+			return presenter.InternalServerError(c, err)
+		}
+		return presenter.NoContent(c)
+	}
+}
+
+func BlockCompany(companyService *service.TransportCompanyService) fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		//To DO: only admin
+		var req presenter.BlockCompany
+
+		if err := c.BodyParser(&req); err != nil {
+			return presenter.BadRequest(c, err)
+		}
+		companyID, err := c.ParamsInt("companyID")
+		if err!=nil{
+			return presenter.BadRequest(c, err)
+		}		//userClaims, ok := c.Locals(UserClaimKey).(*jwt.UserClaims)
+		// if !ok {
+		// 	return SendError(c, errWrongClaimType, fiber.StatusBadRequest)
+		// }
+		// get owner and owner_ID existance check!!!!!! TODO:
+
+		tCompany, err := companyService.BlockCompany(c.UserContext(), uint(companyID), req.IsBlocked)
+		if err != nil {
+			if errors.Is(err, company.ErrCompanyNotFound) {
+				return presenter.BadRequest(c, err)
+			}
+			return presenter.InternalServerError(c, err)
+		}
+		res := presenter.CompanyToCompanyRes(*tCompany)
+		return presenter.OK(c, "Company Updated successfully", res)
+	}
+}

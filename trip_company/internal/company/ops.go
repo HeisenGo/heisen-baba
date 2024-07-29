@@ -15,6 +15,18 @@ func NewOps(repo Repo) *Ops {
 	}
 }
 
+func (o *Ops) GetByID(ctx context.Context, id uint) (*TransportCompany, error) {
+	t, err := o.repo.GetByID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	if t == nil {
+		return nil, ErrCompanyNotFound
+	}
+	return t, nil
+}
+
 func (o *Ops) Create(ctx context.Context, c *TransportCompany) error {
 	// if c.Email != "" {
 	// 	c.Email = LowerCaseEmail(c.Email)
@@ -51,4 +63,12 @@ func (o *Ops) GetTransportCompanies(ctx context.Context, page, pageSize uint) ([
 	limit := pageSize
 	offset := (page - 1) * pageSize
 	return o.repo.GetTransportCompanies(ctx, limit, offset)
+}
+
+func (o *Ops) Delete(ctx context.Context, companyID uint) error {
+	return o.repo.Delete(ctx, companyID)
+}
+
+func (o *Ops) BlockUnBlockCompany(ctx context.Context, companyID uint, isBlocked bool) error {
+	return o.repo.BlockCompany(ctx, companyID, isBlocked)
 }

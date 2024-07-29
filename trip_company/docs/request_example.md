@@ -21,3 +21,19 @@ localhost:2245/api/v1/companies
 ```
 localhost:2245/api/v1/companies/my-companies/owner_ID
 ```
+
+## DELETE : only by owner
+```
+localhost:2245/api/v1/companies/my-companies/3
+```
+
+## Block UnBlock only by admin
+```
+localhost:2245/api/v1/companies/block/3
+```
+
+```go
+{
+  "is_blocked":true
+}
+```
