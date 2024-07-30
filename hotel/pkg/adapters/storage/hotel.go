@@ -116,3 +116,9 @@ func (r *hotelRepo) DeleteHotel(ctx context.Context, id uint) error {
 	}
 	return nil
 }
+func (r *hotelRepo) BlockHotel(ctx context.Context,hotelID uint) error {
+	if err := r.db.WithContext(ctx).Model(&entities.Hotel{}).Where("id = ?", hotelID).Update("is_blocked", true).Error; err != nil {
+		return err
+	}
+	return nil
+}

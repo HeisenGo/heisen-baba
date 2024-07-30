@@ -29,6 +29,7 @@ var (
 	ErrInvalidName    = errors.New("invalid room name: must be 1-100 characters long and can only contain alphanumeric characters, spaces, hyphens, underscores, and periods")
 	ErrPrice          = errors.New("user price should be bigger than agency price")
 	ErrRecordNotFound = errors.New("record not found")
+	ErrEmptyHotelID   = errors.New("hotel_id must be entered")
 )
 
 func ValidatePrice(userprice, agencyprice uint) error {

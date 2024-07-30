@@ -36,6 +36,9 @@ func (s *HotelService) GetHotels(ctx context.Context, city, country string, capa
 func (s *HotelService) GetHotelsByOwnerID(ctx context.Context, ownerID uint, page, pageSize int) ([]hotel.Hotel, int, error) {
 	return s.hotelOps.GetHotelsByOwnerID(ctx, ownerID, page, pageSize)
 }
+func (s *HotelService) BlockHotel(ctx context.Context, hotelID uint)  error{
+	return s.hotelOps.BlockHotel(ctx, hotelID)
+}
 func (s *HotelService) UpdateHotel(ctx context.Context, id uint, updates *hotel.Hotel) error {
 	existingHotel, err := s.hotelOps.GetHotelsByID(ctx, id)
 	if err != nil {

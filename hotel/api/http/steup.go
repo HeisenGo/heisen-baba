@@ -30,6 +30,7 @@ func registerHotelRoutes(router fiber.Router, app *service.AppContainer) {
 	router.Get("/owner", middlewares.SetUserContext(), handlers.GetHotelsByOwnerID(app.HotelService()))
 	router.Put("/:id", middlewares.SetUserContext(), handlers.UpdateHotel(app.HotelService()))
 	router.Delete("/:id", middlewares.SetUserContext(), handlers.DeleteHotel(app.HotelService()))
+	router.Patch("/:id/block", middlewares.SetUserContext(), handlers.BlockHotel(app.HotelService()))
 }
 
 func registerRoomRoutes(router fiber.Router, app *service.AppContainer) {

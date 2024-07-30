@@ -16,6 +16,7 @@ type Repo interface {
 	GetHotelsByID(ctx context.Context, id uint) (*Hotel, error)
 	UpdateHotel(ctx context.Context, hotel *Hotel) error
 	DeleteHotel(ctx context.Context, id uint) error
+	BlockHotel(ctx context.Context,hotelID uint) error
 }
 
 type Hotel struct {

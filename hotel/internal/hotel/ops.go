@@ -72,3 +72,6 @@ func (o *Ops) Delete(ctx context.Context, id uint) error {
 	}
 	return o.repo.DeleteHotel(ctx, id)
 }
+func (o *Ops) BlockHotel(ctx context.Context,hotelID uint) error {
+    return o.repo.BlockHotel(ctx ,hotelID)
+}

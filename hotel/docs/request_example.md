@@ -52,11 +52,11 @@
 
 ```json
 {
-  "name": "Updated Grand Hotel",  // optional
-  "city": "Los Angeles",          // optional
-  "country": "USA",               // optional
-  "details": "Updated details.",  // optional
-  "is_blocked": true              // optional
+  "name": "Updated Grand Hotel",  // required
+  "city": "Los Angeles",          // required
+  "country": "USA",               // required
+  "details": "Updated details.",  // required
+  "is_blocked": true              // required
 }
 ```
 **Example Request:**

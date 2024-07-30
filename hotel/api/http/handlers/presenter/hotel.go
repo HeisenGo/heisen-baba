@@ -9,11 +9,11 @@ import (
 )
 
 type CreateHotelReq struct {
-	OwnerID uuid.UUID `json:"owner_id" example:"aba3b3ed-e3d8-4403-9751-1f04287c9d65"`
-	Name    string    `json:"name" example:"myhotel"`
-	City    string    `json:"city" example:"Los Angles"`
-	Country string    `json:"country" example:"United States America"`
-	Details string    `json:"details" example:"5 Star Beach Palm Hotel"`
+	OwnerID uuid.UUID `json:"owner_id" validate:"required" example:"aba3b3ed-e3d8-4403-9751-1f04287c9d65"`
+	Name    string    `json:"name" validate:"required" example:"myhotel"`
+	City    string    `json:"city" validate:"required" example:"Los Angles"`
+	Country string    `json:"country" validate:"required" example:"United States America"`
+	Details string    `json:"details" validate:"required" example:"5 Star Beach Palm Hotel"`
 }
 
 type HotelResp struct {

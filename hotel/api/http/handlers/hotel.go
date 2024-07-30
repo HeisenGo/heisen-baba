@@ -161,3 +161,27 @@ func DeleteHotel(hotelService *service.HotelService) fiber.Handler {
 		return presenter.NoContent(c)
 	}
 }
+// BlockHotel blocks a hotel by its ID
+// @Summary Block a hotel by ID
+// @Description Block a hotel by its ID
+// @Tags hotels
+// @Produce json
+// @Param id path int true "Hotel ID"
+// @Success 200 {object} presenter.Response "Hotel blocked successfully"
+// @Failure 400 {object} presenter.Response "Bad request"
+// @Failure 500 {object} presenter.Response "Internal server error"
+// @Router /hotels/{id}/block [patch]
+func BlockHotel(hotelService *service.HotelService) fiber.Handler {
+    return func(c *fiber.Ctx) error {
+        hotelID, err := strconv.Atoi(c.Params("id"))
+        if err != nil {
+            return presenter.BadRequest(c, err)
+        }
+
+        if err := hotelService.BlockHotel(c.UserContext(), uint(hotelID)); err != nil {
+            return presenter.InternalServerError(c, err)
+        }
+
+        return presenter.OK(c, "Hotel blocked successfully", nil)
+    }
+}
