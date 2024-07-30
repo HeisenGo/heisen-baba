@@ -72,3 +72,8 @@ func (o *Ops) Delete(ctx context.Context, companyID uint) error {
 func (o *Ops) BlockUnBlockCompany(ctx context.Context, companyID uint, isBlocked bool) error {
 	return o.repo.BlockCompany(ctx, companyID, isBlocked)
 }
+
+func(o *Ops)PatchCompanyByOwner(ctx context.Context, updatedCompany, originalCompany *TransportCompany) error{
+	return o.repo.PatchCompany(ctx, updatedCompany, originalCompany)
+}
+

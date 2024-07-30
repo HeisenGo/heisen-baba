@@ -9,6 +9,28 @@ type BlockCompany struct{
 	IsBlocked bool `json:"is_blocked"`
 }
 
+type UpdateCompanyReq struct {
+	Name        string `json:"name"`
+	Description string `json:"desc"`
+	NewOwnerEmail    string   `json:"new_owner_email"` // in order to withdraw
+	Address     string `json:"address"`
+	//PhoneNumber string `json:"phone"`
+	//Email       string `json:"email"`
+	// relationships
+	//Employees   []Employee
+	//Trips       []Trip
+	//TechTeams   []TechTeam
+}
+
+func UpdateCompanyToCompany(req *UpdateCompanyReq, id uint) *company.TransportCompany{
+	return &company.TransportCompany{
+		ID: id,
+		Name: req.Name,
+		Description: req.Description,
+		Address: req.Address,
+	}
+}
+
 type CompanyReq struct {
 	Name        string `json:"name" validate:"required"`
 	Description string `json:"desc"`

@@ -149,3 +149,35 @@ func (r *companyRepo) BlockCompany(ctx context.Context, companyID uint, isBlocke
 	return nil
 }
 
+
+func (r *companyRepo) PatchCompany(ctx context.Context, updatedCompany, originalCompany *company.TransportCompany) error {
+	// Prepare a map to hold the fields to be updated
+	updates := make(map[string]interface{})
+
+	// Add fields to the map if they are provided in the request
+	if updatedCompany.Name != "" {
+		updates["name"] = updatedCompany.Name
+		originalCompany.Name = updatedCompany.Name
+	}
+
+	if updatedCompany.Description != "" {
+		updates["description"] = updatedCompany.Description
+		originalCompany.Description = updatedCompany.Description
+	}
+	if updatedCompany.Address != "" {
+		updates["address"] = updatedCompany.Address
+		originalCompany.Address = updatedCompany.Address
+	}
+	if updatedCompany.OwnerID != 0 {
+		updates["owner_id"] = updatedCompany.OwnerID
+		originalCompany.OwnerID = updatedCompany.OwnerID
+	}
+
+	if err := r.db.Model(&entities.TransportCompany{}).Where("id = ?", updatedCompany.ID).Updates(updates).Error; err != nil {
+		if strings.Contains(err.Error(), "duplicate key") {
+			return company.ErrDuplication
+		}
+		return fmt.Errorf("%w %w",company.ErrFailedToUpdate, err)
+	}
+	return nil
+}

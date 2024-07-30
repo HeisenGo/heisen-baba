@@ -37,3 +37,18 @@ localhost:2245/api/v1/companies/block/3
   "is_blocked":true
 }
 ```
+
+## PATH only owner
+```
+localhost:2245/api/v1/companies/my-companies/3
+```
+
+```go
+{
+  "name": "salman",
+  "desc": "gh ",
+  "address": "new"
+  //"new_owner_email": 4 
+}
+
+```

@@ -16,11 +16,13 @@ const (
 var (
 	ErrCompanyNotFound = errors.New("company not found")
 	ErrFailedToRestore = errors.New("failed to restore company")
-	ErrDuplication     = errors.New("company with same email/ ownerID-Name already exists")
+	ErrDuplication     = errors.New("company with same owner-Name already exists")
 	ErrInvalidEmail    = errors.New("invalid email")
 	ErrDeleteCompany   = errors.New("error deleting company")
 	ErrCanNotDelete    = errors.New("company can not be deleted due to unfinished trips")
 	ErrFailedToBlock   = errors.New("failed to block the company")
+	ErrFailedToUpdate   = errors.New("failed to update the company")
+
 )
 
 type Repo interface {
@@ -30,6 +32,7 @@ type Repo interface {
 	GetUserTransportCompanies(ctx context.Context, ownerID uint, limit, offset uint) ([]TransportCompany, uint, error)
 	Delete(ctx context.Context, companyID uint) error
 	BlockCompany(ctx context.Context, companyID uint, isBlocked bool) error
+	PatchCompany(ctx context.Context, updatedCompany, originalCompany *TransportCompany) error
 }
 
 type TransportCompany struct {

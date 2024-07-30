@@ -2,7 +2,12 @@ package service
 
 import (
 	"context"
+	"errors"
 	"tripcompanyservice/internal/company"
+)
+
+var (
+	ErrForbidden = errors.New("you are not allowed to do this function")
 )
 
 type TransportCompanyService struct {
@@ -61,4 +66,25 @@ func (s *TransportCompanyService) DeleteCompany(ctx context.Context, companyID u
 		return err
 	}
 	return nil
+}
+
+func (s *TransportCompanyService) PatchCompanyByOwner(ctx context.Context, updatedCompany *company.TransportCompany, userID uint, newOwnerEmail string) (*company.TransportCompany, error) {
+	originalCompany, err := s.companyOps.GetByID(ctx, updatedCompany.ID)
+	if err != nil {
+		return nil, err
+	}
+	if originalCompany.OwnerID != userID {
+		return nil, ErrForbidden
+	}
+
+	if newOwnerEmail!=""{
+		//******
+		// TO DO: check this user exists and get it!!!!
+		updatedCompany.OwnerID = 1
+		return nil, nil
+	}
+
+	err = s.companyOps.PatchCompanyByOwner(ctx, updatedCompany, originalCompany)
+
+	return originalCompany, err
 }

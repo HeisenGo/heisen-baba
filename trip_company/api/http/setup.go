@@ -91,6 +91,9 @@ func registerTransportCompanyRoutes(router fiber.Router, app *service.AppContain
 	router.Delete("/my-companies/:companyID",
 		handlers.DeleteCompany(app.CompanyService()),
 	)
+	router.Patch("/my-companies/:companyID",
+		handlers.PatchCompany(app.CompanyService()),
+	)
 	// only admin can do this
 	router.Patch("/block/:companyID", //, middlewares.SetTransaction(adapters.NewGormCommitter(app.RawDBConnection())),
 		//middlewares.Auth(),

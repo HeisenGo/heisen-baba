@@ -117,7 +117,7 @@ func DeleteCompany(companyService *service.TransportCompanyService) fiber.Handle
 		// 	return presenter.BadRequest(c, errors.New("given owner_id format in path is not correct"))
 		// }
 		companyID, err := c.ParamsInt("companyID")
-		if err!=nil{
+		if err != nil {
 			return presenter.BadRequest(c, err)
 		}
 
@@ -142,9 +142,9 @@ func BlockCompany(companyService *service.TransportCompanyService) fiber.Handler
 			return presenter.BadRequest(c, err)
 		}
 		companyID, err := c.ParamsInt("companyID")
-		if err!=nil{
+		if err != nil {
 			return presenter.BadRequest(c, err)
-		}		//userClaims, ok := c.Locals(UserClaimKey).(*jwt.UserClaims)
+		} //userClaims, ok := c.Locals(UserClaimKey).(*jwt.UserClaims)
 		// if !ok {
 		// 	return SendError(c, errWrongClaimType, fiber.StatusBadRequest)
 		// }
@@ -159,5 +159,45 @@ func BlockCompany(companyService *service.TransportCompanyService) fiber.Handler
 		}
 		res := presenter.CompanyToCompanyRes(*tCompany)
 		return presenter.OK(c, "Company Updated successfully", res)
+	}
+}
+
+func PatchCompany(companyService *service.TransportCompanyService) fiber.Handler {
+	return func(c *fiber.Ctx) error {
+
+		var req presenter.UpdateCompanyReq
+
+		if err := c.BodyParser(&req); err != nil {
+			return SendError(c, err, fiber.StatusBadRequest)
+		}
+
+		// userClaims, ok := c.Locals(UserClaimKey).(*jwt.UserClaims)
+		// if !ok {
+		// 	return SendError(c, errWrongClaimType, fiber.StatusBadRequest)
+		// }
+		companyID, err := c.ParamsInt("companyID")
+		if err != nil {
+			return presenter.BadRequest(c, errWrongIDType)
+		}
+
+		if companyID < 0 {
+			return presenter.BadRequest(c, errWrongIDType)
+		}
+		userID := uint(5) //ownerID
+		updatedCompany := presenter.UpdateCompanyToCompany(&req, uint(companyID))
+		changedCompany, err := companyService.PatchCompanyByOwner(c.UserContext(), updatedCompany, userID, req.NewOwnerEmail)
+
+		if err != nil {
+			if errors.Is(err, service.ErrForbidden) {
+				return presenter.Forbidden(c, err)
+			}
+			if errors.Is(err, company.ErrCompanyNotFound) || errors.Is(err, company.ErrFailedToUpdate) {
+				return presenter.BadRequest(c, err)
+			}
+			// trace ID : TODO
+			return presenter.InternalServerError(c, err)
+		}
+		res := presenter.CompanyToCompanyRes(*changedCompany)
+		return presenter.OK(c, "Terminal updated successfully", res)
 	}
 }
