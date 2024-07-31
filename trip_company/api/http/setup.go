@@ -98,6 +98,12 @@ func registerTransportCompanyRoutes(router fiber.Router, app *service.AppContain
 	router.Patch("/block/:companyID", //, middlewares.SetTransaction(adapters.NewGormCommitter(app.RawDBConnection())),
 		//middlewares.Auth(),
 		handlers.BlockCompany(app.CompanyService()))
+
+	router.Post("/trips",
+		//middlewares.SetTransaction(adapters.NewGormCommitter(app.RawDBConnection())),
+		//middlewares.Auth(),
+		//handlers.CreateTrip(app.TripServiceFromCtx)),
+		handlers.CreateTrip(app.TripService()))
 }
 
 // func registerTerminalRouts(router fiber.Router, app *service.AppContainer, secret []byte) {
