@@ -1,0 +1,87 @@
+package trip
+
+import (
+	"context"
+	"errors"
+	"time"
+	"tripcompanyservice/internal/company"
+	tripcancellingpenalty "tripcompanyservice/internal/trip_cancelling_penalty"
+)
+
+type TripType string
+
+const (
+	RailTrip    TripType = "rail"
+	AirTrip     TripType = "air"
+	RoadTrip    TripType = "road"
+	SailingTrip TripType = "sailing"
+)
+
+var (
+	ErrNegativePrice = errors.New("price should be more than 0")
+	ErrPrice       = errors.New("agency price should not be greater than uer price")
+	ErrReleaseDate = errors.New("agency release should not be greater than uer release date")
+
+	ErrStartTime   = errors.New("wrong start time")
+	ErrDuplication = errors.New("duplicated trip")
+
+	ErrFirstPenalty  = errors.New("first penalty days should be more than the second penalty days")
+	ErrSecondPenalty = errors.New("second penalty days should be more than the third penalty days")
+	ErrFailedToRestore = errors.New("failed to restore duplicated deleted record")
+)
+
+type Repo interface {
+	GetCompanyTrips(ctx context.Context, companyID uint, limit, offset uint) ([]Trip, uint, error)
+	Insert(ctx context.Context, t *Trip) error
+}
+
+type Trip struct {
+	ID                    uint
+	TransportCompanyID    uint
+	TransportCompany      company.TransportCompany
+	TripType              TripType
+	UserReleaseDate       time.Time
+	TourReleaseDate       time.Time
+	UserPrice             float64
+	AgencyPrice           float64
+	PathID                uint
+	Path                  *Path
+	Origin                string
+	Destination           string
+	Status                string `gorm:"type:varchar(20);default:'pending'"`
+	MinPassengers         uint
+	TechTeamID            *uint
+	TripCancellingPenalty *tripcancellingpenalty.TripCancelingPenalty
+	//TechTeam         TechTeam `gorm:"foreignKey:TechTeamID"`
+	//VehicleRequestID uint
+	//VehicleRequest   VehicleRequest `gorm:"foreignKey:TripID"`
+	//Tickets          []Ticket       `gorm:"foreignKey:TripID"`
+	TripCancelingPenaltyID *uint
+	MaxTickets             uint
+	VehicleID              *uint
+	VehicleRequestID       *uint
+	IsCanceled             bool       `grom:"default:false"`
+	IsFinished             bool       `gorm:"default:false"`
+	StartDate              *time.Time // should be given by trip generator
+	EndDate                *time.Time // should be calculated according to the vehicle speed and path distance
+}
+
+type Path struct {
+	ID             uint
+	FromTerminalID uint
+	ToTerminalID   uint
+	FromTerminal   *Terminal
+	ToTerminal     *Terminal
+	DistanceKM     float64 // in kilometers
+	Code           string
+	Name           string
+	Type           string
+}
+
+type Terminal struct {
+	ID      uint
+	Name    string
+	Type    string
+	City    string
+	Country string
+}
