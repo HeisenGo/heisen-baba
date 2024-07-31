@@ -6,7 +6,7 @@ type TechTeam struct {
 	gorm.Model
 	Name               string   `gorm:"type:varchar(100);not null"`
 	Description        string   `gorm:"type:text"`
-	TripType           TripType `gorm:"type:varchar(20);not null"`
+	TripType           string `gorm:"type:varchar(20);not null"`
 	TransportCompanyID uint
 	TransportCompany   TransportCompany `gorm:"foreignKey:TransportCompanyID"`
 	Members            []TechTeamMember `gorm:"foreignKey:TechTeamID"`
