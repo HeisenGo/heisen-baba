@@ -10,4 +10,6 @@ type VehicleRequest struct {
 	ProductionYearMin int
 	Status            string `gorm:"type:varchar(20);default:'pending'"`
 	MatchedVehicleID  uint
+	VehicleReservationFee float64
+	VehicleProductionYear int
 }
