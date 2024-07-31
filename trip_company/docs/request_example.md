@@ -52,3 +52,30 @@ localhost:2245/api/v1/companies/my-companies/3
 }
 
 ```
+
+# Trip
+
+## CREATE
+``` localhost:2245/api/v1/companies/trips```
+```go
+{
+  "company_id": 1,
+  "user_date": "2024-08-30 23:27:09",
+  "tour_date": "2024-08-25 23:27:09",
+  "user_price": 45000,
+  "agency_price": 30000,
+  "path_id": 2,
+  "min_pass": 20,
+  //"tech_team_id": 1,
+  "max_tickets": 23,
+  "start_date": "2024-09-30 23:27:09",
+  "penalty": {
+    "first_days": 25,
+    "first_percentage": 10,
+    "second_days": 15,
+    "second_percentage": 35,
+    "third_days": 10,
+    "third_percentage": 45
+  }
+}
+```
