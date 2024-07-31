@@ -22,7 +22,7 @@ func AddExtension(db *gorm.DB) error {
 func Migrate(db *gorm.DB) error {
 	migrator := db.Migrator()
 
-	err := migrator.AutoMigrate(&entities.TransportCompany{})
+	err := migrator.AutoMigrate(&entities.TransportCompany{}, &entities.Trip{}, &entities.TripCancellingPenalty{})
 	if err != nil {
 		return err
 	}
