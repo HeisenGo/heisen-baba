@@ -1,6 +1,7 @@
 package presenter
 
 import (
+	"encoding/json"
 	"math"
 	"time"
 
@@ -9,19 +10,35 @@ import (
 
 type Timestamp time.Time
 
-func (d *Timestamp) MarshalJSON() ([]byte, error) {
-	value := time.Time(*d).Format(time.DateTime)
-	return []byte(value), nil
+const timestampFormat = "2006-01-02 15:04:05"
+
+// MarshalJSON converts the Timestamp to JSON format.
+func (t Timestamp) MarshalJSON() ([]byte, error) {
+	stamp := time.Time(t).Format(timestampFormat)
+	return json.Marshal(stamp)
 }
 
-func (d *Timestamp) UnmarshalJSON(v []byte) error {
-	t, err := time.Parse(time.DateTime, string(v[1:len(v)-1]))
+// UnmarshalJSON converts JSON data to a Timestamp.
+func (t *Timestamp) UnmarshalJSON(data []byte) error {
+	var err error
+	var parsedTime time.Time
+
+	// Remove quotes from the JSON string
+	trimmedData := string(data)
+	trimmedData = trimmedData[1 : len(trimmedData)-1]
+
+	parsedTime, err = time.Parse(timestampFormat, trimmedData)
 	if err != nil {
 		return err
 	}
 
-	*d = Timestamp(t)
+	*t = Timestamp(parsedTime)
 	return nil
+}
+
+// String converts the Timestamp to string.
+func (t Timestamp) String() string {
+	return time.Time(t).Format(timestampFormat)
 }
 
 type PaginationResponse[T any] struct {
