@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+package pathservice;
+
+option go_package = "terminal_path/internal/protobufs";
+
+message GetFullPathByIDRequest {
+  int32 pathID = 1;
+}
+
+message GetFullPathByIDResponse {
+  string message = 1;
+  PathResponse data = 2;
+}
+
+message PathResponse {
+  uint32 id = 1;
+  double distance_km = 2;
+  string code = 3;
+  string name = 4;
+  string type = 5;
+  string from_country = 6;
+  string from_city = 7;
+  string from_terminal = 8;
+  string to_country = 9;
+  string to_city = 10;
+  string to_terminal = 11;
+}
+
+service PathService {
+  rpc GetFullPathByID(GetFullPathByIDRequest) returns (GetFullPathByIDResponse);
+}
