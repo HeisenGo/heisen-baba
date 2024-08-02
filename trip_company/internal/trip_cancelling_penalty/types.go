@@ -1,6 +1,13 @@
 package tripcancellingpenalty
 
-import "time"
+import (
+	"context"
+	"time"
+)
+
+type Repo interface {
+	GetByID(ctx context.Context, id uint) (*TripCancelingPenalty, error)
+}
 
 type TripCancelingPenalty struct {
 	ID                           uint
