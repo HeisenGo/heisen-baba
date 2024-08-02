@@ -14,6 +14,13 @@ func NewOps(repo Repo) *Ops {
 	return &Ops{repo}
 }
 
+func (o *Ops) GetCountPathUnfinishedTrips(ctx context.Context, pathID uint) (uint, error) {
+	return o.repo.GetCountPathUnfinishedTrips(ctx, pathID)
+}
+func (o *Ops) GetUpcomingUnconfirmedTripIDsToCancel(ctx context.Context) ([]uint, error) {
+	return o.repo.GetUpcomingUnconfirmedTripIDsToCancel(ctx)
+}
+
 // TO Do implement other layers!!!
 func (o *Ops) CompanyTrips(ctx context.Context, companyID uint, page, pageSize uint) ([]Trip, uint, error) {
 	limit := pageSize

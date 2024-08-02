@@ -43,6 +43,10 @@ type Repo interface {
 	GetFullTripByID(ctx context.Context, id uint) (*Trip, error)
 	GetTrips(ctx context.Context, originCity, destinationCity, pathType string, startDate *time.Time, requesterType string, limit, offset uint) ([]Trip, uint, error)
 	UpdateTrip(ctx context.Context, id uint, updates map[string]interface{}) error
+
+	
+	GetCountPathUnfinishedTrips(ctx context.Context, pathID uint) (uint, error)
+	GetUpcomingUnconfirmedTripIDsToCancel(ctx context.Context) ([]uint, error)
 }
 
 type Trip struct {

@@ -159,12 +159,46 @@ func (r *tripRepo) GetTrips(ctx context.Context, originCity, destinationCity, pa
 	return mappers.TripEntitiesToDomain(trips), uint(total), nil
 }
 
-func (r *tripRepo)UpdateTrip(ctx context.Context, id uint, updates map[string]interface{}) error {
-    var t entities.Trip
-    
-    if err := r.db.WithContext(ctx).Model(&t).Updates(updates).Error; err != nil {
-        return fmt.Errorf("%w %w", trip.ErrNotUpdated, err)
-    }
-    
-    return nil
+func (r *tripRepo) UpdateTrip(ctx context.Context, id uint, updates map[string]interface{}) error {
+	var t entities.Trip
+
+	if err := r.db.WithContext(ctx).Model(&t).Updates(updates).Error; err != nil {
+		return fmt.Errorf("%w %w", trip.ErrNotUpdated, err)
+	}
+
+	return nil
+}
+
+func (r *tripRepo) GetCountPathUnfinishedTrips(ctx context.Context, pathID uint) (uint, error) {
+	var count int64
+
+	err := r.db.WithContext(ctx).Model(&entities.Trip{}).
+		Where("is_finished = ?", false).
+		Where("path_id = ?", pathID).
+		Count(&count).Error
+
+	if err != nil {
+		return 100, err
+	}
+	return uint(count), nil
+}
+
+func (r *tripRepo) GetUpcomingUnconfirmedTripIDsToCancel(ctx context.Context) ([]uint, error) {
+	now := time.Now()
+	in24Hours := now.Add(24 * time.Hour)
+
+	var tripIDs []uint
+
+	err := r.db.WithContext(ctx).Model(&entities.Trip{}).
+		Select("id").
+		Where("start_date BETWEEN ? AND ?", now, in24Hours).
+		Where("is_confirmed = ?", false).
+		Pluck("id", &tripIDs).
+		Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	return tripIDs, nil
 }

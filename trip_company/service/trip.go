@@ -19,6 +19,14 @@ func NewTripService(tripOps *trip.Ops, companyOps *company.Ops) *TripService {
 	}
 }
 
+func (s *TripService) GetCountPathUnfinishedTrips(ctx context.Context, pathID uint) (uint, error) {
+	return s.tripOps.GetCountPathUnfinishedTrips(ctx, pathID)
+}
+func (s *TripService) GetUpcomingUnconfirmedTripIDsToCancel(ctx context.Context) ([]uint, error) {
+	// TODO : get them one by one and cancel them move money from libaba to the buyers wallet
+	return s.tripOps.GetUpcomingUnconfirmedTripIDsToCancel(ctx)
+}
+
 func (s *TripService) GetCompanyTrips(ctx context.Context, companyID uint, page, pageSize uint) ([]trip.Trip, uint, error) {
 	tCompany, err := s.companyOps.GetByID(ctx, companyID)
 	if err != nil {

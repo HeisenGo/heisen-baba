@@ -160,9 +160,6 @@ func GetTrips(tripService *service.TripService) fiber.Handler {
 	}
 }
 
-//GET Company Trips
-
-// GET unfinished trips of a path
 
 func PatchTrip(tripService *service.TripService) fiber.Handler { // tansactional!!!! TO DO:
 	return func(c *fiber.Ctx) error {
@@ -199,5 +196,39 @@ func PatchTrip(tripService *service.TripService) fiber.Handler { // tansactional
 		}
 		res := presenter.TripToOwnerAdminTechTeamOperatorTripResponse(*changedTrip)
 		return presenter.OK(c, "Trip updated successfully", res)
+	}
+}
+
+
+
+
+
+// GET unfinished trips of a path => between services => : TODO: GRPc
+func GetCountPathUnfinishedTrips(tripService *service.TripService) fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		// userClaims, ok := c.Locals(UserClaimKey).(*jwt.UserClaims)
+		// if !ok {
+		// 	return SendError(c, errWrongClaimType, fiber.StatusBadRequest)
+		// }
+		//query parameter
+		pathID, err := c.ParamsInt("pathID")
+		if err != nil {
+			return presenter.BadRequest(c, errWrongIDType)
+		}
+
+		if pathID < 0 {
+			return presenter.BadRequest(c, errWrongIDType)
+		}
+
+		total, err := tripService.GetCountPathUnfinishedTrips(c.UserContext(), uint(pathID))
+		if err != nil {
+			if errors.Is(err, trip.ErrRecordsNotFound) {
+				return presenter.BadRequest(c, err)
+			}
+			err := errors.New("Error")
+			return presenter.InternalServerError(c, err)
+		}
+
+		return presenter.OK(c, "Trips fetched successfully", fiber.Map{"count": total})
 	}
 }
