@@ -22,7 +22,7 @@ func (o *Ops) CompanyTrips(ctx context.Context, companyID uint, page, pageSize u
 }
 
 func (o *Ops) Create(ctx context.Context, trip *Trip) error {
-	if trip.AgencyPrice <= 0{
+	if trip.AgencyPrice <= 0 {
 		return ErrNegativePrice
 	}
 	if trip.UserPrice < trip.AgencyPrice {
@@ -56,4 +56,27 @@ func (o *Ops) Create(ctx context.Context, trip *Trip) error {
 	trip.TripCancellingPenalty.ThirdDate = trip.StartDate.AddDate(0, 0, int(-trip.TripCancellingPenalty.ThirdDays))
 
 	return o.repo.Insert(ctx, trip)
+}
+
+func (o *Ops) GetFullTripByID(ctx context.Context, id uint) (*Trip, error) {
+	p, err := o.repo.GetFullTripByID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	if p == nil {
+		return nil, ErrTripNotFound
+	}
+
+	return p, nil
+}
+
+func (o *Ops) GetTrips(ctx context.Context, originCity, destinationCity, pathType string, startDate *time.Time, requesterType string, pageSize, page uint) ([]Trip, uint, error) {
+	limit := pageSize
+	offset := (page - 1) * pageSize
+
+	trips, total, err := o.repo.GetTrips(ctx, originCity, destinationCity, pathType, startDate, requesterType, limit, offset)
+
+	return trips, total, err
+
 }

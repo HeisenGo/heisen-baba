@@ -18,21 +18,28 @@ const (
 )
 
 var (
-	ErrNegativePrice = errors.New("price should be more than 0")
-	ErrPrice       = errors.New("agency price should not be greater than uer price")
-	ErrReleaseDate = errors.New("agency release should not be greater than uer release date")
+	ErrRecordsNotFound = errors.New("no records found")
+	ErrTripNotFound = errors.New("trip not found")
+	ErrFailedToGetTrip = errors.New("failed to get trip")
+	ErrRecordNotFound  = errors.New("records not found")
+	ErrNegativePrice   = errors.New("price should be more than 0")
+	ErrPrice           = errors.New("agency price should not be greater than uer price")
+	ErrReleaseDate     = errors.New("agency release should not be greater than uer release date")
 
 	ErrStartTime   = errors.New("wrong start time")
 	ErrDuplication = errors.New("duplicated trip")
 
-	ErrFirstPenalty  = errors.New("first penalty days should be more than the second penalty days")
-	ErrSecondPenalty = errors.New("second penalty days should be more than the third penalty days")
+	ErrFirstPenalty    = errors.New("first penalty days should be more than the second penalty days")
+	ErrSecondPenalty   = errors.New("second penalty days should be more than the third penalty days")
 	ErrFailedToRestore = errors.New("failed to restore duplicated deleted record")
 )
 
 type Repo interface {
 	GetCompanyTrips(ctx context.Context, companyID uint, limit, offset uint) ([]Trip, uint, error)
 	Insert(ctx context.Context, t *Trip) error
+	
+	GetFullTripByID(ctx context.Context, id uint) (*Trip, error)
+	GetTrips(ctx context.Context, originCity, destinationCity, pathType string, startDate *time.Time, requesterType string, limit, offset uint) ([]Trip, uint, error)
 }
 
 type Trip struct {
@@ -50,6 +57,7 @@ type Trip struct {
 	Destination           string
 	Status                string `gorm:"type:varchar(20);default:'pending'"`
 	MinPassengers         uint
+	SoldTickets           uint
 	TechTeamID            *uint
 	TripCancellingPenalty *tripcancellingpenalty.TripCancelingPenalty
 	//TechTeam         TechTeam `gorm:"foreignKey:TechTeamID"`
