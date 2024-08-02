@@ -28,6 +28,7 @@ type Trip struct {
 	VehicleRequestID        *uint
 	VehicleRequest          *VehicleRequest `gorm:"foreignKey:TripID"`
 	Tickets                 []Ticket        `gorm:"foreignKey:TripID"`
+	SoldTickets 	uint `gorm:"default:0"`
 	TripCancellingPenaltyID *uint
 	TripCancelingPenalty    *TripCancellingPenalty `gorm:"foreignKey:TripCancellingPenaltyID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL"`
 	MaxTickets              uint
