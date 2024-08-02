@@ -35,6 +35,7 @@ type Trip struct {
 	VehicleID               *uint
 	IsCanceled              bool       `gorm:"default:false"`
 	IsFinished              bool       `gorm:"default:false"`
+	IsConfirmed             bool    `gorm:"default:false"`
 	StartDate               *time.Time `gorm:"uniqueIndex:idx_trip_unique"` // should be given by trip generator
 	EndDate                 *time.Time // should be calculated according to the vehicle speed and path distance
 }

@@ -159,59 +159,12 @@ func (r *tripRepo) GetTrips(ctx context.Context, originCity, destinationCity, pa
 	return mappers.TripEntitiesToDomain(trips), uint(total), nil
 }
 
-// func (r *tripRepo) GetTrips(ctx context.Context, originCity, destinationCity, pathType string, startDate *time.Time, requesterType string, limit, offset uint) ([]trip.Trip, uint, error) {
-// 	query := r.db.WithContext(ctx).
-// 		Model(&entities.Trip{}).
-// 		Where("start_date > ?", time.Now()).
-// 		Where("sold_tickets < max_tickets").
-// 		Where("vehicle_id IS NOT NULL").
-// 		Order("created_at DESC")
-// 	if originCity != "" {
-// 		query = query.Where("origin = ?", originCity)
-// 	}
-
-// 	if destinationCity != "" {
-// 		query = query.Where("destination = ?", destinationCity)
-// 	}
-
-// 	if pathType != "" {
-// 		query = query.Where("trip_type = ?", pathType)
-// 	}
-
-// 	if requesterType == "agency" {
-// 		query = query.Where("agency_release_date <= ?", time.Now())
-// 	} else if requesterType == "user" {
-// 		query = query.Where("user_release_date <= ?", time.Now())
-// 	}
-
-// 	if startDate != nil {
-// 		startDateStr := startDate.Format("2006-01-02") // Convert to YYYY-MM-DD
-// 		if startDateStr != "0001-01-01" {
-// 			query = query.Where("DATE(start_date) = ?", startDateStr)
-// 		}
-// 	}
-// 	var total int64
-
-// 	if err := query.Count(&total).Error; err != nil {
-// 		return nil, 0, err
-// 	}
-
-// 	if offset > 0 {
-// 		query = query.Offset(int(offset))
-// 	}
-
-// 	if limit > 0 {
-// 		query = query.Limit(int(limit))
-// 	}
-
-// 	var trips []entities.Trip
-
-// 	if err := query.Find(&trips).Error; err != nil {
-// 		if strings.Contains(err.Error(), "record not found") {
-// 			return nil, 0, trip.ErrRecordsNotFound
-// 		}
-// 		return nil, 0, err
-// 	}
-
-// 	return mappers.TripEntitiesToDomain(trips), uint(total), nil
-// }
+func (r *tripRepo)UpdateTrip(ctx context.Context, id uint, updates map[string]interface{}) error {
+    var t entities.Trip
+    
+    if err := r.db.WithContext(ctx).Model(&t).Updates(updates).Error; err != nil {
+        return fmt.Errorf("%w %w", trip.ErrNotUpdated, err)
+    }
+    
+    return nil
+}

@@ -48,6 +48,7 @@ func TripEntityToDomain(tripEntity entities.Trip) trip.Trip {
 		StartDate:              tripEntity.StartDate,
 		EndDate:                tripEntity.EndDate,
 		SoldTickets:            tripEntity.SoldTickets,
+		IsConfirmed:            tripEntity.IsConfirmed,
 	}
 }
 
@@ -92,6 +93,7 @@ func TripFullEntityToDomain(tripEntity entities.Trip) trip.Trip {
 		EndDate:                tripEntity.EndDate,
 		SoldTickets:            tripEntity.SoldTickets,
 		TripCancellingPenalty:  &penalty,
+		IsConfirmed:            tripEntity.IsConfirmed,
 	}
 }
 
@@ -126,5 +128,6 @@ func TripDomainToEntity(t *trip.Trip) *entities.Trip {
 		StartDate:            t.StartDate,
 		EndDate:              t.EndDate,
 		SoldTickets:          t.SoldTickets,
+		IsConfirmed:          t.IsConfirmed,
 	}
 }

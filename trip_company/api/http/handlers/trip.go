@@ -46,6 +46,42 @@ func CreateTrip(tripService *service.TripService) fiber.Handler { //serviceFacto
 	}
 }
 
+func GetCompanyTrips(tripService *service.TripService) fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		// userClaims, ok := c.Locals(UserClaimKey).(*jwt.UserClaims)
+		// if !ok {
+		// 	return SendError(c, errWrongClaimType, fiber.StatusBadRequest)
+		// }
+		//query parameter
+		page, pageSize := PageAndPageSize(c)
+		// get from auth!!!!! TODO:
+
+		// Parse dates
+		var err error
+		companyID, err := c.ParamsInt("companyID")
+		if err != nil {
+			return presenter.BadRequest(c, err)
+		}
+		//startDateStr := startDate.Format("2006-01-02") // Convert to YYYY-MM-DD
+
+		trips, total, err := tripService.GetCompanyTrips(c.UserContext(), uint(companyID), uint(page), uint(pageSize))
+		if err != nil {
+			if errors.Is(err, trip.ErrRecordsNotFound) {
+				return presenter.BadRequest(c, err)
+			}
+			err := errors.New("Error")
+			return presenter.InternalServerError(c, err)
+		}
+		data := presenter.NewPagination(
+			presenter.BatchTripToOwnerAdminTechTeamOperatorTripResponse(trips),
+			uint(page),
+			uint(pageSize),
+			total,
+		)
+		return presenter.OK(c, "Trips fetched successfully", data)
+	}
+}
+
 func GetFullTripByID(tripService *service.TripService) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		// userClaims, ok := c.Locals(UserClaimKey).(*jwt.UserClaims)
@@ -121,5 +157,47 @@ func GetTrips(tripService *service.TripService) fiber.Handler {
 			total,
 		)
 		return presenter.OK(c, "Trips fetched successfully", data)
+	}
+}
+
+//GET Company Trips
+
+// GET unfinished trips of a path
+
+func PatchTrip(tripService *service.TripService) fiber.Handler { // tansactional!!!! TO DO:
+	return func(c *fiber.Ctx) error {
+
+		var req presenter.UpdateTripRequest
+
+		if err := c.BodyParser(&req); err != nil {
+			return presenter.BadRequest(c, err)
+		}
+
+		// userClaims, ok := c.Locals(UserClaimKey).(*jwt.UserClaims)
+		// if !ok {
+		// 	return SendError(c, errWrongClaimType, fiber.StatusBadRequest)
+		// }
+		tripID, err := c.ParamsInt("tripID")
+		if err != nil {
+			return presenter.BadRequest(c, errWrongIDType)
+		}
+
+		if tripID < 0 {
+			return presenter.BadRequest(c, errWrongIDType)
+		}
+
+		newTrip := presenter.UpdateTripReqToTrip(&req)
+
+		changedTrip, err := tripService.UpdateTrip(c.UserContext(), uint(tripID), newTrip)
+
+		if err != nil {
+			if errors.Is(err, trip.ErrCanNotUpdate) || errors.Is(err, trip.ErrNotUpdated) || errors.Is(err, trip.ErrRecordNotFound) {
+				return presenter.BadRequest(c, err)
+			}
+			// trace ID : TODO
+			return presenter.InternalServerError(c, err)
+		}
+		res := presenter.TripToOwnerAdminTechTeamOperatorTripResponse(*changedTrip)
+		return presenter.OK(c, "Trip updated successfully", res)
 	}
 }

@@ -48,6 +48,7 @@ type CreateTripRes struct {
 	//end date should be calculated according to the vehicle speed and path distance
 	TripCancellingPenalty *CreateTripCancelingPenaltyReq `json:"penalty" `
 	EndDate               Timestamp                      `json:"end_date"`
+	IsConfirmed           bool                           `json:"is_confirmed"`
 }
 
 func CreateTripReqToTrip(req *CreateTripReq) *trip.Trip {
@@ -110,6 +111,7 @@ func TripToCreateTripRes(t *trip.Trip) *CreateTripRes {
 		ToTerminalName:        t.Path.ToTerminal.Name,
 		PathName:              t.Path.Name,
 		Type:                  t.Path.Type,
+		IsConfirmed:           t.IsConfirmed,
 	}
 }
 
@@ -141,6 +143,7 @@ type OwnerAdminTechTeamOperatorTripResponse struct {
 	IsFinished             bool                           `json:"is_finished"`
 	StartDate              Timestamp                      `json:"start_date"`
 	EndDate                Timestamp                      `json:"end_date"`
+	IsConfirmed            bool                           `json:"is_confirmed"`
 }
 
 func TripToOwnerAdminTechTeamOperatorTripResponse(t trip.Trip) OwnerAdminTechTeamOperatorTripResponse {
@@ -182,6 +185,8 @@ func TripToOwnerAdminTechTeamOperatorTripResponse(t trip.Trip) OwnerAdminTechTea
 		VehicleRequestID:       t.VehicleRequestID,
 		IsCanceled:             t.IsCanceled,
 		IsFinished:             t.IsFinished,
+		IsConfirmed:            t.IsConfirmed,
+
 		//tech team name
 	}
 }
@@ -233,4 +238,41 @@ func TripToUserTripResponse(t trip.Trip) UserTripResponse {
 
 func BatchTripToUserTripResponse(trips []trip.Trip) []UserTripResponse {
 	return fp.Map(trips, TripToUserTripResponse)
+}
+
+type UpdateTripRequest struct {
+	UserReleaseDate Timestamp `json:"user_release"`
+	TourReleaseDate Timestamp `json:"tour_release"`
+	UserPrice       float64   `json:"user_price"`
+	AgencyPrice     float64   `json:"agency_price"`
+	PathID          uint      `json:"path_id"`
+	Status          string    `json:"status"`
+	MinPassengers   uint      `json:"min_pass"`
+	TechTeamID      *uint     `json:"tech_id"`
+	MaxTickets      uint      `json:"max_tickets"`
+	IsCanceled      bool      `json:"is_canceled"`
+	IsFinished      bool      `json:"is_finished"`
+	StartDate       Timestamp `json:"start_date"`
+	IsConfirmed     bool      `json:"is_confirmed"`
+}
+
+func UpdateTripReqToTrip(t *UpdateTripRequest) *trip.Trip {
+	var startDate *time.Time
+	if !time.Time(t.StartDate).IsZero() {
+		startDate = (*time.Time)(&t.StartDate)
+	}
+	return &trip.Trip{
+		UserReleaseDate: time.Time(t.UserReleaseDate),
+		TourReleaseDate: time.Time(t.TourReleaseDate),
+		UserPrice:       t.UserPrice,
+		AgencyPrice:     t.AgencyPrice,
+		PathID:          t.PathID,
+		MinPassengers:   t.MinPassengers,
+		TechTeamID:      t.TechTeamID,
+		MaxTickets:      t.MaxTickets,
+		StartDate:       startDate,
+		IsCanceled:      t.IsCanceled,
+		IsFinished:      t.IsFinished,
+		IsConfirmed:     t.IsConfirmed,
+	}
 }

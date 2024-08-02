@@ -67,8 +67,7 @@ func (s *TripService) CreateTrip(ctx context.Context, t *trip.Trip, creatorID ui
 	t.Path.Type = "rail"
 	t.TripType = trip.TripType(t.Path.Type)
 	t.TripType = "rail"
-	var v uint
-	v = uint(1)
+	v := uint(1)
 	t.VehicleID = &v
 	//********************************************************
 	if err := s.tripOps.Create(ctx, t); err != nil {
@@ -85,4 +84,22 @@ func (s *TripService) GetTrips(ctx context.Context, originCity, destinationCity,
 
 func (s *TripService) GetFullTripByID(ctx context.Context, id uint) (*trip.Trip, error) {
 	return s.tripOps.GetFullTripByID(ctx, id)
+}
+
+func (s *TripService) UpdateTrip(ctx context.Context, id uint, newTrip *trip.Trip) (*trip.Trip, error) {
+	oldTrip, err := s.tripOps.GetFullTripByID(ctx, id)
+
+	if err != nil {
+		return nil, err
+	}
+
+	// TO DO check permissions and roles ex: tech team can only update is_confirmed
+	// admin can update is_finished
+	// owner/operator can update everything according to the conditions of trip
+
+	err = s.tripOps.UpdateTrip(ctx, id, newTrip, oldTrip)
+	if err != nil {
+		return nil, err
+	}
+	return oldTrip, nil
 }

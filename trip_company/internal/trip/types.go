@@ -18,8 +18,10 @@ const (
 )
 
 var (
+	ErrCanNotUpdate = errors.New("can not update")
+	ErrNotUpdated      = errors.New("could not update trip")
 	ErrRecordsNotFound = errors.New("no records found")
-	ErrTripNotFound = errors.New("trip not found")
+	ErrTripNotFound    = errors.New("trip not found")
 	ErrFailedToGetTrip = errors.New("failed to get trip")
 	ErrRecordNotFound  = errors.New("records not found")
 	ErrNegativePrice   = errors.New("price should be more than 0")
@@ -37,9 +39,10 @@ var (
 type Repo interface {
 	GetCompanyTrips(ctx context.Context, companyID uint, limit, offset uint) ([]Trip, uint, error)
 	Insert(ctx context.Context, t *Trip) error
-	
+
 	GetFullTripByID(ctx context.Context, id uint) (*Trip, error)
 	GetTrips(ctx context.Context, originCity, destinationCity, pathType string, startDate *time.Time, requesterType string, limit, offset uint) ([]Trip, uint, error)
+	UpdateTrip(ctx context.Context, id uint, updates map[string]interface{}) error
 }
 
 type Trip struct {
@@ -68,8 +71,9 @@ type Trip struct {
 	MaxTickets             uint
 	VehicleID              *uint
 	VehicleRequestID       *uint
-	IsCanceled             bool       `grom:"default:false"`
-	IsFinished             bool       `gorm:"default:false"`
+	IsCanceled             bool       
+	IsFinished             bool   
+	IsConfirmed             bool    
 	StartDate              *time.Time // should be given by trip generator
 	EndDate                *time.Time // should be calculated according to the vehicle speed and path distance
 }

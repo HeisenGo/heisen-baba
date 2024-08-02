@@ -94,6 +94,7 @@ func registerTransportCompanyRoutes(router fiber.Router, app *service.AppContain
 	router.Patch("/my-companies/:companyID",
 		handlers.PatchCompany(app.CompanyService()),
 	)
+
 	// only admin can do this
 	router.Patch("/block/:companyID", //, middlewares.SetTransaction(adapters.NewGormCommitter(app.RawDBConnection())),
 		//middlewares.Auth(),
@@ -107,6 +108,10 @@ func registerTransportCompanyRoutes(router fiber.Router, app *service.AppContain
 
 	router.Get("/trips", handlers.GetTrips(app.TripService()))
 	router.Get("/one-trip/:tripID", handlers.GetFullTripByID(app.TripService()))
+	router.Patch("/trips/:tripID",
+		handlers.PatchTrip(app.TripService()),
+	)
+	router.Get("/company-trips/:companyID", handlers.GetCompanyTrips(app.TripService()))
 
 }
 
