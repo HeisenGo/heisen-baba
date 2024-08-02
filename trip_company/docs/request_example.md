@@ -38,7 +38,7 @@ localhost:2245/api/v1/companies/block/3
 }
 ```
 
-## PATH only owner
+## PACTH only owner
 ```
 localhost:2245/api/v1/companies/my-companies/3
 ```
@@ -79,3 +79,15 @@ localhost:2245/api/v1/companies/my-companies/3
   }
 }
 ```
+
+## GET
+
+### OneTrip:
+```localhost:2245/api/v1/companies/one-trip/3```
+### all availble with vehicle trips with or without conditions:
+
+``` localhost:2245/api/v1/companies/trips?from=Tehran```
+```localhost:2245/api/v1/companies/trips?from=Tehran&start_date=2024-12-30 ```
+to:
+start_date
+type
