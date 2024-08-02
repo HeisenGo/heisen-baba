@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"time"
 	"tripcompanyservice/internal/company"
 	"tripcompanyservice/internal/trip"
 )
@@ -55,6 +56,7 @@ func (s *TripService) CreateTrip(ctx context.Context, t *trip.Trip, creatorID ui
 		FromTerminal: &trip.Terminal{},
 		ToTerminal:   &trip.Terminal{},
 	}
+	//******************************************
 	t.Path.Name = "jjdjdjlk"
 	t.Path.FromTerminal.Name = "kjdkdkdkk"
 	t.Origin = "Tehran"
@@ -63,10 +65,24 @@ func (s *TripService) CreateTrip(ctx context.Context, t *trip.Trip, creatorID ui
 	t.Path.FromTerminalID = 1
 	t.Path.ToTerminal.Name = "central"
 	t.Path.Type = "rail"
+	t.TripType = trip.TripType(t.Path.Type)
 	t.TripType = "rail"
+	var v uint
+	v = uint(1)
+	t.VehicleID = &v
+	//********************************************************
 	if err := s.tripOps.Create(ctx, t); err != nil {
 		return err
 	}
 
 	return nil
+}
+
+func (s *TripService) GetTrips(ctx context.Context, originCity, destinationCity, pathType string, startDate *time.Time, requesterType string, page, pageSize uint) ([]trip.Trip, uint, error) {
+	//check claim and role!!!
+	return s.tripOps.GetTrips(ctx, originCity, destinationCity, pathType, startDate, requesterType, pageSize, page)
+}
+
+func (s *TripService) GetFullTripByID(ctx context.Context, id uint) (*trip.Trip, error) {
+	return s.tripOps.GetFullTripByID(ctx, id)
 }
