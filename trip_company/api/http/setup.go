@@ -104,6 +104,10 @@ func registerTransportCompanyRoutes(router fiber.Router, app *service.AppContain
 		//middlewares.Auth(),
 		//handlers.CreateTrip(app.TripServiceFromCtx)),
 		handlers.CreateTrip(app.TripService()))
+
+	router.Get("/trips", handlers.GetTrips(app.TripService()))
+	router.Get("/one-trip/:tripID", handlers.GetFullTripByID(app.TripService()))
+
 }
 
 // func registerTerminalRouts(router fiber.Router, app *service.AppContainer, secret []byte) {
