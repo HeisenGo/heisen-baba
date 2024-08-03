@@ -7,6 +7,7 @@ import (
 
 type Repo interface {
 	GetByID(ctx context.Context, id uint) (*TripCancelingPenalty, error)
+	// TODO: update
 }
 
 type TripCancelingPenalty struct {

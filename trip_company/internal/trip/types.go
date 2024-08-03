@@ -47,6 +47,9 @@ type Repo interface {
 	
 	GetCountPathUnfinishedTrips(ctx context.Context, pathID uint) (uint, error)
 	GetUpcomingUnconfirmedTripIDsToCancel(ctx context.Context) ([]uint, error)
+
+	// TODO: remove if no tickets are sold
+	// TODO: separate is_cancled, is_finished_is_confirmed from update
 }
 
 type Trip struct {
