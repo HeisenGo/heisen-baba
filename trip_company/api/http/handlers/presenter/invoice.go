@@ -13,6 +13,7 @@ type AgencyInvoice struct {
 	Info           string       `json:"info"`
 	PerAmountPrice float64      `json:"per_price"`
 	TotalPrice     float64      `json:"total_price"`
+	Penalty        float64      `json:"penalty"`
 }
 
 type UserInvoice struct {
@@ -23,6 +24,7 @@ type UserInvoice struct {
 	Info           string     `json:"info"`
 	PerAmountPrice float64    `json:"per_price"`
 	TotalPrice     float64    `json:"total_price"`
+	Penalty        float64    `json:"penalty"`
 }
 
 func InvoiceToAgencyInvoice(i invoice.Invoice) AgencyInvoice {
@@ -35,6 +37,7 @@ func InvoiceToAgencyInvoice(i invoice.Invoice) AgencyInvoice {
 		Info:           i.Info,
 		PerAmountPrice: i.PerAmountPrice,
 		TotalPrice:     i.TotalPrice,
+		Penalty:        i.Penalty,
 	}
 }
 
@@ -48,6 +51,7 @@ func InvoiceToUserInvoice(i invoice.Invoice) UserInvoice {
 		Info:           i.Info,
 		PerAmountPrice: i.PerAmountPrice,
 		TotalPrice:     i.TotalPrice,
+		Penalty:        i.Penalty,
 	}
 }
 
