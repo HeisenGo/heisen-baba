@@ -7,6 +7,8 @@ import (
 )
 
 type Repo interface {
+	GetInvoicesByUserOrAgency(ctx context.Context, userID *uint, agencyID *uint, limit, offset uint) ([]Invoice,uint, error)
+
 	Insert(ctx context.Context, i *Invoice) error
 	UpdateInvoiceStatus(ctx context.Context, invoiceID uint, status string) error
 }
