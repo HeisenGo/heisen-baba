@@ -1,6 +1,9 @@
 package presenter
 
-import "tripcompanyservice/internal/ticket"
+import (
+	"tripcompanyservice/internal/ticket"
+	"tripcompanyservice/pkg/fp"
+)
 
 type AgencyTicketReq struct {
 	TripID   uint  `json:"trip_id" validate:"required"`
@@ -74,4 +77,16 @@ func TicketToUserTicket(t ticket.Ticket) UserTicket {
 		TotalPrice: t.TotalPrice,
 		Status:     t.Status,
 	}
+}
+
+func BatchTicketsToUserTickets(tickets []ticket.Ticket) []UserTicket {
+	return fp.Map(tickets, TicketToUserTicket)
+}
+
+func BatchTicketsToAgencyTickets(tickets []ticket.Ticket) []AgencyTicket {
+	return fp.Map(tickets, TicketToAgencyTicket)
+}
+
+type CancelTicket struct {
+	AgencyID uint `json:"agency_id"`
 }
