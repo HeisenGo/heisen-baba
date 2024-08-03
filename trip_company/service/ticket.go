@@ -12,6 +12,7 @@ import (
 
 var (
 	ErrImpossibleToBuy = errors.New("not possible to buy")
+	ErrUnableToCancel  = errors.New("unable to cancel")
 )
 
 type TicketService struct {
@@ -89,7 +90,7 @@ func (s *TicketService) ProcessUserTicket(ctx context.Context, t *ticket.Ticket)
 	username := "new_user"
 	info := fmt.Sprintf("User %s bought %d trips of from %s %s to %s %s in %s for date %v", username, t.Quantity, trp.Origin, trp.Path.FromTerminal.Name, trp.Destination, trp.Path.ToTerminal.Name, trp.TripType, trp.StartDate)
 
-	newInvoice := invoice.NewInvoice(t.ID, t, time.Now(), info, trp.UserPrice, t.TotalPrice)
+	newInvoice := invoice.NewInvoice(t.ID, t, time.Now(), info, trp.UserPrice, t.TotalPrice, 0)
 
 	err = s.invoiceOps.Create(ctx, newInvoice)
 	if err != nil {
@@ -112,4 +113,75 @@ func (s *TicketService) ProcessUserTicket(ctx context.Context, t *ticket.Ticket)
 func (s *TicketService) GetTicketsByUserOrAgency(ctx context.Context, userID *uint, agencyID *uint, page, pageSize uint) ([]ticket.Ticket, uint, error) {
 	// check one of them should be nill !!!
 	return s.ticketOps.GetTicketsByUserOrAgency(ctx, userID, agencyID, page, pageSize)
+}
+
+func (s *TicketService) CancelTicket(ctx context.Context, ticketID uint, userID *uint, agencyID *uint) (*invoice.Invoice, error) {
+	// check permisson of requester if AgencyID!=nil!!!
+	fullTicket, err := s.ticketOps.GetFullTicketByID(ctx, ticketID)
+	if err != nil {
+		return nil, err
+	}
+	var perTripCost float64
+	if agencyID != nil {
+		// check validation of agency TODO:
+		if fullTicket.AgencyID != agencyID {
+			return nil, ErrForbidden
+		}
+		perTripCost = fullTicket.Trip.AgencyPrice
+		// id = ownerID
+	} else {
+		// check user TODO:
+		if fullTicket.UserID != userID {
+			return nil, ErrForbidden
+		}
+		perTripCost = fullTicket.Trip.UserPrice
+		// id = ownerID
+	}
+	fullTicket.Trip.TripCancellingPenalty.FirstDate = fullTicket.Trip.StartDate.AddDate(0, 0, int(-fullTicket.Trip.TripCancellingPenalty.FirstDays))
+	fullTicket.Trip.TripCancellingPenalty.SecondDate = fullTicket.Trip.StartDate.AddDate(0, 0, int(-fullTicket.Trip.TripCancellingPenalty.SecondDays))
+	fullTicket.Trip.TripCancellingPenalty.ThirdDate = fullTicket.Trip.StartDate.AddDate(0, 0, int(-fullTicket.Trip.TripCancellingPenalty.ThirdDays))
+
+	first := fullTicket.Trip.TripCancellingPenalty.FirstDate
+	second := fullTicket.Trip.TripCancellingPenalty.SecondDate
+	third := fullTicket.Trip.TripCancellingPenalty.ThirdDate
+
+	date := time.Now()
+	var p uint
+	if date.Before(first) {
+		p = fullTicket.Trip.TripCancellingPenalty.FirstCancellationPercentage
+	} else if date.Before(second) {
+		p = fullTicket.Trip.TripCancellingPenalty.SecondCancellationPercentage
+	} else if date.Before(third) {
+		p = fullTicket.Trip.TripCancellingPenalty.ThirdCancellationPercentage
+	} else {
+		return nil, ErrUnableToCancel
+	}
+	penalty := (perTripCost * float64(p) / 100) * float64(fullTicket.Quantity)
+
+	fullTicket.Penalty = penalty
+	fullTicket.Status = "Canceled"
+	inv, err := s.invoiceOps.GetInvoiceByTicketID(ctx, ticketID)
+	if err != nil {
+		return nil, err
+	}
+	inv.Penalty = penalty
+	inv.Status = "Canceled"
+
+	updates := make(map[string]interface{})
+	updates["status"] = "Canceled"
+	updates["penalty"] = penalty
+	inv.Info = fmt.Sprintf("Ticket %s %s Canceled By User on %v", fullTicket.Trip.Origin, fullTicket.Trip.Destination, time.Now())
+
+	err = s.ticketOps.UpdateTicket(ctx, ticketID, updates)
+	if err != nil {
+		return nil, err
+	}
+	updates["info"] = inv.Info
+
+	err = s.invoiceOps.UpdateInvoice(ctx, inv.ID, updates)
+	if err != nil {
+		return nil, err
+	}
+	// send to bank TODO: from alibaba to UserID/ AgnecyID owner: id by company owner !
+	return inv, nil
 }
