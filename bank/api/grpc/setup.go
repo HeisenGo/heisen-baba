@@ -1,10 +1,10 @@
 package grpc
 
 import (
-	"authservice/api/grpc/handlers"
-	"authservice/config"
-	auth "authservice/protobufs"
-	"authservice/service"
+	"bankservice/api/grpc/handlers"
+	"bankservice/config"
+	auth "bankservice/protobufs"
+	"bankservice/service"
 	"fmt"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/health/grpc_health_v1"
@@ -13,14 +13,14 @@ import (
 	"net"
 )
 
-func Run(cfg config.Config, app *service.AppContainer) {
+func Run(cfg config.Config, app *services.AppContainer) {
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%v", cfg.Server.GRPCPort))
 	if err != nil {
 		log.Fatalf("Failed to listen: %v", err)
 	}
 
 	s := grpc.NewServer()
-	auth.RegisterAuthServiceServer(s, handlers.NewGRPCAuthHandler(app.AuthService()))
+	auth.RegisterBankServiceServer(s, handlers.NewGRPCBankHandler(app.WalletService()))
 	// Register the Health Service server
 	healthServer := &handlers.HealthServer{}
 	grpc_health_v1.RegisterHealthServer(s, healthServer)
