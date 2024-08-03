@@ -7,15 +7,16 @@ import (
 )
 
 func InvoiceEntityToDomain(invoiceEntity entities.Invoice) invoice.Invoice {
-	ticket := TicketEntityToDomain(invoiceEntity.Ticket)
+	ticket := TicketEntityToDomain(*invoiceEntity.Ticket)
 	return invoice.Invoice{
 		ID:             invoiceEntity.ID,
 		TicketID:       invoiceEntity.TicketID,
-		Ticket:         ticket,
+		Ticket:         &ticket,
 		IssuedDate:     invoiceEntity.IssuedDate,
 		Info:           invoiceEntity.Info,
 		PerAmountPrice: invoiceEntity.PerAmountPrice,
 		TotalPrice:     invoiceEntity.TotalPrice,
+		Status:         invoiceEntity.Status,
 	}
 }
 
@@ -23,7 +24,7 @@ func InvoiceEntitiesToDomain(invoiceEntities []entities.Invoice) []invoice.Invoi
 	return fp.Map(invoiceEntities, InvoiceEntityToDomain)
 }
 
-func InvoiceDomainToEntity(i invoice.Invoice) *entities.Invoice {
+func InvoiceDomainToEntity(i *invoice.Invoice) *entities.Invoice {
 	//ticket := TicketDomainToEntity(i.Ticket)
 	return &entities.Invoice{
 		TicketID:       i.TicketID,

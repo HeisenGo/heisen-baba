@@ -19,6 +19,7 @@ type Invoice struct {
 	Info           string // Detailed information for the invoice
 	PerAmountPrice float64
 	TotalPrice     float64
+	Status         string
 }
 
 func NewInvoice(ticket_id uint, ticket *ticket.Ticket, issuedDate time.Time, info string, perAmountPrice, totalPrice float64) *Invoice {
