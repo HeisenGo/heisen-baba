@@ -18,7 +18,7 @@ const (
 )
 
 var (
-	ErrCanNotUpdate = errors.New("can not update")
+	ErrCanNotUpdate    = errors.New("can not update")
 	ErrNotUpdated      = errors.New("could not update trip")
 	ErrRecordsNotFound = errors.New("no records found")
 	ErrTripNotFound    = errors.New("trip not found")
@@ -44,7 +44,6 @@ type Repo interface {
 	GetTrips(ctx context.Context, originCity, destinationCity, pathType string, startDate *time.Time, requesterType string, limit, offset uint) ([]Trip, uint, error)
 	UpdateTrip(ctx context.Context, id uint, updates map[string]interface{}) error
 
-	
 	GetCountPathUnfinishedTrips(ctx context.Context, pathID uint) (uint, error)
 	GetUpcomingUnconfirmedTripIDsToCancel(ctx context.Context) ([]uint, error)
 
@@ -78,9 +77,9 @@ type Trip struct {
 	MaxTickets             uint
 	VehicleID              *uint
 	VehicleRequestID       *uint
-	IsCanceled             bool       
-	IsFinished             bool   
-	IsConfirmed             bool    
+	IsCanceled             bool
+	IsFinished             bool
+	IsConfirmed            bool
 	StartDate              *time.Time // should be given by trip generator
 	EndDate                *time.Time // should be calculated according to the vehicle speed and path distance
 }
@@ -103,4 +102,10 @@ type Terminal struct {
 	Type    string
 	City    string
 	Country string
+}
+
+func NewTripTOUpdateSoldTickets(soldTickets uint) *Trip {
+	return &Trip{
+		SoldTickets: soldTickets,
+	}
 }

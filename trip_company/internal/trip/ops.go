@@ -215,6 +215,10 @@ func (o *Ops) UpdateTrip(ctx context.Context, id uint, newTrip, oldTrip *Trip) e
 		}
 	}
 
+	if newTrip.SoldTickets != 0 {
+		updates["sold_tickets"] = newTrip.SoldTickets
+		oldTrip.SoldTickets = newTrip.SoldTickets
+	}
 	return o.repo.UpdateTrip(ctx, id, updates)
 
 }
