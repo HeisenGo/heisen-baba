@@ -2,6 +2,8 @@ package storage
 
 import (
 	"context"
+	"fmt"
+	"strings"
 	"tripcompanyservice/internal/ticket"
 	"tripcompanyservice/pkg/adapters/storage/entities"
 	"tripcompanyservice/pkg/adapters/storage/mappers"
@@ -15,6 +17,25 @@ type ticketRepo struct {
 
 func NewTicketRepo(db *gorm.DB) ticket.Repo {
 	return &ticketRepo{db}
+}
+
+func (r *ticketRepo) GetFullTicketByID(ctx context.Context, id uint) (*ticket.Ticket, error) {
+	var eT entities.Ticket
+
+	if err := r.db.WithContext(ctx).
+		Preload("Trip").                  // Preload related Trip
+		Preload("Trip.TransportCompany").
+		Preload("Trip.TripCancellingPenalty"). // Preload TransportCompany within Trip
+		Preload("Ticket").                // Preload related Invoice
+		First(&eT, id).Error; err != nil {
+		if strings.Contains(err.Error(), "record not found") {
+			return nil, nil
+		}
+		return nil, fmt.Errorf("%w %w %d", ticket.ErrFailedToGetTicket, err, id)
+	}
+	dT := mappers.TicketEntityToDomainWithTripWithCompanyWithPenalty(eT)
+
+	return &dT, nil
 }
 
 func (r *ticketRepo) Insert(ctx context.Context, t *ticket.Ticket) error {
@@ -64,6 +85,16 @@ func (r *ticketRepo) GetTicketsByUserOrAgency(ctx context.Context, userID *uint,
 	if err := query.Find(&tickets).Error; err != nil {
 		return nil, 0, err
 	}
-	dTickets := mappers.TicketEntitiesToDomain(tickets)
+	dTickets := mappers.TicketEntitiesToDomainWithTrips(tickets)
 	return dTickets, uint(total), nil
+}
+
+func (r *ticketRepo) UpdateTicket(ctx context.Context, id uint, updates map[string]interface{}) error {
+	var t entities.Ticket
+
+	if err := r.db.WithContext(ctx).Model(&t).Updates(updates).Error; err != nil {
+		return fmt.Errorf("%w %w", ticket.ErrFailedToUpdate, err)
+	}
+
+	return nil
 }
