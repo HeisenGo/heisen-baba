@@ -1,6 +1,9 @@
 package presenter
 
-import "tripcompanyservice/internal/invoice"
+import (
+	"tripcompanyservice/internal/invoice"
+	"tripcompanyservice/pkg/fp"
+)
 
 type AgencyInvoice struct {
 	ID             uint         `json:"id"`
@@ -46,4 +49,12 @@ func InvoiceToUserInvoice(i invoice.Invoice) UserInvoice {
 		PerAmountPrice: i.PerAmountPrice,
 		TotalPrice:     i.TotalPrice,
 	}
+}
+
+func BatchInvoicesToUserInvoices(is []invoice.Invoice) []UserInvoice {
+	return fp.Map(is, InvoiceToUserInvoice)
+}
+
+func BatchInvoicesToAgencyInvoices(is []invoice.Invoice) []AgencyInvoice {
+	return fp.Map(is, InvoiceToAgencyInvoice)
 }
