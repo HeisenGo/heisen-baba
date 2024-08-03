@@ -26,7 +26,7 @@ type Repo interface {
 
 type Wallet struct {
 	ID             *uuid.UUID `json:"id"`
-	IsSystemWallet uuid.UUID  `json:"is_system_wallet"`
+	IsSystemWallet bool       `json:"is_system_wallet"`
 	UserID         uuid.UUID  `json:"user_id"`
 	Balance        uint       `json:"balance"`
 }
