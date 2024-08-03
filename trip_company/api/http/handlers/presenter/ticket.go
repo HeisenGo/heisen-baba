@@ -22,7 +22,7 @@ func AgencyTicketReqToTicket(t *AgencyTicketReq) *ticket.Ticket {
 	}
 }
 
-func UserTicketReqToAgency(t *UserTicketReq) *ticket.Ticket {
+func UserTicketReqToTicket(t *UserTicketReq) *ticket.Ticket {
 	return &ticket.Ticket{
 		TripID:   t.TripID,
 		UserID:   t.UserID,
@@ -51,7 +51,7 @@ type UserTicket struct {
 }
 
 func TicketToAgencyTicket(t ticket.Ticket) AgencyTicket {
-	trip := TripToAgencyTripResponse(t.Trip)
+	trip := TripToAgencyTripResponse(*t.Trip)
 	return AgencyTicket{
 		ID:         t.ID,
 		TripID:     t.TripID,
@@ -64,7 +64,7 @@ func TicketToAgencyTicket(t ticket.Ticket) AgencyTicket {
 }
 
 func TicketToUserTicket(t ticket.Ticket) UserTicket {
-	trip := TripToUserTripResponse(t.Trip)
+	trip := TripToUserTripResponse(*t.Trip)
 	return UserTicket{
 		ID:         t.ID,
 		TripID:     t.TripID,
