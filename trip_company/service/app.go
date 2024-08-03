@@ -5,6 +5,7 @@ import (
 	"log"
 	"tripcompanyservice/config"
 	"tripcompanyservice/internal/company"
+	"tripcompanyservice/internal/ticket"
 	"tripcompanyservice/internal/trip"
 	"tripcompanyservice/pkg/adapters/consul"
 	"tripcompanyservice/pkg/adapters/storage"
@@ -19,6 +20,7 @@ type AppContainer struct {
 	dbConn          *gorm.DB
 	companyService  *TransportCompanyService
 	tripService     *TripService
+	ticketService   *TicketService
 	serviceRegistry *ports.IServiceRegistry
 }
 
@@ -37,6 +39,7 @@ func NewAppContainer(cfg config.Config) (*AppContainer, error) {
 
 	app.setCompanyService()
 	app.setTripService()
+	app.setTicketService()
 	//app.setPathService()
 	return app, nil
 }
@@ -132,4 +135,34 @@ func (a *AppContainer) setTripService() {
 		return
 	}
 	a.tripService = NewTripService(trip.NewOps(storage.NewTripRepo(a.dbConn)), company.NewOps(storage.NewTransportCompanyRepo(a.dbConn)))
+}
+
+// Ticket Service
+
+func (a *AppContainer) TicketService() *TicketService {
+	return a.ticketService
+}
+
+func (a *AppContainer) TicketServiceFromCtx(ctx context.Context) *TicketService {
+	tx, ok := valuecontext.TryGetTxFromContext(ctx)
+	if !ok {
+		return a.ticketService
+	}
+
+	gc, ok := tx.Tx().(*gorm.DB)
+	if !ok {
+		return a.ticketService
+	}
+
+	return NewTicketService(
+		ticket.NewOps(storage.NewTicketRepo(gc)),
+		trip.NewOps(storage.NewTripRepo(gc)),
+	)
+}
+
+func (a *AppContainer) setTicketService() {
+	if a.ticketService != nil {
+		return
+	}
+	a.ticketService = NewTicketService(ticket.NewOps(storage.NewTicketRepo(a.dbConn)), trip.NewOps(storage.NewTripRepo(a.dbConn)))
 }
