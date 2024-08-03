@@ -102,7 +102,7 @@ func GetTickets(ticketService *service.TicketService) fiber.Handler {
 	}
 }
 
-func CancelTripByID(ticketService *service.TicketService) fiber.Handler {
+func CancelTicketByID(ticketService *service.TicketService) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		// userClaims, ok := c.Locals(UserClaimKey).(*jwt.UserClaims)
 		// if !ok {
@@ -121,7 +121,7 @@ func CancelTripByID(ticketService *service.TicketService) fiber.Handler {
 
 		var body map[string]interface{}
 		if err := c.BodyParser(&body); err != nil {
-			return presenter.BadRequest(c, fmt.Errorf("Invalid req body"))
+			return presenter.BadRequest(c, fmt.Errorf("invalid req body"))
 		}
 		var res interface{}
 
@@ -129,10 +129,10 @@ func CancelTripByID(ticketService *service.TicketService) fiber.Handler {
 
 			var req *presenter.CancelTicket
 			if err := json.Unmarshal(c.Body(), &req); err != nil {
-				return presenter.BadRequest(c, fmt.Errorf("Invalid req body"))
+				return presenter.BadRequest(c, fmt.Errorf("invalid req body"))
 			}
 
-			invoice, err := ticketService.CancelTicket(c.UserContext(), ticketID, nil, req.AgencyID)
+			invoice, err := ticketService.CancelTicket(c.UserContext(), uint(ticketID), nil, &req.AgencyID)
 			if err != nil { //err = "failed to process agency ticket"
 				return presenter.BadRequest(c, err)
 			}
@@ -140,7 +140,7 @@ func CancelTripByID(ticketService *service.TicketService) fiber.Handler {
 		} else {
 			// USER ID is needed ! TODO :
 			userID := uint(1)
-			invoice, err := ticketService.CancelTicket(c.UserContext(), ticketID, &userID, nil)
+			invoice, err := ticketService.CancelTicket(c.UserContext(), uint(ticketID), &userID, nil)
 			if err != nil { //err = "failed to process agency ticket"
 				return presenter.BadRequest(c, err)
 			}
