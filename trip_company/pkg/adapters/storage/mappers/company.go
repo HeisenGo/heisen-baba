@@ -29,6 +29,7 @@ func CompanyDomainToEntity(c *company.TransportCompany) *entities.TransportCompa
 		Description: c.Description,
 		OwnerID:     c.OwnerID,
 		Address:     c.Address,
+		IsBlocked: c.IsBlocked,
 		//PhoneNumber: c.PhoneNumber,
 		//Email:       c.Email,
 	}
