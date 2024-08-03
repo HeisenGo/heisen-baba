@@ -26,7 +26,9 @@ func CreateHotel(hotelService *service.HotelService) fiber.Handler {
 		if err := c.BodyParser(&req); err != nil {
 			return presenter.BadRequest(c, err)
 		}
-
+		if err := BodyValidator(&req); err != nil {
+			return presenter.BadRequest(c, err)
+		}
 		h := presenter.CreateHotelRequest(&req)
 		if err := hotelService.CreateHotel(c.UserContext(), h); err != nil {
 			return presenter.InternalServerError(c, err)
@@ -130,7 +132,9 @@ func UpdateHotel(hotelService *service.HotelService) fiber.Handler {
 		if err := c.BodyParser(&updateReq); err != nil {
 			return presenter.BadRequest(c, err)
 		}
-
+		if err := BodyValidator(&updateReq); err != nil {
+			return presenter.BadRequest(c, err)
+		}
 		if err := hotelService.UpdateHotel(c.UserContext(), uint(hotelID), presenter.UpdateHotelRequestToDomain(&updateReq)); err != nil {
 			return presenter.InternalServerError(c, err)
 		}

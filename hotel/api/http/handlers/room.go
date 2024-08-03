@@ -66,7 +66,32 @@ func GetRooms(roomService *service.RoomService) fiber.Handler {
 		return presenter.OK(c, "Rooms retrieved successfully", pagination)
 	}
 }
+// GetRoomsByID gets a room by its ID
+// @Summary Get a room by ID
+// @Description Get a room by ID
+// @Tags rooms
+// @Produce json
+// @Param id path int true "room ID"
+// @Success 200 {object} presenter.roomResp
+// @Failure 400 {object} presenter.Response "error: bad request"
+// @Failure 500 {object} presenter.Response "error: internal server error"
+// @Router /rooms/{id} [get]
+func GetRoomsByID(roomService *service.RoomService) fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		id, err := strconv.Atoi(c.Params("id"))
+		if err != nil {
+			return presenter.BadRequest(c, err)
+		}
 
+		room, err := roomService.GetRoomByID(c.UserContext(), uint(id))
+		if err != nil {
+			return presenter.InternalServerError(c, err)
+		}
+
+		resp := presenter.RoomToFullRoomResponse(room)
+		return presenter.OK(c, "room retrieved successfully", resp)
+	}
+}
 // UpdateRoom updates a room by ID
 // @Summary Update a room by ID
 // @Description Update a room by ID
