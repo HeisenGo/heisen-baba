@@ -30,6 +30,15 @@ func (o *Ops) CompanyTrips(ctx context.Context, companyID uint, page, pageSize u
 }
 
 func (o *Ops) Create(ctx context.Context, trip *Trip) error {
+	if trip.TripCancellingPenalty.FirstCancellationPercentage > 100 {
+		return ErrInvalidPercentage
+	}
+	if trip.TripCancellingPenalty.SecondCancellationPercentage > 100 {
+		return ErrInvalidPercentage
+	}
+	if trip.TripCancellingPenalty.ThirdCancellationPercentage > 100 {
+		return ErrInvalidPercentage
+	}
 	if trip.AgencyPrice <= 0 {
 		return ErrNegativePrice
 	}
