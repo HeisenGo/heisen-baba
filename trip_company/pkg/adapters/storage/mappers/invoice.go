@@ -7,16 +7,17 @@ import (
 )
 
 func InvoiceEntityToDomain(invoiceEntity entities.Invoice) invoice.Invoice {
-	ticket := TicketEntityToDomain(*invoiceEntity.Ticket)
+	//ticket := TicketEntityToDomainWithTrip(*invoiceEntity.Ticket)
 	return invoice.Invoice{
 		ID:             invoiceEntity.ID,
 		TicketID:       invoiceEntity.TicketID,
-		Ticket:         &ticket,
+		//Ticket:         *ticket,
 		IssuedDate:     invoiceEntity.IssuedDate,
 		Info:           invoiceEntity.Info,
 		PerAmountPrice: invoiceEntity.PerAmountPrice,
 		TotalPrice:     invoiceEntity.TotalPrice,
 		Status:         invoiceEntity.Status,
+		Penalty: invoiceEntity.Penalty,
 	}
 }
 
@@ -32,5 +33,21 @@ func InvoiceDomainToEntity(i *invoice.Invoice) *entities.Invoice {
 		Info:           i.Info,
 		PerAmountPrice: i.PerAmountPrice,
 		TotalPrice:     i.TotalPrice,
+		Penalty: i.Penalty,
+		//Ticket: ticket,
+	}
+}
+
+func SimpleInvoiceEntityToDomain(invoiceEntity entities.Invoice) invoice.Invoice {
+	return invoice.Invoice{
+		ID:             invoiceEntity.ID,
+		TicketID:       invoiceEntity.TicketID,
+		IssuedDate:     invoiceEntity.IssuedDate,
+		Info:           invoiceEntity.Info,
+		PerAmountPrice: invoiceEntity.PerAmountPrice,
+		TotalPrice:     invoiceEntity.TotalPrice,
+		Status:         invoiceEntity.Status,
+		Penalty: invoiceEntity.Penalty,
+
 	}
 }
