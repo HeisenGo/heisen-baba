@@ -240,6 +240,50 @@ func BatchTripToUserTripResponse(trips []trip.Trip) []UserTripResponse {
 	return fp.Map(trips, TripToUserTripResponse)
 }
 
+type AgencyTripResponse struct {
+	ID                    uint                           `json:"id"`
+	TripType              string                         `json:"trip_type"`
+	AgencyPrice           float64                        `json:"agency_price"`
+	PathName              string                         `json:"path_name"`
+	FromTerminalName      string                         `json:"from_terminal"`
+	Origin                string                         `json:"from"`
+	Destination           string                         `json:"to"`
+	ToTerminalName        string                         `json:"to_terminal"`
+	TripCancellingPenalty *CreateTripCancelingPenaltyRes `json:"penalty"`
+	StartDate             Timestamp                      `json:"start_date"`
+	EndDate               Timestamp                      `json:"end_date"`
+}
+
+func TripToAgencyTripResponse(t trip.Trip) AgencyTripResponse {
+	// check ID is owner TODO:
+	p := TripCancelingPenaltyToTripCancellingPenaltyRes(t.TripCancellingPenalty)
+	var startDate, endDate Timestamp
+	if t.StartDate != nil {
+		startDate = Timestamp(*t.StartDate)
+	}
+	if t.EndDate != nil {
+		endDate = Timestamp(*t.EndDate)
+	}
+
+	return AgencyTripResponse{
+		ID:                    t.ID,
+		AgencyPrice:           t.AgencyPrice,
+		StartDate:             startDate,
+		EndDate:               endDate,
+		TripCancellingPenalty: p,
+		Origin:                t.Path.FromTerminal.City,
+		Destination:           t.Path.ToTerminal.City,
+		FromTerminalName:      t.Path.FromTerminal.Name,
+		ToTerminalName:        t.Path.ToTerminal.Name,
+		PathName:              t.Path.Name,
+		TripType:              t.Path.Type,
+	}
+}
+
+func BatchTripToAgencyTripResponse(trips []trip.Trip) []AgencyTripResponse {
+	return fp.Map(trips, TripToAgencyTripResponse)
+}
+
 type UpdateTripRequest struct {
 	UserReleaseDate Timestamp `json:"user_release"`
 	TourReleaseDate Timestamp `json:"tour_release"`
