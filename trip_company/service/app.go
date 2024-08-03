@@ -5,6 +5,7 @@ import (
 	"log"
 	"tripcompanyservice/config"
 	"tripcompanyservice/internal/company"
+	"tripcompanyservice/internal/invoice"
 	"tripcompanyservice/internal/ticket"
 	"tripcompanyservice/internal/trip"
 	"tripcompanyservice/pkg/adapters/consul"
@@ -21,6 +22,7 @@ type AppContainer struct {
 	companyService  *TransportCompanyService
 	tripService     *TripService
 	ticketService   *TicketService
+	invoiceService  *InvoiceService
 	serviceRegistry *ports.IServiceRegistry
 }
 
@@ -40,6 +42,7 @@ func NewAppContainer(cfg config.Config) (*AppContainer, error) {
 	app.setCompanyService()
 	app.setTripService()
 	app.setTicketService()
+	app.setInvoiceService()
 	//app.setPathService()
 	return app, nil
 }
@@ -157,6 +160,7 @@ func (a *AppContainer) TicketServiceFromCtx(ctx context.Context) *TicketService 
 	return NewTicketService(
 		ticket.NewOps(storage.NewTicketRepo(gc)),
 		trip.NewOps(storage.NewTripRepo(gc)),
+		invoice.NewOps(storage.NewInvoiceRepo(gc)),
 	)
 }
 
@@ -164,5 +168,35 @@ func (a *AppContainer) setTicketService() {
 	if a.ticketService != nil {
 		return
 	}
-	a.ticketService = NewTicketService(ticket.NewOps(storage.NewTicketRepo(a.dbConn)), trip.NewOps(storage.NewTripRepo(a.dbConn)))
+	a.ticketService = NewTicketService(ticket.NewOps(storage.NewTicketRepo(a.dbConn)), trip.NewOps(storage.NewTripRepo(a.dbConn)), invoice.NewOps(storage.NewInvoiceRepo(a.dbConn)))
+}
+
+// Invoice Service
+func (a *AppContainer) InvoiceService() *InvoiceService {
+	return a.invoiceService
+}
+
+func (a *AppContainer) InvoiceServiceFromCtx(ctx context.Context) *InvoiceService {
+	tx, ok := valuecontext.TryGetTxFromContext(ctx)
+	if !ok {
+		return a.invoiceService
+	}
+
+	gc, ok := tx.Tx().(*gorm.DB)
+	if !ok {
+		return a.invoiceService
+	}
+
+	return NewInvoiceService(
+		invoice.NewOps(storage.NewInvoiceRepo(gc)),
+		ticket.NewOps(storage.NewTicketRepo(gc)),
+		trip.NewOps(storage.NewTripRepo(gc)),
+	)
+}
+
+func (a *AppContainer) setInvoiceService() {
+	if a.invoiceService != nil {
+		return
+	}
+	a.invoiceService = NewInvoiceService(invoice.NewOps(storage.NewInvoiceRepo(a.dbConn)), ticket.NewOps(storage.NewTicketRepo(a.dbConn)), trip.NewOps(storage.NewTripRepo(a.dbConn)))
 }
