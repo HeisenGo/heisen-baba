@@ -23,7 +23,7 @@ type UserInvoice struct {
 }
 
 func InvoiceToAgencyInvoice(i invoice.Invoice) AgencyInvoice {
-	ticket := TicketToAgencyTicket(i.Ticket)
+	ticket := TicketToAgencyTicket(*i.Ticket)
 	return AgencyInvoice{
 		ID:             i.ID,
 		TicketID:       i.TicketID,
@@ -36,7 +36,7 @@ func InvoiceToAgencyInvoice(i invoice.Invoice) AgencyInvoice {
 }
 
 func InvoiceToUserInvoice(i invoice.Invoice) UserInvoice {
-	ticket := TicketToUserTicket(i.Ticket)
+	ticket := TicketToUserTicket(*i.Ticket)
 	return UserInvoice{
 		ID:             i.ID,
 		TicketID:       i.TicketID,
