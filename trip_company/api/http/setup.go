@@ -114,7 +114,7 @@ func registerTransportCompanyRoutes(router fiber.Router, app *service.AppContain
 	router.Get("/company-trips/:companyID", handlers.GetCompanyTrips(app.TripService()))
 	router.Post("/buy", handlers.BuyTicket(app.TicketService())) // TODO : should be transactional
 
-	router.Patch("/cancel-ticket/:ticketID", handlers.CancelTicket(app.TicketService()))
+	router.Patch("/cancel-ticket/:ticketID", handlers.CancelTicketByID(app.TicketService()))
 }
 
 // func registerTerminalRouts(router fiber.Router, app *service.AppContainer, secret []byte) {
