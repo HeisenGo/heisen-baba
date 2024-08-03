@@ -112,6 +112,7 @@ func registerTransportCompanyRoutes(router fiber.Router, app *service.AppContain
 		handlers.PatchTrip(app.TripService()),
 	)
 	router.Get("/company-trips/:companyID", handlers.GetCompanyTrips(app.TripService()))
+	router.Post("/buy", handlers.BuyTicket(app.TicketService())) // TODO : should be transactional
 
 }
 
