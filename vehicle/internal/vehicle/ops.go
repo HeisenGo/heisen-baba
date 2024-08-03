@@ -41,12 +41,14 @@ func (o *Ops) GetVehicleByID(ctx context.Context, id uint) (*Vehicle, error) {
 	return o.repo.GetVehicleByID(ctx, id)
 }
 
-func (o *Ops) GetVehicles(ctx context.Context, vehicleType string, capacity uint, page, pageSize int) ([]Vehicle, uint, error) {
-	return o.repo.GetVehicles(ctx, vehicleType, capacity, page, pageSize)
+func (o *Ops) GetVehicles(ctx context.Context, filters VehicleFilters, page, pageSize int) ([]Vehicle, uint, error) {
+	return o.repo.GetVehicles(ctx, filters, page, pageSize)
 }
 
 func (o *Ops) GetVehiclesByOwnerID(ctx context.Context, ownerID uuid.UUID, page, pageSize int) ([]Vehicle, int, error) {
-	return o.repo.GetVehiclesByOwnerID(ctx, ownerID, page, pageSize)
+	filters := VehicleFilters{OwnerID: ownerID}
+	vehicles, total, err := o.repo.GetVehicles(ctx, filters, page, pageSize)
+	return vehicles, int(total), err
 }
 
 func (o *Ops) Update(ctx context.Context, vehicle *Vehicle) error {
@@ -91,4 +93,32 @@ func (o *Ops) Delete(ctx context.Context, id uint) error {
 		return ErrRecordNotFound
 	}
 	return o.repo.DeleteVehicle(ctx, id)
+}
+
+func (o *Ops) ApproveVehicle(ctx context.Context, id uint) error {
+	// Ensure vehicle exists before approving
+	existingVehicle, err := o.repo.GetVehicleByID(ctx, id)
+	if err != nil {
+		return err
+	}
+	if existingVehicle == nil {
+		return ErrRecordNotFound
+	}
+	return o.repo.ApproveVehicle(ctx, id)
+}
+
+func (o *Ops) SetVehicleStatus(ctx context.Context, id uint, isActive bool) error {
+	// Ensure vehicle exists before changing status
+	existingVehicle, err := o.repo.GetVehicleByID(ctx, id)
+	if err != nil {
+		return err
+	}
+	if existingVehicle == nil {
+		return ErrRecordNotFound
+	}
+	return o.repo.SetVehicleStatus(ctx, id, isActive)
+}
+
+func (o *Ops) SelectVehicles(ctx context.Context, numPassengers uint, cost float64) ([]Vehicle, error) {
+	return o.repo.SelectVehicles(ctx, numPassengers, cost)
 }

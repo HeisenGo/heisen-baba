@@ -28,8 +28,8 @@ func (s *VehicleService) CreateVehicle(ctx context.Context, v *vehicle.Vehicle) 
 	return s.vehicleOps.Create(ctx, v)
 }
 
-func (s *VehicleService) GetVehicles(ctx context.Context, vehicleType string, capacity uint, page, pageSize int) ([]vehicle.Vehicle, uint, error) {
-	return s.vehicleOps.GetVehicles(ctx, vehicleType, capacity, page, pageSize)
+func (s *VehicleService) GetVehicles(ctx context.Context, filters vehicle.VehicleFilters, page, pageSize int) ([]vehicle.Vehicle, uint, error) {
+	return s.vehicleOps.GetVehicles(ctx, filters, page, pageSize)
 }
 
 func (s *VehicleService) GetVehiclesByOwnerID(ctx context.Context, ownerID uuid.UUID, page, pageSize int) ([]vehicle.Vehicle, int, error) {
@@ -82,4 +82,16 @@ func (s *VehicleService) DeleteVehicle(ctx context.Context, id uint) error {
 	}
 
 	return s.vehicleOps.Delete(ctx, id)
+}
+
+func (s *VehicleService) ApproveVehicle(ctx context.Context, id uint) error {
+	return s.vehicleOps.ApproveVehicle(ctx, id)
+}
+
+func (s *VehicleService) SetVehicleStatus(ctx context.Context, id uint, isActive bool) error {
+	return s.vehicleOps.SetVehicleStatus(ctx, id, isActive)
+}
+
+func (s *VehicleService) SelectVehicles(ctx context.Context, numPassengers uint, cost float64) ([]vehicle.Vehicle, error) {
+	return s.vehicleOps.SelectVehicles(ctx, numPassengers, cost)
 }

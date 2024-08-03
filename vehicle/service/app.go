@@ -1,16 +1,19 @@
 package service
 
 import (
+	"context"
+	"log"
 	"vehicle/config"
 	"vehicle/internal/vehicle"
 	"vehicle/pkg/adapters/storage"
-	"log"
+	"vehicle/pkg/valuecontext"
+
 	"gorm.io/gorm"
 )
 
 type AppContainer struct {
-	cfg          config.Config
-	dbConn       *gorm.DB
+	cfg            config.Config
+	dbConn         *gorm.DB
 	vehicleService *VehicleService
 }
 
@@ -48,6 +51,20 @@ func (a *AppContainer) mustInitDB() {
 
 func (a *AppContainer) VehicleService() *VehicleService {
 	return a.vehicleService
+}
+
+func (a *AppContainer) VehicleServiceFromCtx(ctx context.Context) *VehicleService {
+	tx, ok := valuecontext.TryGetTxFromContext(ctx)
+	if !ok {
+		return a.vehicleService
+	}
+
+	gc, ok := tx.Tx().(*gorm.DB)
+	if !ok {
+		return a.vehicleService
+	}
+
+	return NewVehicleService(vehicle.NewOps(storage.NewVehicleRepo(gc)))
 }
 
 func (a *AppContainer) setVehicleService() {

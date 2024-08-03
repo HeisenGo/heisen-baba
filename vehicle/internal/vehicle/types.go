@@ -9,13 +9,21 @@ import (
 	"github.com/google/uuid"
 )
 
+
 type Repo interface {
-	CreateVehicle(ctx context.Context, v *Vehicle) error
-	GetVehicles(ctx context.Context, vehicleType string, capacity uint, page, pageSize int) ([]Vehicle, uint, error)
-	GetVehiclesByOwnerID(ctx context.Context, ownerID uuid.UUID, page, pageSize int) ([]Vehicle, int, error)
+	CreateVehicle(ctx context.Context, vehicle *Vehicle) error
 	GetVehicleByID(ctx context.Context, id uint) (*Vehicle, error)
-	UpdateVehicle(ctx context.Context, v *Vehicle) error
+	GetVehicles(ctx context.Context, filters VehicleFilters, page, pageSize int) ([]Vehicle, uint, error)
+	UpdateVehicle(ctx context.Context, vehicle *Vehicle) error
 	DeleteVehicle(ctx context.Context, id uint) error
+	ApproveVehicle(ctx context.Context, id uint) error
+	SetVehicleStatus(ctx context.Context, id uint, isActive bool) error
+	SelectVehicles(ctx context.Context, numPassengers uint, cost float64) ([]Vehicle, error)
+}
+
+type VehicleFilters struct {
+	OwnerID uuid.UUID
+	Type    string
 }
 
 type Vehicle struct {
@@ -53,7 +61,7 @@ func ValidateVehicleName(name string) error {
 }
 
 func ValidateType(vehicleType string) error {
-	var validTypes = regexp.MustCompile(`^(train|bus|airplane|ship)$`)
+	var validTypes = regexp.MustCompile(`^(rail|road|air|sailing)$`)
 	if !validTypes.MatchString(vehicleType) {
 		return ErrInvalidType
 	}

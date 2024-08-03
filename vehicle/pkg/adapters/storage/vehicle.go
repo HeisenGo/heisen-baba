@@ -30,22 +30,36 @@ func (r *vehicleRepo) CreateVehicle(ctx context.Context, v *vehicle.Vehicle) err
 	return nil
 }
 
-func (r *vehicleRepo) GetVehicles(ctx context.Context, vehicleType string, capacity uint, page, pageSize int) ([]vehicle.Vehicle, uint, error) {
+func (r *vehicleRepo) GetVehicleByID(ctx context.Context, id uint) (*vehicle.Vehicle, error) {
+	var vehicleEntity entities.Vehicle
+	if err := r.db.WithContext(ctx).First(&vehicleEntity, id).Error; err != nil {
+		return nil, err
+	}
+	domainVehicle := mappers.VehicleEntityToDomain(vehicleEntity)
+	return &domainVehicle, nil
+}
+
+func (r *vehicleRepo) GetVehicles(ctx context.Context, filters vehicle.VehicleFilters, page, pageSize int) ([]vehicle.Vehicle, uint, error) {
 	var vehicles []entities.Vehicle
 	var int64Total int64
 
 	query := r.db.Model(&entities.Vehicle{})
 
 	// Filters
-	if vehicleType != "" {
-		query = query.Where("type = ?", vehicleType)
+	if filters.Type != "" {
+		query = query.Where("type = ?", filters.Type)
 	}
-	if capacity > 0 {
-		query = query.Where("capacity >= ?", capacity)
+	if filters.OwnerID != uuid.Nil {
+		query = query.Where("owner_id = ?", filters.OwnerID)
 	}
 
 	// Count total records for pagination
-	query.Count(&int64Total)
+	if err := query.Count(&int64Total).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, 0, nil
+		}
+		return nil, 0, err
+	}
 
 	offset := (page - 1) * pageSize
 	query = query.Offset(offset).Limit(pageSize)
@@ -62,6 +76,7 @@ func (r *vehicleRepo) GetVehicles(ctx context.Context, vehicleType string, capac
 	return domainVehicles, total, nil
 }
 
+
 func (r *vehicleRepo) GetVehiclesByOwnerID(ctx context.Context, ownerID uuid.UUID, page, pageSize int) ([]vehicle.Vehicle, int, error) {
 	var vehicleEntities []entities.Vehicle
 	var total int64
@@ -76,15 +91,6 @@ func (r *vehicleRepo) GetVehiclesByOwnerID(ctx context.Context, ownerID uuid.UUI
 
 	domainVehicles := mappers.BatchVehicleEntitiesToDomain(vehicleEntities)
 	return domainVehicles, int(total), nil
-}
-
-func (r *vehicleRepo) GetVehicleByID(ctx context.Context, id uint) (*vehicle.Vehicle, error) {
-	var vehicleEntity entities.Vehicle
-	if err := r.db.WithContext(ctx).First(&vehicleEntity, id).Error; err != nil {
-		return nil, err
-	}
-	domainVehicle := mappers.VehicleEntityToDomain(vehicleEntity)
-	return &domainVehicle, nil
 }
 
 func (r *vehicleRepo) UpdateVehicle(ctx context.Context, v *vehicle.Vehicle) error {
@@ -108,4 +114,34 @@ func (r *vehicleRepo) DeleteVehicle(ctx context.Context, id uint) error {
 		return err
 	}
 	return nil
+}
+
+func (r *vehicleRepo) ApproveVehicle(ctx context.Context, id uint) error {
+	if err := r.db.WithContext(ctx).Model(&entities.Vehicle{}).Where("id = ?", id).Update("is_confirmed_by_admin", true).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+func (r *vehicleRepo) SetVehicleStatus(ctx context.Context, id uint, isActive bool) error {
+	if err := r.db.WithContext(ctx).Model(&entities.Vehicle{}).Where("id = ?", id).Update("is_active", isActive).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+func (r *vehicleRepo) SelectVehicles(ctx context.Context, numPassengers uint, cost float64) ([]vehicle.Vehicle, error) {
+	var vehicles []entities.Vehicle
+
+	query := r.db.Model(&entities.Vehicle{}).Where("is_confirmed_by_admin = ?", true).Where("capacity >= ?", numPassengers).Where("price_per_hour <= ?", cost)
+	
+	if err := query.Order("capacity desc, price_per_hour asc, production_year desc, created_at asc").Find(&vehicles).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+		return nil, err
+	}
+
+	domainVehicles := mappers.BatchVehicleEntitiesToDomain(vehicles)
+	return domainVehicles, nil
 }

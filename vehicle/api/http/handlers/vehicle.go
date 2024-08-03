@@ -3,7 +3,9 @@ package handlers
 import (
 	"strconv"
 	"vehicle/api/http/handlers/presenter"
+	"vehicle/internal/vehicle"
 	"vehicle/service"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 )
@@ -51,11 +53,14 @@ func CreateVehicle(vehicleService *service.VehicleService) fiber.Handler {
 func GetVehicles(vehicleService *service.VehicleService) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		vehicleType := c.Query("type")
-		capacity, _ := strconv.ParseUint(c.Query("capacity"), 10, 32)
 		page := c.QueryInt("page", 1)
 		pageSize := c.QueryInt("page_size", 10)
 
-		vehicles, total, err := vehicleService.GetVehicles(c.UserContext(), vehicleType, uint(capacity), page, pageSize)
+		filters := vehicle.VehicleFilters{
+			Type:     vehicleType,
+		}
+
+		vehicles, total, err := vehicleService.GetVehicles(c.UserContext(), filters, page, pageSize)
 		if err != nil {
 			return presenter.InternalServerError(c, err)
 		}
@@ -161,5 +166,97 @@ func DeleteVehicle(vehicleService *service.VehicleService) fiber.Handler {
 			return presenter.InternalServerError(c, err)
 		}
 		return presenter.NoContent(c)
+	}
+}
+
+// ApproveVehicle approves a vehicle by ID
+// @Summary Approve a vehicle by ID
+// @Description Approve a vehicle by ID
+// @Tags vehicles
+// @Produce json
+// @Param id path uint true "Vehicle ID"
+// @Success 200 {object} presenter.Response "Vehicle approved successfully"
+// @Failure 400 {object} presenter.Response "error: bad request"
+// @Failure 500 {object} presenter.Response "error: internal server error"
+// @Router /vehicles/{id}/approve [post]
+func ApproveVehicle(vehicleService *service.VehicleService) fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		vehicleID, err := c.ParamsInt("id")
+		if err != nil {
+			return presenter.BadRequest(c, err)
+		}
+
+		if err := vehicleService.ApproveVehicle(c.UserContext(), uint(vehicleID)); err != nil {
+			return presenter.InternalServerError(c, err)
+		}
+
+		return presenter.OK(c, "Vehicle approved successfully", nil)
+	}
+}
+
+// SetVehicleStatus sets the status of a vehicle by ID
+// @Summary Set vehicle status by ID
+// @Description Set the active status of a vehicle by ID
+// @Tags vehicles
+// @Accept json
+// @Produce json
+// @Param id path uint true "Vehicle ID"
+// @Param status body presenter.UpdateVehicleReq true "Status to set"
+// @Success 200 {object} presenter.Response "Vehicle status updated successfully"
+// @Failure 400 {object} presenter.Response "error: bad request"
+// @Failure 500 {object} presenter.Response "error: internal server error"
+// @Router /vehicles/{id}/status [patch]
+func SetVehicleStatus(vehicleService *service.VehicleService) fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		vehicleID, err := c.ParamsInt("id")
+		if err != nil {
+			return presenter.BadRequest(c, err)
+		}
+
+		var statusReq presenter.UpdateVehicleReq
+		if err := c.BodyParser(&statusReq); err != nil {
+			return presenter.BadRequest(c, err)
+		}
+
+		if err := vehicleService.SetVehicleStatus(c.UserContext(), uint(vehicleID), statusReq.IsActive); err != nil {
+			return presenter.InternalServerError(c, err)
+		}
+
+		return presenter.OK(c, "Vehicle status updated successfully", nil)
+	}
+}
+
+// SelectVehicles selects vehicles based on passenger count and cost
+// @Summary Select vehicles based on criteria
+// @Description Select vehicles that match the criteria for passengers and cost
+// @Tags vehicles
+// @Produce json
+// @Param num_passengers query uint true "Number of passengers"
+// @Param cost query float64 true "Maximum cost"
+// @Success 200 {object} presenter.FullVehicleResponse
+// @Failure 500 {object} presenter.Response
+// @Router /vehicles/select [get]
+func SelectVehicles(vehicleService *service.VehicleService) fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		numPassengersStr := c.Query("num_passengers")
+		costStr := c.Query("cost")
+
+		numPassengers, err := strconv.ParseUint(numPassengersStr, 10, 32)
+		if err != nil {
+			return presenter.BadRequest(c, err)
+		}
+
+		cost, err := strconv.ParseFloat(costStr, 64)
+		if err != nil {
+			return presenter.BadRequest(c, err)
+		}
+
+		vehicles, err := vehicleService.SelectVehicles(c.UserContext(), uint(numPassengers), cost)
+		if err != nil {
+			return presenter.InternalServerError(c, err)
+		}
+
+		res := presenter.BatchVehiclesToVehicleResponse(vehicles)
+		return presenter.OK(c, "Vehicles selected successfully", res)
 	}
 }
