@@ -8,6 +8,7 @@ import (
 type Repo interface {
 	Insert(ctx context.Context, t *Ticket) error
     UpdateTicketStatus(ctx context.Context, ticketID uint, status string) error
+    GetTicketsByUserOrAgency(ctx context.Context, userID *uint, agencyID *uint, limit, offset uint) ([]Ticket,uint, error) 
 }
 
 type Ticket struct {
