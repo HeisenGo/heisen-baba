@@ -24,3 +24,20 @@ func (o *Ops) GetInvoicesByUserOrAgency(ctx context.Context, userID *uint, agenc
 
 	return o.repo.GetInvoicesByUserOrAgency(ctx, userID, agencyID, limit, offset)
 }
+
+func (o *Ops) GetInvoiceByTicketID(ctx context.Context, ticketID uint) (*Invoice, error) {
+
+	t, err := 	 o.repo.GetInvoiceByTicketID(ctx, ticketID)
+	if err != nil {
+		return nil, err
+	}
+
+	if t == nil {
+		return nil, ErrRecordNotFound
+	}
+	return t, nil
+}
+
+func(o *Ops)UpdateInvoice(ctx context.Context, id uint, updates map[string]interface{}) error{
+	return o.repo.UpdateInvoice(ctx,id, updates)
+}
