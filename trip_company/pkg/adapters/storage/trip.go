@@ -100,14 +100,16 @@ func (r *tripRepo) GetFullTripByID(ctx context.Context, id uint) (*trip.Trip, er
 }
 
 func (r *tripRepo) GetTrips(ctx context.Context, originCity, destinationCity, pathType string, startDate *time.Time, requesterType string, limit, offset uint) ([]trip.Trip, uint, error) {
+	// Start the query for trips
 	query := r.db.WithContext(ctx).
 		Model(&entities.Trip{}).
-		Preload("TransportCompany").     // Preload TransportCompany
-		Preload("TripCancelingPenalty"). // Preload TripCancelingPenalty
+		Joins("JOIN transport_companies ON transport_companies.id = trips.transport_company_id").
+		Preload("TransportCompany").
+		Preload("TripCancelingPenalty").
 		Where("start_date > ?", time.Now()).
 		Where("sold_tickets < max_tickets").
-		Where("vehicle_id IS NOT NULL") //.
-		//Order("created_at DESC")
+		Where("vehicle_id IS NOT NULL").
+		Where("transport_companies.is_blocked = ?", false)
 
 	if originCity != "" {
 		query = query.Where("origin = ?", originCity)
@@ -128,10 +130,9 @@ func (r *tripRepo) GetTrips(ctx context.Context, originCity, destinationCity, pa
 	}
 
 	if startDate != nil {
-		startDateStr := startDate.Format("2006-01-02") // Convert to YYYY-MM-DD
+		startDateStr := startDate.Format("2006-01-02")
 		if startDateStr != "0001-01-01" {
-			query = query.Where("DATE(start_date) = ?", startDateStr).
-				Order("created_at DESC")
+			query = query.Where("DATE(start_date) = ?", startDateStr)
 		}
 	}
 
