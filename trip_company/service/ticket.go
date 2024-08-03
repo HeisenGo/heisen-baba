@@ -20,10 +20,11 @@ type TicketService struct {
 	invoiceOps *invoice.Ops
 }
 
-func NewTicketService(ticketOps *ticket.Ops, tripOps *trip.Ops) *TicketService {
+func NewTicketService(ticketOps *ticket.Ops, tripOps *trip.Ops, invoiceOps *invoice.Ops) *TicketService {
 	return &TicketService{
-		ticketOps: ticketOps,
-		tripOps:   tripOps,
+		ticketOps:  ticketOps,
+		tripOps:    tripOps,
+		invoiceOps: invoiceOps,
 	}
 }
 
@@ -99,11 +100,16 @@ func (s *TicketService) ProcessUserTicket(ctx context.Context, t *ticket.Ticket)
 	//****************************************
 	trp.SoldTickets = trp.SoldTickets + uint(t.Quantity)
 	newTrip := trip.NewTripTOUpdateSoldTickets(trp.SoldTickets)
-	s.tripOps.UpdateTrip(ctx, trp.ID, newTrip, trp)  
+	s.tripOps.UpdateTrip(ctx, trp.ID, newTrip, trp)
 	t.Status = "Confirmed"
-	newInvoice.Status = "Paid"            //sold tickets
+	newInvoice.Status = "Paid"                                   //sold tickets
 	s.ticketOps.UpdateTicketStatus(ctx, t.ID, "Confirmed")       //state
 	s.invoiceOps.UpdateInvoiceStatus(ctx, newInvoice.ID, "Paid") //state
 	// notif with bank?
 	return nil
+}
+
+func (s *TicketService) GetTicketsByUserOrAgency(ctx context.Context, userID *uint, agencyID *uint, page, pageSize uint) ([]ticket.Ticket, uint, error) {
+	// check one of them should be nill !!!
+	return s.ticketOps.GetTicketsByUserOrAgency(ctx, userID, agencyID, page, pageSize)
 }
