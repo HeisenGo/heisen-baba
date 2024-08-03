@@ -1,12 +1,15 @@
 package main
 
 import (
-	grpcServer "authservice/api/grpc"
-	"authservice/config"
-	"authservice/service"
+	grpcServer "bankservice/api/grpc"
+	"bankservice/config"
+	"bankservice/service"
 	"flag"
 	"log"
 	"os"
+	"sync"
+
+	httpServer "bankservice/api/http"
 )
 
 var configPath = flag.String("config", "", "configuration path")
@@ -14,11 +17,26 @@ var configPath = flag.String("config", "", "configuration path")
 func main() {
 	cfg := readConfig()
 
-	app, err := service.NewAppContainer(cfg)
+	app, err := services.NewAppContainer(cfg)
 	if err != nil {
 		log.Fatal(err)
 	}
-	grpcServer.Run(cfg, app)
+
+	var wg sync.WaitGroup
+	wg.Add(2) // We are running two servers
+
+	// Start the Fiber server
+	go func() {
+		defer wg.Done()
+		httpServer.Run(cfg, app)
+	}()
+
+	go func() {
+		defer wg.Done()
+		grpcServer.Run(cfg, app)
+	}()
+
+	wg.Wait()
 }
 
 func readConfig() config.Config {
