@@ -26,3 +26,20 @@ func (o *Ops) GetTicketsByUserOrAgency(ctx context.Context, userID *uint, agency
 
 	return o.repo.GetTicketsByUserOrAgency(ctx, userID, agencyID, limit, offset)
 }
+
+func (o *Ops) GetFullTicketByID(ctx context.Context, id uint) (*Ticket, error) {
+
+	t, err := o.repo.GetFullTicketByID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	if t == nil {
+		return nil, ErrRecordNotFound
+	}
+	return t, nil
+}
+
+func (o *Ops) UpdateTicket(ctx context.Context, id uint, updates map[string]interface{}) error {
+	return o.repo.UpdateTicket(ctx, id, updates)
+}
