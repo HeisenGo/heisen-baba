@@ -267,7 +267,7 @@ func (a *AppContainer) TechTeamServiceFromCtx(ctx context.Context) *TechTeamServ
 }
 
 func (a *AppContainer) setTechTeamService() {
-	if a.tripService != nil {
+	if a.techTeamService != nil {
 		return
 	}
 	a.techTeamService = NewTechTeamService(techteam.NewOps(storage.NewTechTeamRepo(a.dbConn)), trip.NewOps(storage.NewTripRepo(a.dbConn)), company.NewOps(storage.NewTransportCompanyRepo(a.dbConn)))

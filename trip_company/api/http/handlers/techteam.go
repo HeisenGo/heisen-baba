@@ -27,7 +27,7 @@ func CreateTechTeam(techService *service.TechTeamService) fiber.Handler {
 		}
 		team := presenter.TechTeamReqToTechTeam(&req)
 		// TODO: from context
-		creatorID := uint(3)
+		creatorID := uint(1)
 		if err := techService.CreateTechTeam(c.UserContext(), team, creatorID); err != nil {
 			return presenter.InternalServerError(c, err)
 			//TODO error handeling
@@ -86,7 +86,7 @@ func GetTechTeamsOfCompany(techService *service.TechTeamService) fiber.Handler {
 		requesterID := uint(1) // get from contex
 		teams, total, err := techService.GetTechTeamsOfCompany(c.UserContext(), uint(companyID), requesterID, uint(page), uint(pageSize))
 		if err != nil {
-			
+
 			return presenter.InternalServerError(c, err)
 		}
 		data := presenter.NewPagination(
@@ -95,7 +95,6 @@ func GetTechTeamsOfCompany(techService *service.TechTeamService) fiber.Handler {
 			uint(pageSize),
 			total,
 		)
-		return presenter.OK(c, "Trips fetched successfully", data)
+		return presenter.OK(c, "Teams fetched successfully", data)
 	}
 }
-
