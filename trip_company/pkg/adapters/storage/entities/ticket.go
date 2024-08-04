@@ -12,4 +12,5 @@ type Ticket struct {
     TotalPrice float64
     Status     string          `gorm:"type:varchar(20);default:'pending'"` //confirmed
     Penalty    float64   `gorm:"default:0"`
+    Invoice         *Invoice    `gorm:"foreignKey:TicketID"`
 }
