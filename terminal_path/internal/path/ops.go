@@ -134,10 +134,7 @@ func (o *Ops) PatchPath(ctx context.Context, updatedPath, originalPath *Path, ha
 	return o.repo.PatchPath(ctx, updatedPath, originalPath)
 }
 
-func (o *Ops) Delete(ctx context.Context, pathID uint, hasUnfinishedTrip bool) error {
-	if hasUnfinishedTrip {
-		return ErrCanNotDelete
-	}
+func (o *Ops) Delete(ctx context.Context, pathID uint) error {
 	return o.repo.Delete(ctx, pathID)
 }
 

@@ -6,17 +6,20 @@ import (
 	"fmt"
 	"terminalpathservice/internal/path"
 	"terminalpathservice/internal/terminal"
+	"terminalpathservice/pkg/ports/clients/clients"
 )
 
 type PathService struct {
-	pathOps     *path.Ops
-	terminalOps *terminal.Ops
+	pathOps           *path.Ops
+	terminalOps       *terminal.Ops
+	tripCompanyClient clients.ITripCompanyClient
 }
 
-func NewPathService(pathOps *path.Ops, terminalOps *terminal.Ops) *PathService {
+func NewPathService(pathOps *path.Ops, terminalOps *terminal.Ops, tripCompanyClient clients.ITripCompanyClient) *PathService {
 	return &PathService{
-		pathOps:     pathOps,
-		terminalOps: terminalOps,
+		pathOps:           pathOps,
+		terminalOps:       terminalOps,
+		tripCompanyClient: tripCompanyClient,
 	}
 }
 
@@ -47,7 +50,15 @@ func (s *PathService) GetFullPathByID(ctx context.Context, id uint) (*path.Path,
 	return s.pathOps.GetFullPathByID(ctx, id)
 }
 
-func (s *PathService) PatchPath(ctx context.Context, updatedPath *path.Path, hasUnfinishedTrips bool) (*path.Path, error) {
+func (s *PathService) PatchPath(ctx context.Context, updatedPath *path.Path) (*path.Path, error) {
+	var hasUnfinishedTrips bool
+	count, err := s.tripCompanyClient.GetCountPathUnfinishedTrips(updatedPath.ID)
+	if err != nil {
+		return nil, err
+	}
+	if count > 0 {
+		hasUnfinishedTrips = true
+	}
 	originalPath, err := s.GetFullPathByID(ctx, updatedPath.ID)
 	if err != nil {
 		return nil, err
@@ -72,12 +83,20 @@ func (s *PathService) PatchPath(ctx context.Context, updatedPath *path.Path, has
 	return originalPath, nil
 }
 
-func (s *PathService) DeletePath(ctx context.Context, pathID uint, hasUnFinishedTrips bool) (*path.Path, error) {
+func (s *PathService) DeletePath(ctx context.Context, pathID uint) (*path.Path, error) {
+
+	count, err := s.tripCompanyClient.GetCountPathUnfinishedTrips(pathID)
+	if err != nil {
+		return nil, err
+	}
+	if count > 0 {
+		return nil, path.ErrCanNotDelete
+	}
 	p, err := s.pathOps.GetFullPathByID(ctx, pathID)
 	if err != nil {
 		return nil, err
 	}
-	err = s.pathOps.Delete(ctx, pathID, hasUnFinishedTrips)
+	err = s.pathOps.Delete(ctx, pathID)
 	if err != nil {
 		return nil, err
 	}
