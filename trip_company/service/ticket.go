@@ -90,9 +90,10 @@ func (s *TicketService) ProcessUserTicket(ctx context.Context, t *ticket.Ticket)
 	username := "new_user"
 	info := fmt.Sprintf("User %s bought %d trips of from %s %s to %s %s in %s for date %v", username, t.Quantity, trp.Origin, trp.Path.FromTerminal.Name, trp.Destination, trp.Path.ToTerminal.Name, trp.TripType, trp.StartDate)
 
-	newInvoice := invoice.NewInvoice(t.ID, t, time.Now(), info, trp.UserPrice, t.TotalPrice, 0)
+	newInvoice := invoice.NewInvoice(t.ID, time.Now(), info, trp.UserPrice, t.TotalPrice, 0)
 
 	err = s.invoiceOps.Create(ctx, newInvoice)
+	t.Invoice = *newInvoice
 	if err != nil {
 		return err
 	}
@@ -102,9 +103,9 @@ func (s *TicketService) ProcessUserTicket(ctx context.Context, t *ticket.Ticket)
 	trp.SoldTickets = trp.SoldTickets + uint(t.Quantity)
 	newTrip := trip.NewTripTOUpdateSoldTickets(trp.SoldTickets)
 	s.tripOps.UpdateTrip(ctx, trp.ID, newTrip, trp)
-	t.Status = "Confirmed"
+	t.Status = "Paid"
 	newInvoice.Status = "Paid"                                   //sold tickets
-	s.ticketOps.UpdateTicketStatus(ctx, t.ID, "Confirmed")       //state
+	s.ticketOps.UpdateTicketStatus(ctx, t.ID, "Paid")       //state
 	s.invoiceOps.UpdateInvoiceStatus(ctx, newInvoice.ID, "Paid") //state
 	// notif with bank?
 	return nil
