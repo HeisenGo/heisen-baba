@@ -1,13 +1,12 @@
 package main
 
 import (
-
-	grpcServer "authservice/api/grpc"
-	"authservice/config"
-	"authservice/service"
 	"flag"
 	"log"
 	"os"
+	http_server "tripcompanyservice/api/http"
+	"tripcompanyservice/config"
+	"tripcompanyservice/service"
 )
 
 var configPath = flag.String("config", "", "configuration path")
@@ -19,7 +18,8 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	grpcServer.Run(cfg, app)
+
+	http_server.Run(cfg.Server, app)
 }
 
 func readConfig() config.Config {
