@@ -75,6 +75,7 @@ func (s *TripService) CreateTrip(ctx context.Context, t *trip.Trip, creatorID ui
 	t.Path.Type = "rail"
 	t.TripType = trip.TripType(t.Path.Type)
 	t.TripType = "rail"
+	t.Path.DistanceKM = 220
 	v := uint(1)
 	t.VehicleID = &v
 	//********************************************************

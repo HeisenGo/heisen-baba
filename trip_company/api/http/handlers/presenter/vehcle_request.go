@@ -5,8 +5,8 @@ import vehiclerequest "tripcompanyservice/internal/vehicle_request"
 
 
 type CreateVehicleRequest struct{
-	TripID            uint `json:"trip_id"` 
-	MinCapacity       int `json:"min_capacity"`
+	TripID            uint `json:"trip_id" validate:"required"` 
+	MinCapacity       int `json:"min_capacity" validate:"required"`
 	ProductionYearMin  int `json:"product_year"`
 }
 
@@ -22,7 +22,8 @@ type CreateVehicleRes struct{
 	VehicleReservationFee float64 `json:"vehicle_fee"`
 	VehicleProductionYear int `json:"vehicle_product_year"`
 	VehicleName        string `json:"name"`
-}
+	MatchVehicleSpeed  float64 `json:"speed"`
+ }
 
 func CreateVehicleRequestToVehicleRequest(r *CreateVehicleRequest) *vehiclerequest.VehicleRequest{
 	return &vehiclerequest.VehicleRequest{
@@ -43,5 +44,6 @@ func VehicleToCreateVehicleRes(v vehiclerequest.VehicleRequest) CreateVehicleRes
 		MatchedVehicleID: v.MatchedVehicleID,
 		MinCapacity: v.MinCapacity,
 		ProductionYearMin: v.ProductionYearMin,
+		MatchVehicleSpeed: v.MatchVehicleSpeed,
 	}
 }

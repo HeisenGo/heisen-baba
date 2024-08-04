@@ -215,12 +215,14 @@ func (o *Ops) UpdateTrip(ctx context.Context, id uint, newTrip, oldTrip *Trip) e
 		// TO DO move money from alibaba to company's owner wallet
 	}
 
-	if newTrip.StartDate != nil{
-		if oldTrip.SoldTickets != 0 {
-			return ErrCanNotUpdate
-		} else {
-			updates["start_date"] = newTrip.StartDate
-			oldTrip.StartDate = newTrip.StartDate
+	if newTrip.StartDate != nil {
+		if !newTrip.StartDate.IsZero() {
+			if oldTrip.SoldTickets != 0 {
+				return ErrCanNotUpdate
+			} else {
+				updates["start_date"] = newTrip.StartDate
+				oldTrip.StartDate = newTrip.StartDate
+			}
 		}
 	}
 
@@ -231,3 +233,8 @@ func (o *Ops) UpdateTrip(ctx context.Context, id uint, newTrip, oldTrip *Trip) e
 	return o.repo.UpdateTrip(ctx, id, updates)
 
 }
+
+func (o *Ops) UpdateEndDateTrip(ctx context.Context, id uint, updates map[string]interface{}) error {
+	return o.repo.UpdateTrip(ctx, id, updates)
+}
+

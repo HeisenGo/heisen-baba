@@ -21,6 +21,7 @@ type Trip struct {
 	ToTerminalName          string
 	Destination             string `gorm:"type:varchar(100);not null"`
 	PathName                string
+	PathDistanceKM          float64
 	Status                  string `gorm:"type:varchar(20);default:'pending'"`
 	MinPassengers           uint
 	TechTeamID              *uint     `gorm:""`

@@ -11,6 +11,7 @@ func TripEntityToDomain(tripEntity entities.Trip) trip.Trip {
 		ID:   tripEntity.PathID,
 		Name: tripEntity.PathName,
 		Type: tripEntity.TripType,
+		DistanceKM: tripEntity.PathDistanceKM,
 		FromTerminal: &trip.Terminal{
 			City: tripEntity.Origin,
 			Name: tripEntity.FromTerminalName,
@@ -56,6 +57,7 @@ func TripFullEntityToDomain(tripEntity entities.Trip) trip.Trip {
 	path := &trip.Path{
 		ID:   tripEntity.PathID,
 		Name: tripEntity.PathName,
+		DistanceKM: tripEntity.PathDistanceKM,
 		FromTerminal: &trip.Terminal{
 			City: tripEntity.Origin,
 			Name: tripEntity.FromTerminalName,
@@ -111,6 +113,7 @@ func TripDomainToEntity(t *trip.Trip) *entities.Trip {
 		UserPrice:            t.UserPrice,
 		AgencyPrice:          t.AgencyPrice,
 		PathID:               t.PathID,
+		PathDistanceKM: t.Path.DistanceKM,
 		Origin:               t.Origin,
 		Destination:          t.Destination,
 		FromTerminalName:     t.Path.FromTerminal.Name,
@@ -137,6 +140,7 @@ func SimpleTripEntityToDomain(tripEntity entities.Trip) trip.Trip {
 		ID:   tripEntity.PathID,
 		Name: tripEntity.PathName,
 		Type: tripEntity.TripType,
+		DistanceKM: tripEntity.PathDistanceKM,
 		FromTerminal: &trip.Terminal{
 			City: tripEntity.Origin,
 			Name: tripEntity.FromTerminalName,

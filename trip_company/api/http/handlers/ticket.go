@@ -16,7 +16,7 @@ func BuyTicket(ticketService *service.TicketService) fiber.Handler { //serviceFa
 
 		var body map[string]interface{}
 		if err := c.BodyParser(&body); err != nil {
-			return presenter.BadRequest(c, fmt.Errorf("Invalid req body"))
+			return presenter.BadRequest(c, fmt.Errorf("invalid req body"))
 		}
 		var res interface{}
 
@@ -24,7 +24,7 @@ func BuyTicket(ticketService *service.TicketService) fiber.Handler { //serviceFa
 
 			var req *presenter.AgencyTicketReq
 			if err := json.Unmarshal(c.Body(), &req); err != nil {
-				return presenter.BadRequest(c, fmt.Errorf("Invalid req body"))
+				return presenter.BadRequest(c, fmt.Errorf("invalid req body"))
 			}
 
 			ticket := presenter.AgencyTicketReqToTicket(req)
@@ -37,7 +37,7 @@ func BuyTicket(ticketService *service.TicketService) fiber.Handler { //serviceFa
 		} else {
 			var req *presenter.UserTicketReq
 			if err := json.Unmarshal(c.Body(), &req); err != nil {
-				return presenter.BadRequest(c, fmt.Errorf("Invalid req body"))
+				return presenter.BadRequest(c, fmt.Errorf("invalid req body"))
 			}
 
 			//userID := getUserID(c) // TODO: user ID from authentication

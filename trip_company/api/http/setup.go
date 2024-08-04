@@ -116,7 +116,8 @@ func registerTransportCompanyRoutes(router fiber.Router, app *service.AppContain
 
 	router.Patch("/cancel-ticket/:ticketID", handlers.CancelTicketByID(app.TicketService()))
 	router.Get("/tickets", handlers.GetTickets(app.TicketService())) // configure a way o separate agnecy and user TODO:
-	
+
+	router.Post("/vehicle-req", handlers.CreateVehicleRequest(app.VehicleReqService()))
 }
 
 // func registerTerminalRouts(router fiber.Router, app *service.AppContainer, secret []byte) {

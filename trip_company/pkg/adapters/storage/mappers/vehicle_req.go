@@ -25,5 +25,6 @@ func VehicleReqEntityToVehicleReqDomain(v entities.VehicleRequest) vehiclereques
 		MatchedVehicleID:      v.MatchedVehicleID,
 		MinCapacity:           v.MinCapacity,
 		ProductionYearMin:     v.ProductionYearMin,
+		MatchVehicleSpeed: v.MatchVehicleSpeed,
 	}
 }
