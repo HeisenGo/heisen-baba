@@ -1,7 +1,7 @@
 package adapters
 
 import (
-	"hotel/pkg/valuecontext"
+	"agency/pkg/valuecontext"
 	"gorm.io/gorm"
 )
 
