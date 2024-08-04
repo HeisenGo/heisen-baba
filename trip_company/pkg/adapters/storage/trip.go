@@ -90,6 +90,8 @@ func (r *tripRepo) GetFullTripByID(ctx context.Context, id uint) (*trip.Trip, er
 		Preload("TransportCompany").     // Preload related TransportCompany
 		Preload("TripCancelingPenalty"). // Preload related TripCancelingPenalty
 		Preload("VehicleRequest").
+		Preload("TechTeam").
+		Preload("TechTeam.TechTeamMember").
 		First(&t, id).Error; err != nil {
 		if strings.Contains(err.Error(), "record not found") {
 			return nil, nil
