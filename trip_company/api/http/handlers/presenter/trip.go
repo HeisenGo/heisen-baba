@@ -294,6 +294,20 @@ func BatchTripToAgencyTripResponse(trips []trip.Trip) []AgencyTripResponse {
 	return fp.Map(trips, TripToAgencyTripResponse)
 }
 
+type CancelTripReq struct{
+	IsCanceled  bool `json:"is_canceled"`
+}
+
+
+type ConfirmTripReq struct{
+	IsConfirmed  bool `json:"is_confirmed"`
+}
+
+
+type FinishTripReq struct{
+	IsFinished  bool `json:"is_finished"`
+}
+
 type UpdateTripRequest struct {
 	UserReleaseDate Timestamp `json:"user_release"`
 	TourReleaseDate Timestamp `json:"tour_release"`

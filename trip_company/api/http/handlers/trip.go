@@ -199,7 +199,117 @@ func PatchTrip(tripService *service.TripService) fiber.Handler { // tansactional
 	}
 }
 
+func CancelTrip(tripService *service.TripService) fiber.Handler { // tansactional!!!! TO DO:
+	return func(c *fiber.Ctx) error {
 
+		var req presenter.CancelTripReq
+
+		if err := c.BodyParser(&req); err != nil {
+			return presenter.BadRequest(c, err)
+		}
+
+		// userClaims, ok := c.Locals(UserClaimKey).(*jwt.UserClaims)
+		// if !ok {
+		// 	return SendError(c, errWrongClaimType, fiber.StatusBadRequest)
+		// }
+		tripID, err := c.ParamsInt("tripID")
+		if err != nil {
+			return presenter.BadRequest(c, errWrongIDType)
+		}
+
+		if tripID < 0 {
+			return presenter.BadRequest(c, errWrongIDType)
+		}
+
+		// USERID from context TODO:
+		requesterID := uint(1)
+		changedTrip, err := tripService.CancelTrip(c.UserContext(), uint(tripID), requesterID, req.IsCanceled)
+
+		if err != nil {
+			if errors.Is(err, trip.ErrCanNotUpdate) || errors.Is(err, trip.ErrNotUpdated) || errors.Is(err, trip.ErrRecordNotFound) {
+				return presenter.BadRequest(c, err)
+			}
+			// trace ID : TODO
+			return presenter.InternalServerError(c, err)
+		}
+		res := presenter.TripToOwnerAdminTechTeamOperatorTripResponse(*changedTrip)
+		return presenter.OK(c, "Trip canceled successfully", res)
+	}
+}
+
+func ConfirmTrip(tripService *service.TripService) fiber.Handler { // tansactional!!!! TO DO:
+	return func(c *fiber.Ctx) error {
+
+		var req presenter.ConfirmTripReq
+
+		if err := c.BodyParser(&req); err != nil {
+			return presenter.BadRequest(c, err)
+		}
+
+		// userClaims, ok := c.Locals(UserClaimKey).(*jwt.UserClaims)
+		// if !ok {
+		// 	return SendError(c, errWrongClaimType, fiber.StatusBadRequest)
+		// }
+		tripID, err := c.ParamsInt("tripID")
+		if err != nil {
+			return presenter.BadRequest(c, errWrongIDType)
+		}
+
+		if tripID < 0 {
+			return presenter.BadRequest(c, errWrongIDType)
+		}
+
+		requesterID := uint(1)
+		changedTrip, err := tripService.ConfirmTrip(c.UserContext(), uint(tripID), requesterID, req.IsConfirmed)
+
+		if err != nil {
+			if errors.Is(err, trip.ErrCanNotUpdate) || errors.Is(err, trip.ErrNotUpdated) || errors.Is(err, trip.ErrRecordNotFound) {
+				return presenter.BadRequest(c, err)
+			}
+			// trace ID : TODO
+			return presenter.InternalServerError(c, err)
+		}
+		res := presenter.TripToOwnerAdminTechTeamOperatorTripResponse(*changedTrip)
+		return presenter.OK(c, "Trip updated successfully", res)
+	}
+}
+
+func FinishTrip(tripService *service.TripService) fiber.Handler { // tansactional!!!! TO DO:
+	return func(c *fiber.Ctx) error {
+
+		var req presenter.FinishTripReq
+
+		if err := c.BodyParser(&req); err != nil {
+			return presenter.BadRequest(c, err)
+		}
+
+		// userClaims, ok := c.Locals(UserClaimKey).(*jwt.UserClaims)
+		// if !ok {
+		// 	return SendError(c, errWrongClaimType, fiber.StatusBadRequest)
+		// }
+		tripID, err := c.ParamsInt("tripID")
+		if err != nil {
+			return presenter.BadRequest(c, errWrongIDType)
+		}
+
+		if tripID < 0 {
+			return presenter.BadRequest(c, errWrongIDType)
+		}
+
+		requesterID := uint(1)
+		changedTrip, err := tripService.FinishTrip(c.UserContext(), uint(tripID), requesterID, req.IsFinished)
+
+		if err != nil {
+			if errors.Is(err, trip.ErrCanNotUpdate) || errors.Is(err, trip.ErrNotUpdated) || errors.Is(err, trip.ErrRecordNotFound) {
+				return presenter.BadRequest(c, err)
+			}
+			// trace ID : TODO
+			return presenter.InternalServerError(c, err)
+		}
+		res := presenter.TripToOwnerAdminTechTeamOperatorTripResponse(*changedTrip)
+		return presenter.OK(c, "Trip updated successfully", res)
+	}
+}
 
 
 
@@ -232,3 +342,4 @@ func GetCountPathUnfinishedTrips(tripService *service.TripService) fiber.Handler
 		return presenter.OK(c, "Trips fetched successfully", fiber.Map{"count": total})
 	}
 }
+
