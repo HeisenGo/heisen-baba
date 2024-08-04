@@ -57,7 +57,7 @@ func CreateTechMember(techService *service.TechTeamService) fiber.Handler {
 		}
 		m := presenter.TechTeamMemberReToTechTeamMember(&req)
 		// TODO: from context
-		creatorID := uint(3)
+		creatorID := uint(1)
 		if err := techService.CreateTechTeamMember(c.UserContext(), m, creatorID); err != nil {
 			return presenter.InternalServerError(c, err)
 			//TODO error handeling

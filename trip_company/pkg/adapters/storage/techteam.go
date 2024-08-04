@@ -22,7 +22,7 @@ func NewTechTeamRepo(db *gorm.DB) techteam.Repo {
 func (r *techTeamRepo) GetTechTeamByID(ctx context.Context, id uint) (*techteam.TechTeam, error) {
 	var t entities.TechTeam
 	if err := r.db.WithContext(ctx).
-		Preload("TechTeamMember").
+		Preload("Members").
 		First(&t, id).Error; err != nil {
 		if strings.Contains(err.Error(), "record not found") {
 			return nil, nil
@@ -55,12 +55,14 @@ func (r *techTeamRepo) InsertMember(ctx context.Context, t *techteam.TechTeamMem
 }
 
 func (r *techTeamRepo) GetTechTeamsOfCompany(ctx context.Context, companyId uint, limit, offset uint) ([]techteam.TechTeam, uint, error) {
-	query := r.db.WithContext(ctx).Model(&entities.TechTeam{}).Where("transport_company_id = ?", companyId)
+	query := r.db.WithContext(ctx).
+		Preload("Members").
+		Model(&entities.TechTeam{}).
+		Where("transport_company_id = ?", companyId)
 
 	var total int64
-
 	if err := query.Count(&total).Error; err != nil {
-		return nil, 0, err
+		return nil, 0, fmt.Errorf("failed to count tech teams: %w", err)
 	}
 
 	if offset > 0 {
@@ -72,12 +74,11 @@ func (r *techTeamRepo) GetTechTeamsOfCompany(ctx context.Context, companyId uint
 	}
 
 	var teams []entities.TechTeam
-
 	if err := query.Find(&teams).Error; err != nil {
 		if strings.Contains(err.Error(), "record not found") {
 			return nil, 0, nil
 		}
-		return nil, 0, err
+		return nil, 0, fmt.Errorf("failed to fetch tech teams: %w", err)
 	}
 
 	return mappers.BatchTecTeamEnToDo(teams), uint(total), nil
