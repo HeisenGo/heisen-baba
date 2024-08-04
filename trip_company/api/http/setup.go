@@ -123,8 +123,10 @@ func registerTransportCompanyRoutes(router fiber.Router, app *service.AppContain
 	router.Post("/tech-members", handlers.CreateTechMember(app.TechTeamService()))
 	router.Get("/tech-teams/:companyID", handlers.GetTechTeamsOfCompany(app.TechTeamService()))
 	router.Patch("/cancel-trip/:tripID", handlers.CancelTrip(app.TripService()))
-	router.Patch("finish-trip/:tripID", handlers.FinishTrip(app.TripService()))
-	router.Patch("confirm-trip/:tripID", handlers.ConfirmTrip(app.TripService()))
+	router.Patch("/finish-trip/:tripID", handlers.FinishTrip(app.TripService()))
+	router.Patch("/confirm-trip/:tripID", handlers.ConfirmTrip(app.TripService()))
+
+	router.Get("/path-trips/:pathID", handlers.GetCountPathUnfinishedTrips(app.TripService()))
 }
 
 // func registerTerminalRouts(router fiber.Router, app *service.AppContainer, secret []byte) {
