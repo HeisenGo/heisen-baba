@@ -102,3 +102,32 @@ func (r *invoiceRepo) UpdateInvoice(ctx context.Context, id uint, updates map[st
 
 	return nil
 }
+
+func (r *invoiceRepo) CalculateCompanyProfitForTrip(ctx context.Context, tripID uint) (float64, error) {
+	var totalPenalty float64
+	var totalPaid float64
+
+	if err := r.db.WithContext(ctx).
+		Model(&entities.Invoice{}).
+		Joins("JOIN tickets ON tickets.id = invoices.ticket_id").
+		Where("tickets.trip_id = ?", tripID).
+		Where("invoices.status = ?", "Canceled").
+		Select("SUM(invoices.penalty)").
+		Scan(&totalPenalty).Error; err != nil {
+		return 0, err
+	}
+
+	if err := r.db.WithContext(ctx).
+		Model(&entities.Invoice{}).
+		Joins("JOIN tickets ON tickets.id = invoices.ticket_id").
+		Where("tickets.trip_id = ?", tripID).
+		Where("invoices.status = ?", "Paid").
+		Select("SUM(invoices.total_price)").
+		Scan(&totalPaid).Error; err != nil {
+		return 0, err
+	}
+
+	totalProfit := totalPenalty + totalPaid
+
+	return totalProfit, nil
+}
