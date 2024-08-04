@@ -199,6 +199,7 @@ func PatchTrip(tripService *service.TripService) fiber.Handler { // tansactional
 	}
 }
 
+// TODO : transactional
 func CancelTrip(tripService *service.TripService) fiber.Handler { // tansactional!!!! TO DO:
 	return func(c *fiber.Ctx) error {
 
@@ -274,6 +275,7 @@ func ConfirmTrip(tripService *service.TripService) fiber.Handler { // tansaction
 	}
 }
 
+// TODO: transactional
 func FinishTrip(tripService *service.TripService) fiber.Handler { // tansactional!!!! TO DO:
 	return func(c *fiber.Ctx) error {
 

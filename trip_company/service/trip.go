@@ -153,3 +153,121 @@ func (s *TripService) SetTechTeamToTrip(ctx context.Context, tripID, techteamID 
 	t.TechTeamID = &techteamID
 	return t, nil
 }
+
+func (s *TripService) CancelTrip(ctx context.Context, tripID uint, requesterID uint, isCanceled bool) (*trip.Trip, error) {
+	t, err := s.tripOps.GetFullTripByID(ctx, tripID)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if t.TransportCompany.OwnerID != requesterID {
+		return nil, ErrForbidden
+	}
+
+	if t.IsCanceled == isCanceled {
+		return nil, errors.New("same state")
+	}
+
+	if t.IsFinished {
+		return nil, errors.New("this trip finished")
+	}
+
+	updates := make(map[string]interface{})
+
+	updates["is_canceled"] = isCanceled
+	if isCanceled {
+		updates["status"] = "Canceled"
+	}
+
+	err = s.tripOps.UpdateTripTechTimID(ctx, tripID, updates)
+	if err != nil {
+		return nil, err
+	}
+
+	// get trip tickets and invoices and set their status to cancel , penalty = 0 send to bank to get total price from alibaba to user wallet or agency wallet
+
+
+	return t, nil
+
+}
+
+func (s *TripService) ConfirmTrip(ctx context.Context, tripID uint, requesterID uint, isConfirmed bool) (*trip.Trip, error) {
+	t, err := s.tripOps.GetFullTripByID(ctx, tripID)
+
+	if err != nil {
+		return nil, err
+	}
+
+	// if t.TransportCompany.OwnerID != requesterID{
+	// 	return nil, ErrForbidden
+	// }
+	_, err = s.techTeamOps.GetTechTeamMemberByUserIDAndTechTeamID(ctx, requesterID, *t.TechTeamID)
+	if err != nil {
+		return nil, ErrForbidden
+	}
+	if t.IsCanceled {
+		return nil, errors.New("trip is canceled")
+	}
+
+	if t.IsConfirmed == isConfirmed {
+		return nil, errors.New("same state")
+	}
+
+	if t.IsFinished {
+		return nil, errors.New("this trip finished")
+	}
+
+	updates := make(map[string]interface{})
+
+	updates["is_confirmed"] = isConfirmed
+	if isConfirmed {
+		updates["status"] = "Confirmed"
+	}
+	err = s.tripOps.UpdateTripTechTimID(ctx, tripID, updates)
+	if err != nil {
+		return nil, err
+	}
+
+	return t, nil
+}
+
+func (s *TripService) FinishTrip(ctx context.Context, tripID uint, requesterID uint, isFinished bool) (*trip.Trip, error) {
+	t, err := s.tripOps.GetFullTripByID(ctx, tripID)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if t.TransportCompany.OwnerID != requesterID {
+		return nil, ErrForbidden
+	}
+
+	if !t.IsConfirmed {
+		return nil, errors.New("trip is not confirmed")
+	}
+
+	if t.IsCanceled {
+		return nil, errors.New("trip is canceled")
+	}
+	if t.IsFinished == isFinished {
+		return nil, errors.New("same state")
+	}
+
+	updates := make(map[string]interface{})
+
+	updates["is_finished"] = isFinished
+	if isFinished {
+		updates["status"] = "Finished"
+	}
+
+	err = s.tripOps.UpdateTripTechTimID(ctx, tripID, updates)
+	if err != nil {
+		return nil, err
+	}
+	//TODO : bank
+	// calculate profit tell alibaba to move money from alibaba to owner id wallet: profit = totalprice (status canceled nis) + penalty (status cancel and )
+
+
+	return t, nil
+}
