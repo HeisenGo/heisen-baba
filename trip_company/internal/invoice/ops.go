@@ -27,7 +27,7 @@ func (o *Ops) GetInvoicesByUserOrAgency(ctx context.Context, userID *uint, agenc
 
 func (o *Ops) GetInvoiceByTicketID(ctx context.Context, ticketID uint) (*Invoice, error) {
 
-	t, err := 	 o.repo.GetInvoiceByTicketID(ctx, ticketID)
+	t, err := o.repo.GetInvoiceByTicketID(ctx, ticketID)
 	if err != nil {
 		return nil, err
 	}
@@ -38,6 +38,10 @@ func (o *Ops) GetInvoiceByTicketID(ctx context.Context, ticketID uint) (*Invoice
 	return t, nil
 }
 
-func(o *Ops)UpdateInvoice(ctx context.Context, id uint, updates map[string]interface{}) error{
-	return o.repo.UpdateInvoice(ctx,id, updates)
+func (o *Ops) UpdateInvoice(ctx context.Context, id uint, updates map[string]interface{}) error {
+	return o.repo.UpdateInvoice(ctx, id, updates)
+}
+
+func (o *Ops) CalculateCompanyProfitForTrip(ctx context.Context, tripID uint) (float64, error) {
+	return o.repo.CalculateCompanyProfitForTrip(ctx, tripID)
 }
