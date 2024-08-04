@@ -145,7 +145,8 @@ type OwnerAdminTechTeamOperatorTripResponse struct {
 	EndDate                Timestamp                      `json:"end_date"`
 	IsConfirmed            bool                           `json:"is_confirmed"`
 	VehicleRequest         *CreateVehicleRes              `json:"vehicle_req"`
-	TechTeam               *TechTeamRe
+	TechTeam               *TechTeamRe      `json:"tech_team"`
+	Profit      float64  `json:"profit"`
 }
 
 func TripToOwnerAdminTechTeamOperatorTripResponse(t trip.Trip) OwnerAdminTechTeamOperatorTripResponse {
@@ -198,6 +199,7 @@ func TripToOwnerAdminTechTeamOperatorTripResponse(t trip.Trip) OwnerAdminTechTea
 		IsFinished:             t.IsFinished,
 		IsConfirmed:            t.IsConfirmed,
 		TechTeam:               &team,
+		Profit: t.Profit,
 	}
 }
 
