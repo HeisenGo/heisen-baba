@@ -6,6 +6,7 @@ import (
 	"tripcompanyservice/config"
 	"tripcompanyservice/internal/company"
 	"tripcompanyservice/internal/invoice"
+	"tripcompanyservice/internal/techteam"
 	"tripcompanyservice/internal/ticket"
 	"tripcompanyservice/internal/trip"
 	vehiclerequest "tripcompanyservice/internal/vehicle_request"
@@ -18,14 +19,15 @@ import (
 )
 
 type AppContainer struct {
-	cfg             config.Config
-	dbConn          *gorm.DB
-	companyService  *TransportCompanyService
-	tripService     *TripService
-	ticketService   *TicketService
-	invoiceService  *InvoiceService
-	serviceRegistry *ports.IServiceRegistry
-	vehicleReqService  *VehicleReService
+	cfg               config.Config
+	dbConn            *gorm.DB
+	companyService    *TransportCompanyService
+	tripService       *TripService
+	ticketService     *TicketService
+	invoiceService    *InvoiceService
+	serviceRegistry   *ports.IServiceRegistry
+	vehicleReqService *VehicleReService
+	techTeamService   *TechTeamService
 }
 
 func NewAppContainer(cfg config.Config) (*AppContainer, error) {
@@ -45,6 +47,8 @@ func NewAppContainer(cfg config.Config) (*AppContainer, error) {
 	app.setTripService()
 	app.setTicketService()
 	app.setInvoiceService()
+	app.setVehicleReqService()
+	app.setTechTeamService()
 	//app.setPathService()
 	return app, nil
 }
@@ -132,6 +136,7 @@ func (a *AppContainer) TripServiceFromCtx(ctx context.Context) *TripService {
 	return NewTripService(
 		trip.NewOps(storage.NewTripRepo(gc)),
 		company.NewOps(storage.NewTransportCompanyRepo(gc)),
+		techteam.NewOps(storage.NewTechTeamRepo(gc)),
 	)
 }
 
@@ -139,7 +144,7 @@ func (a *AppContainer) setTripService() {
 	if a.tripService != nil {
 		return
 	}
-	a.tripService = NewTripService(trip.NewOps(storage.NewTripRepo(a.dbConn)), company.NewOps(storage.NewTransportCompanyRepo(a.dbConn)))
+	a.tripService = NewTripService(trip.NewOps(storage.NewTripRepo(a.dbConn)), company.NewOps(storage.NewTransportCompanyRepo(a.dbConn)), techteam.NewOps(storage.NewTechTeamRepo(a.dbConn)))
 }
 
 // Ticket Service
@@ -203,7 +208,6 @@ func (a *AppContainer) setInvoiceService() {
 	a.invoiceService = NewInvoiceService(invoice.NewOps(storage.NewInvoiceRepo(a.dbConn)), ticket.NewOps(storage.NewTicketRepo(a.dbConn)), trip.NewOps(storage.NewTripRepo(a.dbConn)))
 }
 
-
 // vehicleReq
 
 func (a *AppContainer) VehicleReqService() *VehicleReService {
@@ -232,4 +236,35 @@ func (a *AppContainer) setVehicleReqService() {
 		return
 	}
 	a.vehicleReqService = NewVehicleReService(vehiclerequest.NewOps(storage.NewVehicleReqRepo(a.dbConn)), trip.NewOps(storage.NewTripRepo(a.dbConn)))
+}
+
+// Tech team service
+
+func (a *AppContainer) TechTeamService() *TechTeamService {
+	return a.techTeamService
+}
+
+func (a *AppContainer) TechTeamServiceFromCtx(ctx context.Context) *TechTeamService {
+	tx, ok := valuecontext.TryGetTxFromContext(ctx)
+	if !ok {
+		return a.techTeamService
+	}
+
+	gc, ok := tx.Tx().(*gorm.DB)
+	if !ok {
+		return a.techTeamService
+	}
+
+	return NewTechTeamService(
+		techteam.NewOps(storage.NewTechTeamRepo(gc)),
+		trip.NewOps(storage.NewTripRepo(gc)),
+		company.NewOps(storage.NewTransportCompanyRepo(gc)),
+	)
+}
+
+func (a *AppContainer) setTechTeamService() {
+	if a.tripService != nil {
+		return
+	}
+	a.techTeamService = NewTechTeamService(techteam.NewOps(storage.NewTechTeamRepo(a.dbConn)), trip.NewOps(storage.NewTripRepo(a.dbConn)), company.NewOps(storage.NewTransportCompanyRepo(a.dbConn)))
 }

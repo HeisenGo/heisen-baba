@@ -45,7 +45,7 @@ func (s *VehicleReService) CreateVehicleReq(ctx context.Context, vR *vehiclerequ
 	if err != nil {
 		return err
 	}
-	// send vr to rabbit MQ TODO:
+	// send vr to rabbit MQ TODO: with distance and date
 	vR.MatchedVehicleID = uint(2)
 	vR.VehicleName = "new bmb"
 	vR.VehicleProductionYear = 2021
