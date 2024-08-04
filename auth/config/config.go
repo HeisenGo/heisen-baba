@@ -12,12 +12,15 @@ type Server struct {
 	RefreshTokenExpMinutes uint            `mapstructure:"refresh_token_exp_minutes"`
 	TokenSecret            string          `mapstructure:"token_secret"`
 	ServiceRegistry        ServiceRegistry `mapstructure:"service_registry"`
-	ServiceHostName        string          `mapstructure:"service_host_name"`
+
+	ServiceHostAddress     string          `mapstructure:"service_host_address"`
 	ServiceGRPCHealthPath  string          `mapstructure:"service_grpc_health_path"`
 	ServiceGRPCPrefixPath  string          `mapstructure:"service_grpc_prefix_path"`
 }
 type ServiceRegistry struct {
-	Address string `mapstructure:"address"`
+
+	Address     string `mapstructure:"address"`
+	ServiceName string `mapstructure:"service_name"`
 }
 
 type DB struct {

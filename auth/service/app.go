@@ -33,7 +33,8 @@ func NewAppContainer(cfg config.Config) (*AppContainer, error) {
 
 func (a *AppContainer) mustRegisterService(srvCfg config.Server) {
 	registry := consul.NewConsul(srvCfg.ServiceRegistry.Address)
-	err := registry.RegisterService(srvCfg.ServiceHostName, srvCfg.ServiceGRPCPrefixPath, srvCfg.ServiceGRPCHealthPath, srvCfg.GRPCPort)
+
+	err := registry.RegisterService(srvCfg.ServiceRegistry.ServiceName, srvCfg.ServiceHostAddress, srvCfg.ServiceGRPCPrefixPath, srvCfg.ServiceGRPCHealthPath, srvCfg.GRPCPort)
 	if err != nil {
 		log.Fatalf("Failed to register service with Consul: %v", err)
 	}
