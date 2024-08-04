@@ -42,3 +42,8 @@ func (o *Ops) GetFullTicketByID(ctx context.Context, id uint) (*Ticket, error) {
 func (o *Ops) UpdateTicket(ctx context.Context, id uint, updates map[string]interface{}) error {
 	return o.repo.UpdateTicket(ctx, id, updates)
 }
+
+
+func (o *Ops)GetTicketsWithInvoicesByTripID(ctx context.Context, tripID uint) ([]Ticket, error) {
+	return o.repo.GetTicketsWithInvoicesByTripID(ctx, tripID)
+}

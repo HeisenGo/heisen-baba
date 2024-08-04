@@ -3,6 +3,7 @@ package ticket
 import (
 	"context"
 	"errors"
+	"tripcompanyservice/internal/invoice"
 	"tripcompanyservice/internal/trip"
 )
 
@@ -18,6 +19,7 @@ type Repo interface {
     GetTicketsByUserOrAgency(ctx context.Context, userID *uint, agencyID *uint, limit, offset uint) ([]Ticket,uint, error) 
     GetFullTicketByID(ctx context.Context, id uint) (*Ticket, error)
     UpdateTicket(ctx context.Context, id uint, updates map[string]interface{}) error
+	GetTicketsWithInvoicesByTripID(ctx context.Context, tripID uint) ([]Ticket, error)
 }
 
 type Ticket struct {
@@ -30,4 +32,5 @@ type Ticket struct {
 	TotalPrice float64
 	Status     string
     Penalty    float64
+	Invoice   invoice.Invoice
 }
