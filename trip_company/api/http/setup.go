@@ -118,6 +118,10 @@ func registerTransportCompanyRoutes(router fiber.Router, app *service.AppContain
 	router.Get("/tickets", handlers.GetTickets(app.TicketService())) // configure a way o separate agnecy and user TODO:
 
 	router.Post("/vehicle-req", handlers.CreateVehicleRequest(app.VehicleReqService()))
+
+	router.Post("/tech-teams", handlers.CreateTechTeam(app.TechTeamService()))
+	router.Post("/tech-members", handlers.CreateTechMember(app.TechTeamService()))
+	router.Get("/tech-teams/:companyID", handlers.GetTechTeamsOfCompany(app.TechTeamService()))
 }
 
 // func registerTerminalRouts(router fiber.Router, app *service.AppContainer, secret []byte) {
