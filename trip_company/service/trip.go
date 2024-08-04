@@ -5,7 +5,9 @@ import (
 	"errors"
 	"time"
 	"tripcompanyservice/internal/company"
+	"tripcompanyservice/internal/invoice"
 	"tripcompanyservice/internal/techteam"
+	"tripcompanyservice/internal/ticket"
 	"tripcompanyservice/internal/trip"
 )
 
@@ -18,13 +20,17 @@ type TripService struct {
 	tripOps     *trip.Ops
 	companyOps  *company.Ops
 	techTeamOps *techteam.Ops
+	ticketOps   *ticket.Ops
+	invoiceOps  *invoice.Ops
 }
 
-func NewTripService(tripOps *trip.Ops, companyOps *company.Ops, techTeamOps *techteam.Ops) *TripService {
+func NewTripService(tripOps *trip.Ops, companyOps *company.Ops, techTeamOps *techteam.Ops, ticketOps *ticket.Ops, invoiceOps *invoice.Ops) *TripService {
 	return &TripService{
 		tripOps:     tripOps,
 		companyOps:  companyOps,
 		techTeamOps: techTeamOps,
+		ticketOps:   ticketOps,
+		invoiceOps:  invoiceOps,
 	}
 }
 
@@ -154,6 +160,25 @@ func (s *TripService) SetTechTeamToTrip(ctx context.Context, tripID, techteamID 
 	return t, nil
 }
 
+func (s *TripService) UpdateInvoiceTicket(ctx context.Context, t ticket.Ticket, state string, penalty float64, refund float64, receiverID uint) error {
+
+	updates := make(map[string]interface{})
+	updates["status"] = state
+	updates["penalty"] = penalty
+	err := s.ticketOps.UpdateTicket(ctx, t.ID, updates)
+
+	if err != nil {
+		return err
+	}
+	err = s.invoiceOps.UpdateInvoice(ctx, t.Invoice.ID, updates)
+
+	if err != nil {
+		return err
+	}
+	// send to band : TODO from alibaba to user/aganecyId
+	return nil
+}
+
 func (s *TripService) CancelTrip(ctx context.Context, tripID uint, requesterID uint, isCanceled bool) (*trip.Trip, error) {
 	t, err := s.tripOps.GetFullTripByID(ctx, tripID)
 
@@ -185,9 +210,28 @@ func (s *TripService) CancelTrip(ctx context.Context, tripID uint, requesterID u
 		return nil, err
 	}
 
-	// get trip tickets and invoices and set their status to cancel , penalty = 0 send to bank to get total price from alibaba to user wallet or agency wallet
-
-
+	ticks, err := s.ticketOps.GetTicketsWithInvoicesByTripID(ctx, tripID)
+	if err != nil {
+		return nil, err
+	}
+	var state string
+	var refund, penalty float64
+	var receiverID uint
+	state = "Canceled"
+	penalty = 0
+	for i := range len(ticks) {
+		if ticks[i].AgencyID == nil {
+			receiverID = *ticks[i].UserID
+		} else {
+			receiverID = *ticks[i].AgencyID
+		}
+		if ticks[i].Penalty != 0 { // already canceled by user
+			refund = ticks[i].Penalty
+		} else {
+			refund = ticks[i].TotalPrice
+		}
+		s.UpdateInvoiceTicket(ctx, ticks[i], state, penalty, refund, receiverID)
+	}
 	return t, nil
 
 }
@@ -261,13 +305,18 @@ func (s *TripService) FinishTrip(ctx context.Context, tripID uint, requesterID u
 		updates["status"] = "Finished"
 	}
 
-	err = s.tripOps.UpdateTripTechTimID(ctx, tripID, updates)
+	profit, err := s.invoiceOps.CalculateCompanyProfitForTrip(ctx, tripID) // profit
 	if err != nil {
 		return nil, err
 	}
+	updates["profit"] = profit
+	err = s.tripOps.UpdateEndDateTrip(ctx, tripID, updates)
+	if err != nil {
+		return nil, err
+	}
+	t.Profit = profit
 	//TODO : bank
 	// calculate profit tell alibaba to move money from alibaba to owner id wallet: profit = totalprice (status canceled nis) + penalty (status cancel and )
-
 
 	return t, nil
 }

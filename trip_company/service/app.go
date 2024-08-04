@@ -137,6 +137,8 @@ func (a *AppContainer) TripServiceFromCtx(ctx context.Context) *TripService {
 		trip.NewOps(storage.NewTripRepo(gc)),
 		company.NewOps(storage.NewTransportCompanyRepo(gc)),
 		techteam.NewOps(storage.NewTechTeamRepo(gc)),
+		ticket.NewOps(storage.NewTicketRepo(gc)),
+		invoice.NewOps(storage.NewInvoiceRepo(gc)),
 	)
 }
 
@@ -144,7 +146,9 @@ func (a *AppContainer) setTripService() {
 	if a.tripService != nil {
 		return
 	}
-	a.tripService = NewTripService(trip.NewOps(storage.NewTripRepo(a.dbConn)), company.NewOps(storage.NewTransportCompanyRepo(a.dbConn)), techteam.NewOps(storage.NewTechTeamRepo(a.dbConn)))
+	a.tripService = NewTripService(trip.NewOps(storage.NewTripRepo(a.dbConn)),
+		company.NewOps(storage.NewTransportCompanyRepo(a.dbConn)),
+		techteam.NewOps(storage.NewTechTeamRepo(a.dbConn)), ticket.NewOps(storage.NewTicketRepo(a.dbConn)), invoice.NewOps(storage.NewInvoiceRepo(a.dbConn)))
 }
 
 // Ticket Service
