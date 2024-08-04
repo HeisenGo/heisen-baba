@@ -9,7 +9,7 @@ import (
 type Trip struct {
 	gorm.Model
 	TransportCompanyID      uint `gorm:"not null;uniqueIndex:idx_trip_unique"`
-	TransportCompany        *TransportCompany `gorm:"foreignKey:TransportCompanyID"`
+	TransportCompany        *TransportCompany `gorm:"foreignKey:TransportCompanyID; constraint:OnDelete:CASCADE;"`
 	TripType                string            `gorm:"type:varchar(20);not null"`
 	UserReleaseDate         time.Time
 	TourReleaseDate         time.Time
@@ -25,10 +25,10 @@ type Trip struct {
 	Status                  string `gorm:"type:varchar(20);default:'pending'"`
 	MinPassengers           uint
 	TechTeamID              *uint     `gorm:""`
-	TechTeam                *TechTeam `gorm:"foreignKey:TechTeamID"`
+	TechTeam                *TechTeam `gorm:"foreignKey:TechTeamID; constraint:OnDelete:CASCADE;"`
 	VehicleRequestID        *uint
-	VehicleRequest          *VehicleRequest `gorm:"foreignKey:TripID"`
-	Tickets                 []Ticket        `gorm:"foreignKey:TripID"`
+	VehicleRequest          *VehicleRequest `gorm:"foreignKey:TripID; constraint:OnDelete:CASCADE;"`
+	Tickets                 []Ticket        `gorm:"foreignKey:TripID; constraint:OnDelete:CASCADE;"`
 	SoldTickets 	uint `gorm:"default:0"`
 	TripCancellingPenaltyID *uint
 	TripCancelingPenalty    *TripCancellingPenalty `gorm:"foreignKey:TripCancellingPenaltyID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL"`
