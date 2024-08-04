@@ -130,18 +130,27 @@ func (r *vehicleRepo) SetVehicleStatus(ctx context.Context, id uint, isActive bo
 	return nil
 }
 
-func (r *vehicleRepo) SelectVehicles(ctx context.Context, numPassengers uint, cost float64) ([]vehicle.Vehicle, error) {
+func (r *vehicleRepo) SelectVehicles(ctx context.Context, numPassengers uint, cost float64,productionYear uint) ([]vehicle.Vehicle, error) {
 	var vehicles []entities.Vehicle
 
-	query := r.db.Model(&entities.Vehicle{}).Where("is_confirmed_by_admin = ?", true).Where("capacity >= ?", numPassengers).Where("price_per_hour <= ?", cost)
+	query := r.db.Model(&entities.Vehicle{}).Where("is_confirmed_by_admin = ?", true)
 	
+	// Apply filters if they are provided
+	if numPassengers != 0 {
+		query = query.Where("capacity >= ?", numPassengers)
+	}
+	if cost != -1 {
+		query = query.Where("price_per_hour <= ?", cost)
+	}
+	if productionYear != 0 {
+		query = query.Where("production_year >= ?", productionYear)
+	}
 	if err := query.Order("capacity desc, price_per_hour asc, production_year desc, created_at asc").Find(&vehicles).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, nil
 		}
 		return nil, err
 	}
-
 	domainVehicles := mappers.BatchVehicleEntitiesToDomain(vehicles)
 	return domainVehicles, nil
 }

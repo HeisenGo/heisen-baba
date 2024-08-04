@@ -1,8 +1,6 @@
 package entities
 
 import (
-	"time"
-
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
@@ -11,9 +9,9 @@ type Vehicle struct {
 	gorm.Model
 	ID                    uint
 	Name                  string
-	OwnerID               uuid.UUID
+	OwnerID               uuid.UUID		`gorm:"uniqueIndex:idx_owner_motor_number"`
 	PricePerHour          float64
-	MotorNumber           string
+	MotorNumber           string		`gorm:"uniqueIndex:idx_owner_motor_number"`
 	MinRequiredTechPerson uint
 	IsActive              bool
 	Capacity              uint
@@ -22,5 +20,4 @@ type Vehicle struct {
 	Speed                 float64
 	ProductionYear        uint
 	IsConfirmedByAdmin    bool
-	EntryDate             time.Time
 }

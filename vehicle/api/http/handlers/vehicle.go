@@ -28,7 +28,9 @@ func CreateVehicle(vehicleService *service.VehicleService) fiber.Handler {
 		if err := c.BodyParser(&req); err != nil {
 			return presenter.BadRequest(c, err)
 		}
-
+		if err := BodyValidator(&req); err != nil {
+			return presenter.BadRequest(c, err)
+		}
 		v := presenter.CreateVehicleRequest(&req)
 		if err := vehicleService.CreateVehicle(c.UserContext(), v); err != nil {
 			return presenter.InternalServerError(c, err)
@@ -137,7 +139,9 @@ func UpdateVehicle(vehicleService *service.VehicleService) fiber.Handler {
 		if err := c.BodyParser(&updateReq); err != nil {
 			return presenter.BadRequest(c, err)
 		}
-
+		if err := BodyValidator(&updateReq); err != nil {
+			return presenter.BadRequest(c, err)
+		}
 		if err := vehicleService.UpdateVehicle(c.UserContext(), uint(vehicleID), presenter.UpdateVehicleRequestToDomain(&updateReq)); err != nil {
 			return presenter.InternalServerError(c, err)
 		}
@@ -240,18 +244,22 @@ func SelectVehicles(vehicleService *service.VehicleService) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		numPassengersStr := c.Query("num_passengers")
 		costStr := c.Query("cost")
+		productionYearStr := c.Query("production_year")
+		numPassengers, _ := strconv.ParseUint(numPassengersStr, 10, 32)
+		cost, _ := strconv.ParseFloat(costStr, 64)
+		productionYear, _ := strconv.ParseUint(productionYearStr, 10, 32)
 
-		numPassengers, err := strconv.ParseUint(numPassengersStr, 10, 32)
-		if err != nil {
-			return presenter.BadRequest(c, err)
+		// Set default values if parameters are not provided
+		if numPassengersStr == "" {
+			numPassengers = 0
 		}
-
-		cost, err := strconv.ParseFloat(costStr, 64)
-		if err != nil {
-			return presenter.BadRequest(c, err)
+		if costStr == "" {
+			cost = -1
 		}
-
-		vehicles, err := vehicleService.SelectVehicles(c.UserContext(), uint(numPassengers), cost)
+		if productionYearStr == "" {
+			productionYear = 0
+		}
+		vehicles, err := vehicleService.SelectVehicles(c.UserContext(), uint(numPassengers), cost,uint(productionYear))
 		if err != nil {
 			return presenter.InternalServerError(c, err)
 		}

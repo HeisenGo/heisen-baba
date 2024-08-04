@@ -8,18 +8,16 @@ import (
 )
 
 type CreateVehicleReq struct {
-	Name                  string    `json:"name" example:"Volvo RG"`
-	OwnerID               uuid.UUID `json:"owner_id" example:"aba3b3ed-e3d8-4403-9751-1f04287c9d65"`
-	PricePerHour          float64   `json:"priceperhour" example:"250"`
-	MotorNumber           string    `json:"motornumber" example:"aba3b-e3d8-4403-9751-1f04287c9d65"`
-	MinRequiredTechPerson uint      `json:"min_required_tech_person" example:"4"`
-	IsActive              bool      `json:"is_active" example:"true"`
-	Capacity              uint      `json:"capacity" example:"25"`
-	IsBlocked             bool      `json:"is_blocked" example:"false"`
-	Type                  string    `json:"type" example:"road"` // rail, road, air, sailing
-	Speed                 float64   `json:"speed" example:"60"`
-	ProductionYear        uint      `json:"productionyear" example:"1998"`
-	IsConfirmedByAdmin    bool      `json:"is_confirmed_by_admin" example:"true"`
+	Name                  string    `json:"name" validate:"required"  example:"Volvo RG"`
+	OwnerID               uuid.UUID `json:"owner_id" validate:"required"  example:"aba3b3ed-e3d8-4403-9751-1f04287c9d65"`
+	PricePerHour          float64   `json:"priceperhour" validate:"required"  example:"250"`
+	MotorNumber           string    `json:"motornumber" validate:"required"  example:"aba3b-e3d8-4403-9751-1f04287c9d65"`
+	MinRequiredTechPerson uint      `json:"min_required_tech_person" validate:"required"  example:"4"`
+	IsActive              bool      `json:"is_active" validate:"required"  example:"true"`
+	Capacity              uint      `json:"capacity" validate:"required"  example:"25"`
+	Type                  string    `json:"type" validate:"required"  example:"road"` // rail, road, air, sailing
+	Speed                 float64   `json:"speed" validate:"required"  example:"60"`
+	ProductionYear        uint      `json:"productionyear" validate:"required"  example:"1998"`
 }
 
 type VehicleResp struct {
@@ -28,6 +26,7 @@ type VehicleResp struct {
 }
 
 type FullVehicleResponse struct {
+	ID                    uint      `json:"id" example:"12"`
 	Name                  string    `json:"name" example:"Volvo RG"`
 	OwnerID               uuid.UUID `json:"owner_id" example:"aba3b3ed-e3d8-4403-9751-1f04287c9d65"`
 	PricePerHour          float64   `json:"priceperhour" example:"250"`
@@ -43,6 +42,7 @@ type FullVehicleResponse struct {
 }
 
 type UpdateVehicleReq struct {
+	ID                    uint      `json:"id,omitempty" example:"12"`
 	Name                  string    `json:"name,omitempty" example:"Volvo RG"`
 	OwnerID               uuid.UUID `json:"owner_id,omitempty" example:"aba3b3ed-e3d8-4403-9751-1f04287c9d65"`
 	PricePerHour          float64   `json:"priceperhour,omitempty" example:"250"`
@@ -81,11 +81,9 @@ func CreateVehicleRequest(req *CreateVehicleReq) *vehicle.Vehicle {
 		MinRequiredTechPerson: req.MinRequiredTechPerson,
 		IsActive:              req.IsActive,
 		Capacity:              req.Capacity,
-		IsBlocked:             req.IsBlocked,
 		Type:                  req.Type,
 		Speed:                 req.Speed,
 		ProductionYear:        req.ProductionYear,
-		IsConfirmedByAdmin:    req.IsConfirmedByAdmin,
 	}
 }
 
@@ -108,6 +106,7 @@ func VehicleToCreateVehicleResponse(v *vehicle.Vehicle) *CreateVehicleResponse {
 
 func VehicleToFullVehicleResponse(v vehicle.Vehicle) FullVehicleResponse {
 	return FullVehicleResponse{
+		ID:                    v.ID,
 		Name:                  v.Name,
 		OwnerID:               v.OwnerID,
 		PricePerHour:          v.PricePerHour,
@@ -129,6 +128,7 @@ func BatchVehiclesToVehicleResponse(vehicles []vehicle.Vehicle) []FullVehicleRes
 
 func UpdateVehicleRequestToDomain(req *UpdateVehicleReq) *vehicle.Vehicle {
 	v := &vehicle.Vehicle{
+		ID:                    req.ID,
 		Name:                  req.Name,
 		OwnerID:               req.OwnerID,
 		PricePerHour:          req.PricePerHour,

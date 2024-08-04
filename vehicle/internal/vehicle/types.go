@@ -18,7 +18,7 @@ type Repo interface {
 	DeleteVehicle(ctx context.Context, id uint) error
 	ApproveVehicle(ctx context.Context, id uint) error
 	SetVehicleStatus(ctx context.Context, id uint, isActive bool) error
-	SelectVehicles(ctx context.Context, numPassengers uint, cost float64) ([]Vehicle, error)
+	SelectVehicles(ctx context.Context, numPassengers uint, cost float64,productionYear uint) ([]Vehicle, error)
 }
 
 type VehicleFilters struct {

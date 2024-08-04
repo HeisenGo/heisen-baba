@@ -92,6 +92,6 @@ func (s *VehicleService) SetVehicleStatus(ctx context.Context, id uint, isActive
 	return s.vehicleOps.SetVehicleStatus(ctx, id, isActive)
 }
 
-func (s *VehicleService) SelectVehicles(ctx context.Context, numPassengers uint, cost float64) ([]vehicle.Vehicle, error) {
-	return s.vehicleOps.SelectVehicles(ctx, numPassengers, cost)
+func (s *VehicleService) SelectVehicles(ctx context.Context, numPassengers uint, cost float64,productionYear uint) ([]vehicle.Vehicle, error) {
+	return s.vehicleOps.SelectVehicles(ctx, numPassengers, cost,productionYear)
 }

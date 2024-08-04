@@ -34,6 +34,8 @@ func (o *Ops) Create(ctx context.Context, vehicle *Vehicle) error {
 	if err := ValidateCapacity(vehicle.Capacity); err != nil {
 		return ErrInvalidCapacity
 	}
+	vehicle.IsBlocked = false
+	vehicle.IsConfirmedByAdmin = false
 	return o.repo.CreateVehicle(ctx, vehicle)
 }
 
@@ -119,6 +121,6 @@ func (o *Ops) SetVehicleStatus(ctx context.Context, id uint, isActive bool) erro
 	return o.repo.SetVehicleStatus(ctx, id, isActive)
 }
 
-func (o *Ops) SelectVehicles(ctx context.Context, numPassengers uint, cost float64) ([]Vehicle, error) {
-	return o.repo.SelectVehicles(ctx, numPassengers, cost)
+func (o *Ops) SelectVehicles(ctx context.Context, numPassengers uint, cost float64,productionYear uint) ([]Vehicle, error) {
+	return o.repo.SelectVehicles(ctx, numPassengers, cost,productionYear)
 }
