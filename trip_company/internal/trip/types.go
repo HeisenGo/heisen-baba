@@ -5,6 +5,7 @@ import (
 	"errors"
 	"time"
 	"tripcompanyservice/internal/company"
+	"tripcompanyservice/internal/techteam"
 	tripcancellingpenalty "tripcompanyservice/internal/trip_cancelling_penalty"
 	vehiclerequest "tripcompanyservice/internal/vehicle_request"
 )
@@ -70,6 +71,7 @@ type Trip struct {
 	MinPassengers         uint
 	SoldTickets           uint
 	TechTeamID            *uint
+	TechTeam              *techteam.TechTeam
 	TripCancellingPenalty *tripcancellingpenalty.TripCancelingPenalty
 	//TechTeam         TechTeam `gorm:"foreignKey:TechTeamID"`
 	//VehicleRequestID uint
