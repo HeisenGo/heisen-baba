@@ -238,3 +238,6 @@ func (o *Ops) UpdateEndDateTrip(ctx context.Context, id uint, updates map[string
 	return o.repo.UpdateTrip(ctx, id, updates)
 }
 
+func (o *Ops) UpdateTripTechTimID(ctx context.Context, id uint, updates map[string]interface{}) error {
+	return o.repo.UpdateTrip(ctx, id, updates)
+}

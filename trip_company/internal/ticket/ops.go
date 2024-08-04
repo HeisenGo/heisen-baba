@@ -23,7 +23,6 @@ func (o *Ops) UpdateTicketStatus(ctx context.Context, ticketID uint, status stri
 func (o *Ops) GetTicketsByUserOrAgency(ctx context.Context, userID *uint, agencyID *uint, page, pageSize uint) ([]Ticket, uint, error) {
 	limit := pageSize
 	offset := (page - 1) * pageSize
-
 	return o.repo.GetTicketsByUserOrAgency(ctx, userID, agencyID, limit, offset)
 }
 
