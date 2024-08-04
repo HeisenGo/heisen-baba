@@ -23,7 +23,7 @@ func Migrate(db *gorm.DB) error {
 	migrator := db.Migrator()
 
 	err := migrator.AutoMigrate(&entities.TransportCompany{}, &entities.Trip{}, &entities.TripCancellingPenalty{}, 
-	&entities.Ticket{}, &entities.Invoice{})
+	&entities.Ticket{}, &entities.Invoice{}, &entities.VehicleRequest{})
 	if err != nil {
 		return err
 	}

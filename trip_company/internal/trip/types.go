@@ -6,6 +6,7 @@ import (
 	"time"
 	"tripcompanyservice/internal/company"
 	tripcancellingpenalty "tripcompanyservice/internal/trip_cancelling_penalty"
+	vehiclerequest "tripcompanyservice/internal/vehicle_request"
 )
 
 type TripType string
@@ -78,6 +79,7 @@ type Trip struct {
 	MaxTickets             uint
 	VehicleID              *uint
 	VehicleRequestID       *uint
+	VehicleRequest *vehiclerequest.VehicleRequest
 	IsCanceled             bool
 	IsFinished             bool
 	IsConfirmed            bool

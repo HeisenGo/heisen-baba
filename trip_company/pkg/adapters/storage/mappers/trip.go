@@ -2,15 +2,16 @@ package mappers
 
 import (
 	"tripcompanyservice/internal/trip"
+	vehiclerequest "tripcompanyservice/internal/vehicle_request"
 	"tripcompanyservice/pkg/adapters/storage/entities"
 	"tripcompanyservice/pkg/fp"
 )
 
 func TripEntityToDomain(tripEntity entities.Trip) trip.Trip {
 	path := &trip.Path{
-		ID:   tripEntity.PathID,
-		Name: tripEntity.PathName,
-		Type: tripEntity.TripType,
+		ID:         tripEntity.PathID,
+		Name:       tripEntity.PathName,
+		Type:       tripEntity.TripType,
 		DistanceKM: tripEntity.PathDistanceKM,
 		FromTerminal: &trip.Terminal{
 			City: tripEntity.Origin,
@@ -55,8 +56,8 @@ func TripEntityToDomain(tripEntity entities.Trip) trip.Trip {
 
 func TripFullEntityToDomain(tripEntity entities.Trip) trip.Trip {
 	path := &trip.Path{
-		ID:   tripEntity.PathID,
-		Name: tripEntity.PathName,
+		ID:         tripEntity.PathID,
+		Name:       tripEntity.PathName,
 		DistanceKM: tripEntity.PathDistanceKM,
 		FromTerminal: &trip.Terminal{
 			City: tripEntity.Origin,
@@ -69,10 +70,16 @@ func TripFullEntityToDomain(tripEntity entities.Trip) trip.Trip {
 	}
 	penalty := PenaltyEntityToDomain(*tripEntity.TripCancelingPenalty)
 	company := CompanyEntityToDomain(*tripEntity.TransportCompany)
+	var vR vehiclerequest.VehicleRequest
+	if tripEntity.VehicleRequest != nil {
+		vR = VehicleReqEntityToVehicleReqDomain(*tripEntity.VehicleRequest)
+	}
 	return trip.Trip{
 		ID:                     tripEntity.ID,
 		TransportCompanyID:     tripEntity.TransportCompanyID,
 		TransportCompany:       company,
+		VehicleRequest:         &vR,
+		VehicleRequestID:       tripEntity.VehicleRequestID,
 		TripType:               trip.TripType(tripEntity.TripType),
 		UserReleaseDate:        tripEntity.UserReleaseDate,
 		TourReleaseDate:        tripEntity.TourReleaseDate,
@@ -85,7 +92,6 @@ func TripFullEntityToDomain(tripEntity entities.Trip) trip.Trip {
 		Status:                 tripEntity.Status,
 		MinPassengers:          tripEntity.MinPassengers,
 		TechTeamID:             tripEntity.TechTeamID,
-		VehicleRequestID:       tripEntity.VehicleRequestID,
 		TripCancelingPenaltyID: tripEntity.TripCancellingPenaltyID,
 		MaxTickets:             tripEntity.MaxTickets,
 		VehicleID:              tripEntity.VehicleID,
@@ -113,7 +119,7 @@ func TripDomainToEntity(t *trip.Trip) *entities.Trip {
 		UserPrice:            t.UserPrice,
 		AgencyPrice:          t.AgencyPrice,
 		PathID:               t.PathID,
-		PathDistanceKM: t.Path.DistanceKM,
+		PathDistanceKM:       t.Path.DistanceKM,
 		Origin:               t.Origin,
 		Destination:          t.Destination,
 		FromTerminalName:     t.Path.FromTerminal.Name,
@@ -137,9 +143,9 @@ func TripDomainToEntity(t *trip.Trip) *entities.Trip {
 
 func SimpleTripEntityToDomain(tripEntity entities.Trip) trip.Trip {
 	path := &trip.Path{
-		ID:   tripEntity.PathID,
-		Name: tripEntity.PathName,
-		Type: tripEntity.TripType,
+		ID:         tripEntity.PathID,
+		Name:       tripEntity.PathName,
+		Type:       tripEntity.TripType,
 		DistanceKM: tripEntity.PathDistanceKM,
 		FromTerminal: &trip.Terminal{
 			City: tripEntity.Origin,
