@@ -1,0 +1,721 @@
+basePath: /api/v1
+definitions:
+  presenter.CreateHotelReq:
+    properties:
+      city:
+        example: Los Angles
+        type: string
+      country:
+        example: United States America
+        type: string
+      details:
+        example: 5 Star Beach Palm Hotel
+        type: string
+      name:
+        example: myhotel
+        type: string
+      owner_id:
+        example: aba3b3ed-e3d8-4403-9751-1f04287c9d65
+        type: string
+    required:
+    - city
+    - country
+    - details
+    - name
+    - owner_id
+    type: object
+  presenter.CreateHotelResponse:
+    properties:
+      city:
+        type: string
+      country:
+        type: string
+      details:
+        type: string
+      hotel_id:
+        type: integer
+      name:
+        type: string
+      owner_id:
+        type: string
+      rooms:
+        items:
+          $ref: '#/definitions/presenter.HotelRoomResp'
+        type: array
+    type: object
+  presenter.CreateRoomReq:
+    properties:
+      agency_price:
+        type: integer
+      capacity:
+        type: integer
+      facilities:
+        type: string
+      hotel_id:
+        type: integer
+      is_available:
+        type: boolean
+      name:
+        type: string
+      user_price:
+        type: integer
+    required:
+    - agency_price
+    - capacity
+    - facilities
+    - hotel_id
+    - is_available
+    - name
+    - user_price
+    type: object
+  presenter.FullHotelResponse:
+    properties:
+      city:
+        example: Los Angles
+        type: string
+      country:
+        example: United States America
+        type: string
+      details:
+        example: 5 Star Beach Palm Hotel
+        type: string
+      hotel_id:
+        example: 12
+        type: integer
+      is_blocked:
+        example: false
+        type: boolean
+      name:
+        example: myhotel
+        type: string
+      owner_id:
+        example: "1"
+        type: string
+      rooms:
+        items:
+          $ref: '#/definitions/room.Room'
+        type: array
+    type: object
+  presenter.FullReservationResponse:
+    properties:
+      check_in:
+        example: "2024-08-01T00:00:00Z"
+        type: string
+      check_out:
+        example: "2024-08-05T00:00:00Z"
+        type: string
+      reservation_id:
+        example: 12
+        type: integer
+      room_id:
+        example: 1
+        type: integer
+      status:
+        example: booked
+        type: string
+      total_price:
+        example: 50000
+        type: integer
+      user_id:
+        example: aba3b3ed-e3d8-4403-9751-1f04287c9d65
+        type: string
+    type: object
+  presenter.HotelRoomResp:
+    properties:
+      agencyprice:
+        type: integer
+      capacity:
+        type: integer
+      facilities:
+        type: string
+      hotel_id:
+        type: integer
+      is_available:
+        type: boolean
+      name:
+        type: string
+      userprice:
+        type: integer
+    type: object
+  presenter.ReservationCreateReq:
+    properties:
+      check_in:
+        example: "2024-08-01T00:00:00Z"
+        type: string
+      check_out:
+        example: "2024-08-05T00:00:00Z"
+        type: string
+      room_id:
+        example: 1
+        type: integer
+      status:
+        example: booked
+        type: string
+      total_price:
+        example: 50000
+        type: integer
+      user_id:
+        example: aba3b3ed-e3d8-4403-9751-1f04287c9d65
+        type: string
+    required:
+    - check_in
+    - check_out
+    - room_id
+    - status
+    - total_price
+    - user_id
+    type: object
+  presenter.ReservationResp:
+    properties:
+      check_in:
+        type: string
+      check_out:
+        type: string
+      id:
+        type: integer
+      room_id:
+        type: integer
+      status:
+        type: string
+      total_price:
+        type: integer
+      user_id:
+        type: string
+    type: object
+  presenter.Response:
+    properties:
+      data: {}
+      error:
+        type: string
+      message:
+        type: string
+      success:
+        type: boolean
+    type: object
+  presenter.RoomResp:
+    properties:
+      agency_price:
+        type: integer
+      capacity:
+        type: integer
+      facilities:
+        type: string
+      hotel_id:
+        type: integer
+      id:
+        type: integer
+      is_available:
+        type: boolean
+      name:
+        type: string
+      user_price:
+        type: integer
+    type: object
+  room.Room:
+    properties:
+      agencyPrice:
+        type: integer
+      capacity:
+        type: integer
+      facilities:
+        type: string
+      hotelID:
+        type: integer
+      id:
+        type: integer
+      isAvailable:
+        type: boolean
+      name:
+        type: string
+      userPrice:
+        type: integer
+    type: object
+host: localhost:8080
+info:
+  contact:
+    name: HeisenGo
+    url: https://github.com/HeisenGo
+  description: Hotel And Room Reservaiton Domain
+  title: heisenbaba-HotelDomain
+  version: "1.0"
+paths:
+  /hotels:
+    get:
+      description: Get paginated list of hotels with filters
+      parameters:
+      - description: City
+        in: query
+        name: city
+        type: string
+      - description: Country
+        in: query
+        name: country
+        type: string
+      - description: Room capacity
+        in: query
+        name: capacity
+        type: integer
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Page size
+        in: query
+        name: page_size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presenter.FullHotelResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/presenter.Response'
+      summary: Get hotels
+      tags:
+      - hotels
+    post:
+      consumes:
+      - application/json
+      description: Create a new hotel
+      parameters:
+      - description: Hotel to create
+        in: body
+        name: hotel
+        required: true
+        schema:
+          $ref: '#/definitions/presenter.CreateHotelReq'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/presenter.CreateHotelResponse'
+        "400":
+          description: 'error: bad request'
+          schema:
+            $ref: '#/definitions/presenter.Response'
+        "500":
+          description: 'error: internal server error'
+          schema:
+            $ref: '#/definitions/presenter.Response'
+      summary: Create a new hotel
+      tags:
+      - hotels
+  /hotels/{id}:
+    delete:
+      description: Delete a hotel by ID
+      parameters:
+      - description: Hotel ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: 'error: bad request'
+          schema:
+            $ref: '#/definitions/presenter.Response'
+        "500":
+          description: 'error: internal server error'
+          schema:
+            $ref: '#/definitions/presenter.Response'
+      summary: Delete a hotel by ID
+      tags:
+      - hotels
+    put:
+      consumes:
+      - application/json
+      description: Update a hotel by ID
+      parameters:
+      - description: Hotel ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Hotel to update
+        in: body
+        name: hotel
+        required: true
+        schema:
+          $ref: '#/definitions/presenter.CreateHotelReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presenter.FullHotelResponse'
+        "400":
+          description: 'error: bad request'
+          schema:
+            $ref: '#/definitions/presenter.Response'
+        "500":
+          description: 'error: internal server error'
+          schema:
+            $ref: '#/definitions/presenter.Response'
+      summary: Update a hotel by ID
+      tags:
+      - hotels
+  /hotels/{id}/block:
+    patch:
+      description: Block a hotel by its ID
+      parameters:
+      - description: Hotel ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Hotel blocked successfully
+          schema:
+            $ref: '#/definitions/presenter.Response'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/presenter.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/presenter.Response'
+      summary: Block a hotel by ID
+      tags:
+      - hotels
+  /hotels/owner:
+    get:
+      description: Get hotels by owner ID
+      parameters:
+      - description: Owner ID
+        in: query
+        name: owner_id
+        required: true
+        type: integer
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Page size
+        in: query
+        name: page_size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presenter.FullHotelResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/presenter.Response'
+      summary: Get hotels by owner ID
+      tags:
+      - hotels
+  /reservations:
+    post:
+      consumes:
+      - application/json
+      description: Create a new reservation
+      parameters:
+      - description: Reservation to create
+        in: body
+        name: reservation
+        required: true
+        schema:
+          $ref: '#/definitions/presenter.ReservationCreateReq'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/presenter.ReservationResp'
+        "400":
+          description: 'error: bad request'
+          schema:
+            $ref: '#/definitions/presenter.Response'
+        "500":
+          description: 'error: internal server error'
+          schema:
+            $ref: '#/definitions/presenter.Response'
+      summary: Create a new reservation
+      tags:
+      - reservations
+  /reservations/{id}:
+    delete:
+      description: Delete a reservation by ID
+      parameters:
+      - description: Reservation ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: 'error: bad request'
+          schema:
+            $ref: '#/definitions/presenter.Response'
+        "500":
+          description: 'error: internal server error'
+          schema:
+            $ref: '#/definitions/presenter.Response'
+      summary: Delete a reservation by ID
+      tags:
+      - reservations
+    get:
+      description: Get a reservation by ID
+      parameters:
+      - description: Reservation ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presenter.ReservationResp'
+        "400":
+          description: 'error: bad request'
+          schema:
+            $ref: '#/definitions/presenter.Response'
+        "500":
+          description: 'error: internal server error'
+          schema:
+            $ref: '#/definitions/presenter.Response'
+      summary: Get a reservation by ID
+      tags:
+      - reservations
+    put:
+      consumes:
+      - application/json
+      description: Update a reservation by ID
+      parameters:
+      - description: Reservation ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Reservation to update
+        in: body
+        name: reservation
+        required: true
+        schema:
+          $ref: '#/definitions/presenter.ReservationCreateReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presenter.ReservationResp'
+        "400":
+          description: 'error: bad request'
+          schema:
+            $ref: '#/definitions/presenter.Response'
+        "500":
+          description: 'error: internal server error'
+          schema:
+            $ref: '#/definitions/presenter.Response'
+      summary: Update a reservation by ID
+      tags:
+      - reservations
+  /reservations/hotel:
+    get:
+      description: Get reservations by hotel owner ID
+      parameters:
+      - description: Owner ID
+        in: query
+        name: owner_id
+        required: true
+        type: string
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Page size
+        in: query
+        name: page_size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presenter.FullReservationResponse'
+        "400":
+          description: 'error: bad request'
+          schema:
+            $ref: '#/definitions/presenter.Response'
+        "500":
+          description: 'error: internal server error'
+          schema:
+            $ref: '#/definitions/presenter.Response'
+      summary: Get reservations by hotel owner ID
+      tags:
+      - reservations
+  /reservations/user:
+    get:
+      description: Get reservations by user ID
+      parameters:
+      - description: User ID
+        in: query
+        name: user_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presenter.ReservationResp'
+        "400":
+          description: 'error: bad request'
+          schema:
+            $ref: '#/definitions/presenter.Response'
+        "500":
+          description: 'error: internal server error'
+          schema:
+            $ref: '#/definitions/presenter.Response'
+      summary: Get reservations by user ID
+      tags:
+      - reservations
+  /rooms:
+    get:
+      description: Get paginated list of rooms
+      parameters:
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Page size
+        in: query
+        name: page_size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presenter.RoomResp'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/presenter.Response'
+      summary: Get rooms
+      tags:
+      - rooms
+    post:
+      consumes:
+      - application/json
+      description: Create a new room
+      parameters:
+      - description: Room to create
+        in: body
+        name: room
+        required: true
+        schema:
+          $ref: '#/definitions/presenter.CreateRoomReq'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/presenter.RoomResp'
+        "400":
+          description: 'error: bad request'
+          schema:
+            $ref: '#/definitions/presenter.Response'
+        "500":
+          description: 'error: internal server error'
+          schema:
+            $ref: '#/definitions/presenter.Response'
+      summary: Create a new room
+      tags:
+      - rooms
+  /rooms/{id}:
+    delete:
+      description: Delete a room by ID
+      parameters:
+      - description: Room ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "404":
+          description: 'error: bad request'
+          schema:
+            $ref: '#/definitions/presenter.Response'
+        "500":
+          description: 'error: internal server error'
+          schema:
+            $ref: '#/definitions/presenter.Response'
+      summary: Delete a room by ID
+      tags:
+      - rooms
+    put:
+      consumes:
+      - application/json
+      description: Update a room by ID
+      parameters:
+      - description: Room ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Room to update
+        in: body
+        name: room
+        required: true
+        schema:
+          $ref: '#/definitions/presenter.CreateRoomReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presenter.RoomResp'
+        "400":
+          description: 'error: bad request'
+          schema:
+            $ref: '#/definitions/presenter.Response'
+        "404":
+          description: 'error: bad request'
+          schema:
+            $ref: '#/definitions/presenter.Response'
+        "500":
+          description: 'error: internal server error'
+          schema:
+            $ref: '#/definitions/presenter.Response'
+      summary: Update a room by ID
+      tags:
+      - rooms
+swagger: "2.0"
