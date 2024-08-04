@@ -87,6 +87,7 @@ type Trip struct {
 	IsConfirmed            bool
 	StartDate              *time.Time // should be given by trip generator
 	EndDate                *time.Time // should be calculated according to the vehicle speed and path distance
+    Profit      float64
 }
 
 type Path struct {
