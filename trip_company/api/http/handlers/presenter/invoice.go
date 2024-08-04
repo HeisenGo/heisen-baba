@@ -8,7 +8,7 @@ import (
 type AgencyInvoice struct {
 	ID             uint         `json:"id"`
 	TicketID       uint         `json:"ticket_id"`
-	Ticket         AgencyTicket `json:"ticket"`
+	//Ticket         AgencyTicket `json:"ticket"`
 	IssuedDate     Timestamp    `json:"issued_date"`
 	Info           string       `json:"info"`
 	PerAmountPrice float64      `json:"per_price"`
@@ -19,7 +19,7 @@ type AgencyInvoice struct {
 type UserInvoice struct {
 	ID             uint       `json:"id"`
 	TicketID       uint       `json:"ticket_id"`
-	Ticket         UserTicket `json:"ticket"`
+	//Ticket         UserTicket `json:"ticket"`
 	IssuedDate     Timestamp  `json:"issued_date"`
 	Info           string     `json:"info"`
 	PerAmountPrice float64    `json:"per_price"`
@@ -28,11 +28,11 @@ type UserInvoice struct {
 }
 
 func InvoiceToAgencyInvoice(i invoice.Invoice) AgencyInvoice {
-	ticket := TicketToAgencyTicket(*i.Ticket)
+	//ticket := TicketToAgencyTicket(*i.Ticket)
 	return AgencyInvoice{
 		ID:             i.ID,
 		TicketID:       i.TicketID,
-		Ticket:         ticket,
+		//Ticket:         ticket,
 		IssuedDate:     Timestamp(i.IssuedDate),
 		Info:           i.Info,
 		PerAmountPrice: i.PerAmountPrice,
@@ -42,11 +42,11 @@ func InvoiceToAgencyInvoice(i invoice.Invoice) AgencyInvoice {
 }
 
 func InvoiceToUserInvoice(i invoice.Invoice) UserInvoice {
-	ticket := TicketToUserTicket(*i.Ticket)
+	//ticket := TicketToUserTicket(*i.Ticket)
 	return UserInvoice{
 		ID:             i.ID,
 		TicketID:       i.TicketID,
-		Ticket:         ticket,
+	//	Ticket:         ticket,
 		IssuedDate:     Timestamp(i.IssuedDate),
 		Info:           i.Info,
 		PerAmountPrice: i.PerAmountPrice,
