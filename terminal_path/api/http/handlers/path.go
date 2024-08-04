@@ -133,11 +133,7 @@ func PatchPath(pathService *service.PathService) fiber.Handler {
 		}
 
 		newPath := presenter.UpdatePathReqToPath(&req, uint(pathID))
-		// TODO Get this from company-trip service: hasUnFinishedTrips
-		//***********************************************************
-		hasUnFinishedTrips := false
-		//**************************************************************
-		changedPath, err := pathService.PatchPath(c.UserContext(), newPath, hasUnFinishedTrips)
+		changedPath, err := pathService.PatchPath(c.UserContext(), newPath)
 
 		if err != nil {
 			if errors.Is(err, path.ErrFailedToUpdate) || errors.Is(err, path.ErrPathNotFound) || errors.Is(err, path.ErrCanNotUpdatePath) || errors.Is(err, path.ErrDuplication) || errors.Is(err, path.ErrMisMatchStartEndTerminalType) || errors.Is(err, path.ErrSameCitiesTerminals) || errors.Is(err, terminal.ErrTerminalNotFound) || errors.Is(err, internal.ErrEmptyString) || errors.Is(err, internal.ErrConsecutiveSpaces) || errors.Is(err, internal.ErrExceedsMaxLength) || errors.Is(err, internal.ErrInvalidCharacters) {
@@ -166,12 +162,8 @@ func DeletePath(pathService *service.PathService) fiber.Handler {
 			return SendError(c, errWrongIDType, fiber.StatusBadRequest)
 		}
 
-		// TODO Get this from company-trip service: hasUnFinishedTrips
-		//***********************************************************
-		hasUnFinishedTrips := false
-		//**************************************************************
-
-		_, err = pathService.DeletePath(c.UserContext(), uint(pathID), hasUnFinishedTrips)
+		
+		_, err = pathService.DeletePath(c.UserContext(), uint(pathID))
 
 		if err != nil {
 			if errors.Is(err, path.ErrCanNotDelete) || errors.Is(err, path.ErrPathNotFound) {

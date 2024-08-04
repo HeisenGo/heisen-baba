@@ -7,6 +7,7 @@ import (
 	"terminalpathservice/internal/path"
 	"terminalpathservice/internal/terminal"
 	"terminalpathservice/pkg/adapters/clients/grpc"
+	"terminalpathservice/pkg/adapters/clients/rest"
 	"terminalpathservice/pkg/adapters/consul"
 	"terminalpathservice/pkg/adapters/storage"
 	"terminalpathservice/pkg/ports"
@@ -17,12 +18,13 @@ import (
 )
 
 type AppContainer struct {
-	cfg             config.Config
-	dbConn          *gorm.DB
-	pathService     *PathService
-	terminalService *TerminalService
-	serviceRegistry ports.IServiceRegistry
-	authClient      clients.IAuthClient
+	cfg               config.Config
+	dbConn            *gorm.DB
+	pathService       *PathService
+	terminalService   *TerminalService
+	serviceRegistry   ports.IServiceRegistry
+	authClient        clients.IAuthClient
+	tripCompanyClient clients.ITripCompanyClient
 }
 
 func NewAppContainer(cfg config.Config) (*AppContainer, error) {
@@ -45,6 +47,7 @@ func NewAppContainer(cfg config.Config) (*AppContainer, error) {
 	// service registry
 	app.mustRegisterService(cfg.Server)
 	app.setAuthClient(cfg.Server.ServiceRegistry.AuthServiceName)
+	app.setTripCompanyClient(cfg.Server.ServiceRegistry.TripCompanyServiceName)
 
 	app.setTerminalService()
 	app.setPathService()
@@ -80,6 +83,10 @@ func (a *AppContainer) AuthClient() clients.IAuthClient {
 	return a.authClient
 }
 
+func (a *AppContainer) TripCompanyClient() clients.ITripCompanyClient {
+	return a.tripCompanyClient
+}
+
 func (a *AppContainer) TerminalServiceFromCtx(ctx context.Context) *TerminalService {
 	tx, ok := valuecontext.TryGetTxFromContext(ctx)
 	if !ok {
@@ -111,6 +118,13 @@ func (a *AppContainer) setAuthClient(authServiceName string) {
 	a.authClient = grpc.NewGRPCAuthClient(a.serviceRegistry, authServiceName)
 }
 
+func (a *AppContainer) setTripCompanyClient(tripCompanyServiceName string) {
+	if a.tripCompanyClient != nil {
+		return
+	}
+	a.tripCompanyClient = rest.NewRestTripCompanyClient(a.serviceRegistry, tripCompanyServiceName)
+}
+
 func (a *AppContainer) PathService() *PathService {
 	return a.pathService
 }
@@ -129,6 +143,7 @@ func (a *AppContainer) PathServiceFromCtx(ctx context.Context) *PathService {
 	return NewPathService(
 		path.NewOps(storage.NewPathRepo(gc)),
 		terminal.NewOps(storage.NewTerminalRepo(gc)),
+		a.TripCompanyClient(),
 	)
 }
 
@@ -136,7 +151,7 @@ func (a *AppContainer) setPathService() {
 	if a.pathService != nil {
 		return
 	}
-	a.pathService = NewPathService(path.NewOps(storage.NewPathRepo(a.dbConn)), terminal.NewOps(storage.NewTerminalRepo(a.dbConn)))
+	a.pathService = NewPathService(path.NewOps(storage.NewPathRepo(a.dbConn)), terminal.NewOps(storage.NewTerminalRepo(a.dbConn)), a.TripCompanyClient())
 }
 
 func (a *AppContainer) mustRegisterService(srvCfg config.Server) {
