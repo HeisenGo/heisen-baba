@@ -1,0 +1,50 @@
+package consul
+
+import (
+	"fmt"
+	consulAPI "github.com/hashicorp/consul/api"
+)
+
+type Consul struct {
+	Address string
+}
+
+func NewConsul(address string) *Consul {
+	return &Consul{Address: address}
+}
+
+
+func (c *Consul) RegisterService(serviceName, serviceHostAddress, servicePrefixPath, serviceHTTPHealthPath string, serviceGRPCPort int) error {
+	consulConfig := consulAPI.DefaultConfig()
+	consulConfig.Address = c.Address
+	consulClient, err := consulAPI.NewClient(consulConfig)
+	if err != nil {
+		return err
+	}
+
+
+	GRPCHealthURL := fmt.Sprintf("%s:%v", serviceHostAddress, serviceGRPCPort)
+	// Register service with Consul
+	registration := &consulAPI.AgentServiceRegistration{
+		ID:      fmt.Sprintf("%s-service-id", serviceName),
+		Name:    serviceName,
+		Address: serviceHostAddress,
+		Port:    serviceGRPCPort,
+		Tags: []string{
+			serviceName,
+			fmt.Sprintf("traefik.http.routers.%s_router.rule=PathPrefix(`%s`)", serviceName, servicePrefixPath),
+			fmt.Sprintf("traefik.http.services.%s.loadbalancer.server.port=%v", serviceName, serviceGRPCPort),
+		},
+		Check: &consulAPI.AgentServiceCheck{
+			GRPC:     GRPCHealthURL,
+			Interval: "10s",
+			Timeout:  "1s",
+		},
+	}
+
+	err = consulClient.Agent().ServiceRegister(registration)
+	if err != nil {
+		return err
+	}
+	return nil
+}

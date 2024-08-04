@@ -1,0 +1,100 @@
+package storage
+
+import (
+	"context"
+	"fmt"
+	"strings"
+	"tripcompanyservice/internal/techteam"
+	"tripcompanyservice/pkg/adapters/storage/entities"
+	"tripcompanyservice/pkg/adapters/storage/mappers"
+
+	"gorm.io/gorm"
+)
+
+type techTeamRepo struct {
+	db *gorm.DB
+}
+
+func NewTechTeamRepo(db *gorm.DB) techteam.Repo {
+	return &techTeamRepo{db}
+}
+
+func (r *techTeamRepo) GetTechTeamByID(ctx context.Context, id uint) (*techteam.TechTeam, error) {
+	var t entities.TechTeam
+	if err := r.db.WithContext(ctx).
+		Preload("TechTeamMember").
+		First(&t, id).Error; err != nil {
+		if strings.Contains(err.Error(), "record not found") {
+			return nil, nil
+		}
+		return nil, fmt.Errorf("%w", err)
+	}
+	dT := mappers.TechTeamEntityToDomain(t)
+	return &dT, nil
+}
+
+func (r *techTeamRepo) Insert(ctx context.Context, t *techteam.TechTeam) error {
+	teamEntity := mappers.TechTeamDomainToEntity(t)
+	if err := r.db.WithContext(ctx).Save(&teamEntity).Error; err != nil {
+		return err
+	}
+
+	t.ID = teamEntity.ID
+
+	return nil
+}
+
+func (r *techTeamRepo) InsertMember(ctx context.Context, t *techteam.TechTeamMember) error {
+	memberEntity := mappers.MemberDomainToEntity(t)
+	if err := r.db.WithContext(ctx).Save(&memberEntity).Error; err != nil {
+		return err
+	}
+
+	t.ID = memberEntity.ID
+	return nil
+}
+
+func (r *techTeamRepo) GetTechTeamsOfCompany(ctx context.Context, companyId uint, limit, offset uint) ([]techteam.TechTeam, uint, error) {
+	query := r.db.WithContext(ctx).Model(&entities.TechTeam{}).Where("transport_company_id = ?", companyId)
+
+	var total int64
+
+	if err := query.Count(&total).Error; err != nil {
+		return nil, 0, err
+	}
+
+	if offset > 0 {
+		query = query.Offset(int(offset))
+	}
+
+	if limit > 0 {
+		query = query.Limit(int(limit))
+	}
+
+	var teams []entities.TechTeam
+
+	if err := query.Find(&teams).Error; err != nil {
+		if strings.Contains(err.Error(), "record not found") {
+			return nil, 0, nil
+		}
+		return nil, 0, err
+	}
+
+	return mappers.BatchTecTeamEnToDo(teams), uint(total), nil
+}
+
+func (r *techTeamRepo) GetTechTeamMemberByUserIDAndTechTeamID(ctx context.Context, userID uint, techTeamID uint) (*techteam.TechTeamMember, error) {
+	var techTeamMember entities.TechTeamMember
+
+	if err := r.db.WithContext(ctx).
+		Where("user_id = ? AND tech_team_id = ?", userID, techTeamID).
+		First(&techTeamMember).Error; err != nil {
+		if strings.Contains(err.Error(), "record not found") {
+			return nil, nil
+		}
+		return nil, fmt.Errorf("error retrieving TechTeamMember: %w", err)
+	}
+
+	m := mappers.MemberEntityToMemberDomain(techTeamMember)
+	return &m, nil
+}

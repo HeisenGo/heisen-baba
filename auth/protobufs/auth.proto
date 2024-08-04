@@ -1,0 +1,58 @@
+syntax = "proto3";
+
+option go_package = "auth/internal/protobufs";
+package auth;
+
+service AuthService {
+  rpc Login (LoginRequest) returns (LoginResponse) {}
+  rpc GetUserByToken (GetUserByTokenRequest) returns (GetUserByTokenResponse) {}
+  rpc Register (RegisterRequest) returns (RegisterResponse) {}
+  rpc RefreshToken (RefreshTokenRequest) returns (LoginResponse) {}
+  rpc Check (HealthCheckRequest) returns (HealthCheckResponse) {}
+//  rpc Watch (HealthCheckRequest) returns (stream HealthCheckResponse) {}
+}
+
+message HealthCheckRequest {
+  string service = 1;
+}
+
+message HealthCheckResponse {
+  enum ServingStatus {
+    UNKNOWN = 0;
+    SERVING = 1;
+    NOT_SERVING = 2;
+  }
+  ServingStatus status = 1;
+}
+
+message LoginRequest {
+  string email = 1;
+  string password = 2;
+}
+
+message LoginResponse {
+  string token = 1;
+  string refreshToken = 2;
+}
+
+message GetUserByTokenRequest {
+  string token = 1;
+}
+
+message GetUserByTokenResponse {
+  string userId = 1;
+  bool isAdmin = 2;
+}
+
+message RegisterRequest {
+  string email = 1;
+  string password = 4;
+}
+
+message RegisterResponse {
+  string userId = 1;
+}
+
+message RefreshTokenRequest {
+  string refreshToken = 1;
+}
