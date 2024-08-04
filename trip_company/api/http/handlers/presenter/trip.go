@@ -144,9 +144,14 @@ type OwnerAdminTechTeamOperatorTripResponse struct {
 	StartDate              Timestamp                      `json:"start_date"`
 	EndDate                Timestamp                      `json:"end_date"`
 	IsConfirmed            bool                           `json:"is_confirmed"`
+	VehicleRequest         *CreateVehicleRes         `json:"vehicle_req"`
 }
 
 func TripToOwnerAdminTechTeamOperatorTripResponse(t trip.Trip) OwnerAdminTechTeamOperatorTripResponse {
+	var vR CreateVehicleRes
+	if t.VehicleRequest != nil {
+		vR = VehicleToCreateVehicleRes(*t.VehicleRequest)
+	}
 	// check ID is owner TODO:
 	p := TripCancelingPenaltyToTripCancellingPenaltyRes(t.TripCancellingPenalty)
 	var startDate, endDate Timestamp
@@ -166,6 +171,7 @@ func TripToOwnerAdminTechTeamOperatorTripResponse(t trip.Trip) OwnerAdminTechTea
 		UserPrice:              t.UserPrice,
 		AgencyPrice:            t.AgencyPrice,
 		PathID:                 t.PathID,
+		VehicleRequest:         &vR,
 		MinPassengers:          t.MinPassengers,
 		TechTeamID:             t.TechTeamID,
 		MaxTickets:             t.MaxTickets,
