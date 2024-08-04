@@ -1,0 +1,797 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "Agency And Tour Reservaiton Domain",
+        "title": "heisenbaba-Agency Domain",
+        "contact": {
+            "name": "HeisenGo",
+            "url": "https://github.com/HeisenGo"
+        },
+        "version": "1.0"
+    },
+    "host": "localhost:8082",
+    "basePath": "/api/v1",
+    "paths": {
+        "/agencies": {
+            "get": {
+                "description": "Get paginated list of agencies with filters",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "agencies"
+                ],
+                "summary": "Get agencies",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Name",
+                        "name": "name",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page number",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page size",
+                        "name": "page_size",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/presenter.FullAgencyResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/presenter.Response"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Create a new agency",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "agencies"
+                ],
+                "summary": "Create a new agency",
+                "parameters": [
+                    {
+                        "description": "Agency to create",
+                        "name": "agency",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/presenter.CreateAgencyReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/presenter.CreateAgencyResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "error: bad request",
+                        "schema": {
+                            "$ref": "#/definitions/presenter.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "error: internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/presenter.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/agencies/owner": {
+            "get": {
+                "description": "Get agencies by owner ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "agencies"
+                ],
+                "summary": "Get agencies by owner ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Owner ID",
+                        "name": "owner_id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page number",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page size",
+                        "name": "page_size",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/presenter.FullAgencyResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "error: bad request",
+                        "schema": {
+                            "$ref": "#/definitions/presenter.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/presenter.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/agencies/{id}": {
+            "put": {
+                "description": "Update an agency by ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "agencies"
+                ],
+                "summary": "Update an agency by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Agency ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Agency to update",
+                        "name": "agency",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/presenter.CreateAgencyReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/presenter.FullAgencyResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "error: bad request",
+                        "schema": {
+                            "$ref": "#/definitions/presenter.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "error: internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/presenter.Response"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete an agency by ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "agencies"
+                ],
+                "summary": "Delete an agency by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Agency ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "error: bad request",
+                        "schema": {
+                            "$ref": "#/definitions/presenter.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "error: internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/presenter.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/agencies/{id}/block": {
+            "patch": {
+                "description": "Block an agency by its ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "agencies"
+                ],
+                "summary": "Block an agency by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Agency ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Agency blocked successfully",
+                        "schema": {
+                            "$ref": "#/definitions/presenter.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/presenter.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/presenter.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/tours": {
+            "get": {
+                "description": "Get a paginated list of tours",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "tours"
+                ],
+                "summary": "Get tours",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Agency ID",
+                        "name": "agency_id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page number",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page size",
+                        "name": "page_size",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/presenter.FullTourResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "error: internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/presenter.Response"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Create a new tour",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "tours"
+                ],
+                "summary": "Create a new tour",
+                "parameters": [
+                    {
+                        "description": "Tour to create",
+                        "name": "tour",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/presenter.CreateTourReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/presenter.FullTourResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "error: bad request",
+                        "schema": {
+                            "$ref": "#/definitions/presenter.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "error: internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/presenter.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/tours/agency": {
+            "get": {
+                "description": "Get tours by agency ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "tours"
+                ],
+                "summary": "Get tours by agency ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Agency ID",
+                        "name": "agency_id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page number",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page size",
+                        "name": "page_size",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/presenter.FullTourResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "error: internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/presenter.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/tours/{id}": {
+            "put": {
+                "description": "Update a tour by ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "tours"
+                ],
+                "summary": "Update a tour by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Tour ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Tour to update",
+                        "name": "tour",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/presenter.UpdateTourReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/presenter.FullTourResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "error: bad request",
+                        "schema": {
+                            "$ref": "#/definitions/presenter.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "error: internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/presenter.Response"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete a tour by ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "tours"
+                ],
+                "summary": "Delete a tour by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Tour ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "error: bad request",
+                        "schema": {
+                            "$ref": "#/definitions/presenter.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "error: internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/presenter.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/tours/{id}/approve": {
+            "patch": {
+                "description": "Approve a tour by ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "tours"
+                ],
+                "summary": "Approve a tour by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Tour ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Tour approved successfully",
+                        "schema": {
+                            "$ref": "#/definitions/presenter.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/presenter.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/presenter.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/tours/{id}/status": {
+            "patch": {
+                "description": "Set the active status of a tour",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "tours"
+                ],
+                "summary": "Set the active status of a tour",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Tour ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "Active status",
+                        "name": "is_active",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Tour status updated successfully",
+                        "schema": {
+                            "$ref": "#/definitions/presenter.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/presenter.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/presenter.Response"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "presenter.CreateAgencyReq": {
+            "type": "object",
+            "required": [
+                "name",
+                "owner_id"
+            ],
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "example": "myagency"
+                },
+                "owner_id": {
+                    "type": "string",
+                    "example": "aba3b3ed-e3d8-4403-9751-1f04287c9d65"
+                }
+            }
+        },
+        "presenter.CreateAgencyResponse": {
+            "type": "object",
+            "properties": {
+                "agency_id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "owner_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "presenter.CreateTourReq": {
+            "type": "object",
+            "required": [
+                "agency_id",
+                "back_ticket_id",
+                "capacity",
+                "go_ticket_id",
+                "hotel_id",
+                "release_date"
+            ],
+            "properties": {
+                "agency_id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "back_ticket_id": {
+                    "type": "integer",
+                    "example": 2
+                },
+                "capacity": {
+                    "type": "integer",
+                    "example": 20
+                },
+                "go_ticket_id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "hotel_id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "is_active": {
+                    "type": "boolean",
+                    "example": true
+                },
+                "is_approved": {
+                    "type": "boolean",
+                    "example": true
+                },
+                "release_date": {
+                    "type": "string",
+                    "example": "2024-12-01T15:04:05Z"
+                }
+            }
+        },
+        "presenter.FullAgencyResponse": {
+            "type": "object",
+            "properties": {
+                "agency_id": {
+                    "type": "integer",
+                    "example": 12
+                },
+                "is_blocked": {
+                    "type": "boolean",
+                    "example": false
+                },
+                "name": {
+                    "type": "string",
+                    "example": "myagency"
+                },
+                "owner_id": {
+                    "type": "string",
+                    "example": "aba3b3ed-e3d8-4403-9751-1f04287c9d65"
+                }
+            }
+        },
+        "presenter.FullTourResponse": {
+            "type": "object",
+            "properties": {
+                "agency_id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "back_ticket_id": {
+                    "type": "integer",
+                    "example": 2
+                },
+                "capacity": {
+                    "type": "integer",
+                    "example": 20
+                },
+                "go_ticket_id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "hotel_id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "is_active": {
+                    "type": "boolean",
+                    "example": true
+                },
+                "is_approved": {
+                    "type": "boolean",
+                    "example": true
+                },
+                "release_date": {
+                    "type": "string",
+                    "example": "2024-12-01T15:04:05Z"
+                },
+                "tour_id": {
+                    "type": "integer",
+                    "example": 12
+                }
+            }
+        },
+        "presenter.Response": {
+            "type": "object",
+            "properties": {
+                "data": {},
+                "error": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "success": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "presenter.UpdateTourReq": {
+            "type": "object",
+            "properties": {
+                "agency_id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "back_ticket_id": {
+                    "type": "integer",
+                    "example": 2
+                },
+                "capacity": {
+                    "type": "integer",
+                    "example": 20
+                },
+                "go_ticket_id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "hotel_id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "is_active": {
+                    "type": "boolean",
+                    "example": true
+                },
+                "is_approved": {
+                    "type": "boolean",
+                    "example": true
+                },
+                "release_date": {
+                    "type": "string",
+                    "example": "2024-12-01T15:04:05Z"
+                }
+            }
+        }
+    }
+}

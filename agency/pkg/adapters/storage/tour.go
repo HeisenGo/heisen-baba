@@ -75,10 +75,11 @@ func (r *tourRepo) GetToursByAgencyID(ctx context.Context, agencyID uint, page, 
 
 func (r *tourRepo) GetTourByID(ctx context.Context, id uint) (*tour.Tour, error) {
 	var tourEntity entities.Tour
-	if err := r.db.First(&tourEntity, id).Error; err != nil {
+	if err := r.db.WithContext(ctx).First(&tourEntity, id).Error; err != nil {
 		return nil, err
 	}
-	return mappers.TourEntityToDomain(tourEntity), nil
+	tour := mappers.TourEntityToDomain(tourEntity)
+	return &tour, nil
 }
 
 func (r *tourRepo) UpdateTour(ctx context.Context, t *tour.Tour) error {

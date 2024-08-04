@@ -18,7 +18,7 @@ var configPath = flag.String("config", "", "configuration path")
 //	@contact.name	HeisenGo
 //	@contact.url	https://github.com/HeisenGo
 
-// @host			localhost:8080
+// @host			localhost:8082
 // @BasePath		/api/v1
 func main() {
 	cfg := readConfig()

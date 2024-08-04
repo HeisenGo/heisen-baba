@@ -7,7 +7,8 @@ import (
 
 type Agency struct {
 	gorm.Model
-	OwnerID    `gorm:"uniqueIndex"`
+	OwnerID   uuid.UUID 
 	Name      string    `gorm:"uniqueIndex"`
 	IsBlocked bool
+	Tours     []Tour
 }

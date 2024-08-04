@@ -1,6 +1,8 @@
 package entities
 
 import (
+	"time"
+
 	"gorm.io/gorm"
 )
 
@@ -12,5 +14,7 @@ type Tour struct {
 	BackTicketID uint
 	HotelID      uint
 	Capacity     uint
-	ReleaseDate  string
+	ReleaseDate  time.Time
+	IsApproved   bool
+	IsActive     bool
 }

@@ -1,12 +1,13 @@
 package storage
 
 import (
-	"context"
-	"errors"
 	"agency/internal/agency"
 	"agency/pkg/adapters/storage/entities"
 	"agency/pkg/adapters/storage/mappers"
+	"context"
+	"errors"
 
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -33,13 +34,14 @@ func (r *agencyRepo) GetAgencies(ctx context.Context, name string, page, pageSiz
 	var a []entities.Agency
 	var int64Total int64
 
-	query := r.db.Model(&entities.Agency{})
+	query := r.db.Model(&entities.Agency{}).Preload("Tours")
 
 	// Filters
 	if name != "" {
 		query = query.Where("name = ?", name)
 	}
-
+	// Filter out blocked agencies
+	query = query.Where("is_blocked = ?", false)
 	// Count total records for pagination
 	query.Count(&int64Total)
 
@@ -62,7 +64,7 @@ func (r *agencyRepo) GetAgenciesByOwnerID(ctx context.Context, ownerID uuid.UUID
 	var agencyEntities []entities.Agency
 	var total int64
 
-	query := r.db.WithContext(ctx).Model(&entities.Agency{}).Where("owner_id = ?", ownerID)
+	query := r.db.WithContext(ctx).Model(&entities.Agency{}).Where("owner_id = ?", ownerID).Preload("Tours")
 
 	query.Count(&total)
 
@@ -80,10 +82,11 @@ func (r *agencyRepo) GetAgenciesByOwnerID(ctx context.Context, ownerID uuid.UUID
 
 func (r *agencyRepo) GetAgencyByID(ctx context.Context, id uint) (*agency.Agency, error) {
 	var agencyEntity entities.Agency
-	if err := r.db.First(&agencyEntity, id).Error; err != nil {
+	if err := r.db.Preload("Tours").First(&agencyEntity, id).Error; err != nil {
 		return nil, err
 	}
-	return mappers.AgencyEntityToDomain(agencyEntity), nil
+	ag := mappers.AgencyEntityToDomain(agencyEntity)
+	return &ag, nil
 }
 
 func (r *agencyRepo) UpdateAgency(ctx context.Context, a *agency.Agency) error {
