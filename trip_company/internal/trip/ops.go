@@ -215,7 +215,7 @@ func (o *Ops) UpdateTrip(ctx context.Context, id uint, newTrip, oldTrip *Trip) e
 		// TO DO move money from alibaba to company's owner wallet
 	}
 
-	if !newTrip.StartDate.IsZero() {
+	if newTrip.StartDate != nil{
 		if oldTrip.SoldTickets != 0 {
 			return ErrCanNotUpdate
 		} else {

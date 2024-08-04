@@ -8,6 +8,7 @@ import (
 	"tripcompanyservice/internal/invoice"
 	"tripcompanyservice/internal/ticket"
 	"tripcompanyservice/internal/trip"
+	vehiclerequest "tripcompanyservice/internal/vehicle_request"
 	"tripcompanyservice/pkg/adapters/consul"
 	"tripcompanyservice/pkg/adapters/storage"
 	"tripcompanyservice/pkg/ports"
@@ -24,6 +25,7 @@ type AppContainer struct {
 	ticketService   *TicketService
 	invoiceService  *InvoiceService
 	serviceRegistry *ports.IServiceRegistry
+	vehicleReqService  *VehicleReService
 }
 
 func NewAppContainer(cfg config.Config) (*AppContainer, error) {
@@ -199,4 +201,35 @@ func (a *AppContainer) setInvoiceService() {
 		return
 	}
 	a.invoiceService = NewInvoiceService(invoice.NewOps(storage.NewInvoiceRepo(a.dbConn)), ticket.NewOps(storage.NewTicketRepo(a.dbConn)), trip.NewOps(storage.NewTripRepo(a.dbConn)))
+}
+
+
+// vehicleReq
+
+func (a *AppContainer) VehicleReqService() *VehicleReService {
+	return a.vehicleReqService
+}
+
+func (a *AppContainer) VehicleReqServiceFromCtx(ctx context.Context) *VehicleReService {
+	tx, ok := valuecontext.TryGetTxFromContext(ctx)
+	if !ok {
+		return a.vehicleReqService
+	}
+
+	gc, ok := tx.Tx().(*gorm.DB)
+	if !ok {
+		return a.vehicleReqService
+	}
+
+	return NewVehicleReService(
+		vehiclerequest.NewOps(storage.NewVehicleReqRepo(gc)),
+		trip.NewOps(storage.NewTripRepo(gc)),
+	)
+}
+
+func (a *AppContainer) setVehicleReqService() {
+	if a.vehicleReqService != nil {
+		return
+	}
+	a.vehicleReqService = NewVehicleReService(vehiclerequest.NewOps(storage.NewVehicleReqRepo(a.dbConn)), trip.NewOps(storage.NewTripRepo(a.dbConn)))
 }

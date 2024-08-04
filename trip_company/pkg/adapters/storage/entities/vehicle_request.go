@@ -12,4 +12,5 @@ type VehicleRequest struct {
 	MatchedVehicleID  uint
 	VehicleReservationFee float64
 	VehicleProductionYear int
+	VehicleName        string
 }

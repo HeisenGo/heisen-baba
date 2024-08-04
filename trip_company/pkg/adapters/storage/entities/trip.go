@@ -33,9 +33,10 @@ type Trip struct {
 	TripCancelingPenalty    *TripCancellingPenalty `gorm:"foreignKey:TripCancellingPenaltyID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL"`
 	MaxTickets              uint
 	VehicleID               *uint
+	VehicleName             string 
 	IsCanceled              bool       `gorm:"default:false"`
 	IsFinished              bool       `gorm:"default:false"`
 	IsConfirmed             bool    `gorm:"default:false"`
-	StartDate               *time.Time `gorm:"uniqueIndex:idx_trip_unique"` // should be given by trip generator
+	StartDate               *time.Time `gorm:"not null;uniqueIndex:idx_trip_unique"` // should be given by trip generator
 	EndDate                 *time.Time // should be calculated according to the vehicle speed and path distance
 }
