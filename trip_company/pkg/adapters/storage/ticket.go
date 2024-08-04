@@ -57,7 +57,7 @@ func (r *ticketRepo) UpdateTicketStatus(ctx context.Context, ticketID uint, stat
 
 func (r *ticketRepo) GetTicketsByUserOrAgency(ctx context.Context, userID *uint, agencyID *uint, limit, offset uint) ([]ticket.Ticket, uint, error) {
 	query := r.db.WithContext(ctx).Model(&entities.Ticket{}).
-		Preload("Trip")
+		Preload("Trip").Preload("Invoice")
 
 	if userID != nil {
 		query = query.Where("user_id = ?", userID)
@@ -98,3 +98,20 @@ func (r *ticketRepo) UpdateTicket(ctx context.Context, id uint, updates map[stri
 
 	return nil
 }
+
+func (r *ticketRepo) GetTicketsWithInvoicesByTripID(ctx context.Context, tripID uint) ([]ticket.Ticket, error) {
+	var tickets []entities.Ticket
+
+	err := r.db.WithContext(ctx).
+		Preload("Invoice").       // Preload the related Invoice
+		Where("trip_id = ?", tripID). // Filter by trip_id
+		Find(&tickets).Error
+
+	if err != nil {
+		return nil, err
+	}
+	dTickets := mappers.BatchTicketEntitiesToTickets(tickets)
+	return dTickets, nil
+}
+
+
