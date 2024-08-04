@@ -62,6 +62,7 @@ func TripEntityToDomain(tripEntity entities.Trip) trip.Trip {
 		IsConfirmed:            tripEntity.IsConfirmed,
 		TechTeam:               &team,
 		VehicleRequest:         &vR,
+		Profit:                 tripEntity.Profit,
 	}
 }
 
@@ -118,6 +119,7 @@ func TripFullEntityToDomain(tripEntity entities.Trip) trip.Trip {
 		SoldTickets:            tripEntity.SoldTickets,
 		TripCancellingPenalty:  &penalty,
 		IsConfirmed:            tripEntity.IsConfirmed,
+		Profit:                 tripEntity.Profit,
 	}
 }
 
@@ -154,6 +156,7 @@ func TripDomainToEntity(t *trip.Trip) *entities.Trip {
 		EndDate:              t.EndDate,
 		SoldTickets:          t.SoldTickets,
 		IsConfirmed:          t.IsConfirmed,
+		Profit:               t.Profit,
 	}
 }
 
@@ -199,5 +202,6 @@ func SimpleTripEntityToDomain(tripEntity entities.Trip) trip.Trip {
 		EndDate:                tripEntity.EndDate,
 		SoldTickets:            tripEntity.SoldTickets,
 		IsConfirmed:            tripEntity.IsConfirmed,
+		Profit:                 tripEntity.Profit,
 	}
 }

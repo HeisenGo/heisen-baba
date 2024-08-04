@@ -8,7 +8,9 @@ import (
 
 func TicketEntityToDomainWithTrip(ticketEntity entities.Ticket) ticket.Ticket {
 	trip := SimpleTripEntityToDomain(*ticketEntity.Trip)
+	invoice := SimpleInvoiceEntityToDomain(*ticketEntity.Invoice)
 	return ticket.Ticket{
+		Invoice: invoice,
 		ID:         ticketEntity.ID,
 		TripID:     ticketEntity.TripID,
 		Trip:       &trip,
@@ -17,6 +19,23 @@ func TicketEntityToDomainWithTrip(ticketEntity entities.Ticket) ticket.Ticket {
 		Quantity:   ticketEntity.Quantity,
 		TotalPrice: ticketEntity.TotalPrice,
 		Status:     ticketEntity.Status,
+		Penalty: ticketEntity.Penalty,
+	}
+}
+
+
+func TicketInvoiceEntityToDomain(ticketEntity entities.Ticket) ticket.Ticket {
+	invoice := SimpleInvoiceEntityToDomain(*ticketEntity.Invoice)
+	return ticket.Ticket{
+		Invoice: invoice,
+		ID:         ticketEntity.ID,
+		TripID:     ticketEntity.TripID,
+		UserID:     ticketEntity.UserID,
+		AgencyID:   ticketEntity.AgencyID,
+		Quantity:   ticketEntity.Quantity,
+		TotalPrice: ticketEntity.TotalPrice,
+		Status:     ticketEntity.Status,
+		Penalty: ticketEntity.Penalty,
 	}
 }
 
@@ -35,6 +54,7 @@ func TicketEntityToDomainWithTripWithCompanyWithPenalty(ticketEntity entities.Ti
 		Quantity:   ticketEntity.Quantity,
 		TotalPrice: ticketEntity.TotalPrice,
 		Status:     ticketEntity.Status,
+		Penalty: ticketEntity.Penalty,
 	}
 }
 
@@ -46,6 +66,7 @@ func TicketDomainToEntity(t *ticket.Ticket) *entities.Ticket {
 		Quantity:   t.Quantity,
 		TotalPrice: t.TotalPrice,
 		Status:     t.Status,
+		Penalty: t.Penalty,
 	}
 }
 
@@ -59,5 +80,10 @@ func SimpleTicketEntityToDomain(ticketEntity entities.Ticket) ticket.Ticket {
 		Quantity:   ticketEntity.Quantity,
 		TotalPrice: ticketEntity.TotalPrice,
 		Status:     ticketEntity.Status,
+		Penalty: ticketEntity.Penalty,
 	}
+}
+
+func BatchTicketEntitiesToTickets(t []entities.Ticket)[]ticket.Ticket{
+	return fp.Map(t, TicketInvoiceEntityToDomain)
 }

@@ -40,4 +40,5 @@ type Trip struct {
 	IsConfirmed             bool    `gorm:"default:false"`
 	StartDate               *time.Time `gorm:"not null;uniqueIndex:idx_trip_unique"` // should be given by trip generator
 	EndDate                 *time.Time // should be calculated according to the vehicle speed and path distance
+	Profit      float64  `gorm:"default:0"`
 }
