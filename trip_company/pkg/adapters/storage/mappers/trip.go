@@ -1,6 +1,7 @@
 package mappers
 
 import (
+	"tripcompanyservice/internal/techteam"
 	"tripcompanyservice/internal/trip"
 	vehiclerequest "tripcompanyservice/internal/vehicle_request"
 	"tripcompanyservice/pkg/adapters/storage/entities"
@@ -24,6 +25,14 @@ func TripEntityToDomain(tripEntity entities.Trip) trip.Trip {
 	}
 	penalty := PenaltyEntityToDomain(*tripEntity.TripCancelingPenalty)
 	company := CompanyEntityToDomain(*tripEntity.TransportCompany)
+	var vR vehiclerequest.VehicleRequest
+	if tripEntity.VehicleRequest != nil {
+		vR = VehicleReqEntityToVehicleReqDomain(*tripEntity.VehicleRequest)
+	}
+	var team techteam.TechTeam
+	if tripEntity.TechTeam != nil {
+		team = TechTeamEntityToDomain(*tripEntity.TechTeam)
+	}
 	return trip.Trip{
 		ID:                     tripEntity.ID,
 		TransportCompanyID:     tripEntity.TransportCompanyID,
@@ -51,6 +60,8 @@ func TripEntityToDomain(tripEntity entities.Trip) trip.Trip {
 		EndDate:                tripEntity.EndDate,
 		SoldTickets:            tripEntity.SoldTickets,
 		IsConfirmed:            tripEntity.IsConfirmed,
+		TechTeam:               &team,
+		VehicleRequest:         &vR,
 	}
 }
 
@@ -74,6 +85,10 @@ func TripFullEntityToDomain(tripEntity entities.Trip) trip.Trip {
 	if tripEntity.VehicleRequest != nil {
 		vR = VehicleReqEntityToVehicleReqDomain(*tripEntity.VehicleRequest)
 	}
+	var team techteam.TechTeam
+	if tripEntity.TechTeam != nil {
+		team = TechTeamEntityToDomain(*tripEntity.TechTeam)
+	}
 	return trip.Trip{
 		ID:                     tripEntity.ID,
 		TransportCompanyID:     tripEntity.TransportCompanyID,
@@ -92,6 +107,7 @@ func TripFullEntityToDomain(tripEntity entities.Trip) trip.Trip {
 		Status:                 tripEntity.Status,
 		MinPassengers:          tripEntity.MinPassengers,
 		TechTeamID:             tripEntity.TechTeamID,
+		TechTeam:               &team,
 		TripCancelingPenaltyID: tripEntity.TripCancellingPenaltyID,
 		MaxTickets:             tripEntity.MaxTickets,
 		VehicleID:              tripEntity.VehicleID,
