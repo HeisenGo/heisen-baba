@@ -2,20 +2,29 @@ package service
 
 import (
 	"context"
+	"errors"
 	"time"
 	"tripcompanyservice/internal/company"
+	"tripcompanyservice/internal/techteam"
 	"tripcompanyservice/internal/trip"
 )
 
+var (
+	ErrAlreadyHasATeam   = errors.New("already has a team")
+	ErrInvalidAssignment = errors.New("types are different")
+)
+
 type TripService struct {
-	tripOps    *trip.Ops
-	companyOps *company.Ops
+	tripOps     *trip.Ops
+	companyOps  *company.Ops
+	techTeamOps *techteam.Ops
 }
 
-func NewTripService(tripOps *trip.Ops, companyOps *company.Ops) *TripService {
+func NewTripService(tripOps *trip.Ops, companyOps *company.Ops, techTeamOps *techteam.Ops) *TripService {
 	return &TripService{
-		tripOps:    tripOps,
-		companyOps: companyOps,
+		tripOps:     tripOps,
+		companyOps:  companyOps,
+		techTeamOps: techTeamOps,
 	}
 }
 
@@ -111,4 +120,36 @@ func (s *TripService) UpdateTrip(ctx context.Context, id uint, newTrip *trip.Tri
 		return nil, err
 	}
 	return oldTrip, nil
+}
+
+func (s *TripService) SetTechTeamToTrip(ctx context.Context, tripID, techteamID uint) (*trip.Trip, error) {
+	t, err := s.tripOps.GetFullTripByID(ctx, tripID)
+	if err != nil {
+		return nil, err
+	}
+
+	if t.TechTeamID != nil {
+		return nil, ErrAlreadyHasATeam
+	}
+
+	techteam, err := s.techTeamOps.GetTechTeamByID(ctx, techteamID)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if t.TripType != trip.TripType(techteam.TripType) {
+		return nil, ErrInvalidAssignment
+	}
+
+	updates := make(map[string]interface{})
+
+	updates["tech_team_id"] = techteamID
+
+	err = s.tripOps.UpdateTripTechTimID(ctx, tripID, updates)
+	if err != nil {
+		return nil, err
+	}
+	t.TechTeamID = &techteamID
+	return t, nil
 }
