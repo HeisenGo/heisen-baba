@@ -41,6 +41,7 @@ type AgencyTicket struct {
 	Quantity   int                `json:"quantity"`
 	TotalPrice float64            `json:"total_price"`
 	Status     string             `json:"status"`
+	Invoice    AgencyInvoice      `json:"invoice"`
 }
 
 type UserTicket struct {
@@ -51,10 +52,12 @@ type UserTicket struct {
 	Quantity   int              `json:"quantity"`
 	TotalPrice float64          `json:"total_price"`
 	Status     string           `json:"status"`
+	Invoice    UserInvoice      `json:"invoice"`
 }
 
 func TicketToAgencyTicket(t ticket.Ticket) AgencyTicket {
 	trip := TripToAgencyTripResponse(*t.Trip)
+	invoice := InvoiceToAgencyInvoice(t.Invoice)
 	return AgencyTicket{
 		ID:         t.ID,
 		TripID:     t.TripID,
@@ -63,12 +66,15 @@ func TicketToAgencyTicket(t ticket.Ticket) AgencyTicket {
 		Quantity:   t.Quantity,
 		TotalPrice: t.TotalPrice,
 		Status:     t.Status,
+		Invoice:    invoice,
 	}
 }
 
 func TicketToUserTicket(t ticket.Ticket) UserTicket {
 	trip := TripToUserTripResponse(*t.Trip)
+	invoice := InvoiceToUserInvoice(t.Invoice)
 	return UserTicket{
+		Invoice:    invoice,
 		ID:         t.ID,
 		TripID:     t.TripID,
 		Trip:       trip,
