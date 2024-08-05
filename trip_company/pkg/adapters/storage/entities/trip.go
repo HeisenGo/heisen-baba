@@ -8,14 +8,14 @@ import (
 
 type Trip struct {
 	gorm.Model
-	TransportCompanyID      uint `gorm:"not null;uniqueIndex:idx_trip_unique"`
+	TransportCompanyID      uint `gorm:"not null"`//;uniqueIndex:idx_trip_unique"`
 	TransportCompany        *TransportCompany `gorm:"foreignKey:TransportCompanyID; constraint:OnDelete:CASCADE;"`
 	TripType                string            `gorm:"type:varchar(20);not null"`
 	UserReleaseDate         time.Time
 	TourReleaseDate         time.Time
 	UserPrice               float64
 	AgencyPrice             float64
-	PathID                  uint   `gorm:"not null;uniqueIndex:idx_trip_unique"`
+	PathID                  uint   `gorm:"not null"`//;uniqueIndex:idx_trip_unique"`
 	Origin                  string `gorm:"type:varchar(100);not null"`
 	FromTerminalName        string
 	ToTerminalName          string
@@ -38,7 +38,7 @@ type Trip struct {
 	IsCanceled              bool       `gorm:"default:false"`
 	IsFinished              bool       `gorm:"default:false"`
 	IsConfirmed             bool    `gorm:"default:false"`
-	StartDate               *time.Time `gorm:"not null;uniqueIndex:idx_trip_unique"` // should be given by trip generator
+	StartDate               *time.Time `gorm:"not null;"`//uniqueIndex:idx_trip_unique"` // should be given by trip generator
 	EndDate                 *time.Time // should be calculated according to the vehicle speed and path distance
 	Profit      float64  `gorm:"default:0"`
 }
