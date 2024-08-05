@@ -108,13 +108,13 @@ func registerTransportCompanyRoutes(router fiber.Router, app *service.AppContain
 	router.Get("/trips", handlers.GetTrips(app.TripService()))
 	router.Get("/one-trip/:tripID", handlers.GetFullTripByID(app.TripService()))
 	router.Patch("/trips/:tripID",
-		handlers.PatchTrip(app.TripService()),
+		handlers.PatchTrip(app.TripServiceFromCtx),
 	)
 	router.Get("/company-trips/:companyID", handlers.GetCompanyTrips(app.TripService()))
 
 	router.Post("/buy", handlers.BuyTicket(app.TicketServiceFromCtx))
 	router.Patch("/cancel-ticket/:ticketID", handlers.CancelTicketByID(app.TicketServiceFromCtx))
-	
+
 	router.Get("/user-tickets", handlers.GetUserTickets(app.TicketService()))
 	router.Get("/agency-tickets/:agencyID", handlers.GetAgencyTickets(app.TicketService())) 
 

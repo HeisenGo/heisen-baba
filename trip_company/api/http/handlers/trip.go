@@ -34,11 +34,12 @@ func CreateTrip(serviceFactory ServiceFactory[*service.TripService]) fiber.Handl
 		creatorID := uint(1) // TO DO
 
 		if err := tripService.CreateTrip(c.UserContext(), t, creatorID); err != nil {
-			if errors.Is(err, company.ErrCompanyNotFound) || errors.Is(err, trip.ErrInvalidPercentage) || errors.Is(err, trip.ErrStartTime) || errors.Is(err, trip.ErrSecondPenalty) || errors.Is(err, trip.ErrInvalidPercentage) || errors.Is(err, trip.ErrDuplication) || errors.Is(err, trip.ErrFirstPenalty) || errors.Is(err, trip.ErrNegativePrice) {
+			if errors.Is(err, service.ErrPathNotFound) || errors.Is(err, company.ErrCompanyNotFound) || errors.Is(err, trip.ErrInvalidPercentage) || errors.Is(err, trip.ErrStartTime) || errors.Is(err, trip.ErrSecondPenalty) || errors.Is(err, trip.ErrInvalidPercentage) || errors.Is(err, trip.ErrDuplication) || errors.Is(err, trip.ErrFirstPenalty) || errors.Is(err, trip.ErrNegativePrice) {
 				return presenter.BadRequest(c, err)
 			}
-			//err := errors.New("Error")
-			// apply trace ID here .... TODO
+			if errors.Is(err, service.ErrForbidden) {
+				return presenter.Forbidden(c, err)
+			}
 			return presenter.InternalServerError(c, err)
 		}
 		res := presenter.TripToOwnerAdminTechTeamOperatorTripResponse(*t)
@@ -211,11 +212,11 @@ func GetTrips(tripService *service.TripService) fiber.Handler {
 	}
 }
 
-func PatchTrip(tripService *service.TripService) fiber.Handler { // tansactional!!!! TO DO:
+func PatchTrip(serviceFactory ServiceFactory[*service.TripService]) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 
 		var req presenter.UpdateTripRequest
-
+		tripService := serviceFactory(c.UserContext())
 		if err := c.BodyParser(&req); err != nil {
 			return presenter.BadRequest(c, err)
 		}
@@ -424,7 +425,6 @@ func GetCountPathUnfinishedTrips(tripService *service.TripService) fiber.Handler
 			if errors.Is(err, trip.ErrRecordsNotFound) {
 				return presenter.BadRequest(c, err)
 			}
-			err := errors.New("Error")
 			return presenter.InternalServerError(c, err)
 		}
 

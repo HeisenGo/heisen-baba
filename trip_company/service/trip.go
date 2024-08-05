@@ -21,6 +21,7 @@ var (
 	ErrCanceled    = errors.New("trip is canceled")
 	ErrUnConfirmed = errors.New("trip is not confirmed")
 	ErrFutureTrip  = errors.New("you can not finish future trips")
+	ErrPathNotFound = errors.New("path not found")
 )
 
 type TripService struct {
