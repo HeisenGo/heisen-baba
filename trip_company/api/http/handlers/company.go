@@ -183,7 +183,7 @@ func PatchCompany(companyService *service.TransportCompanyService) fiber.Handler
 		if companyID < 0 {
 			return presenter.BadRequest(c, errWrongIDType)
 		}
-		userID := uint(5) //ownerID
+		userID := uint(1) //ownerID
 		updatedCompany := presenter.UpdateCompanyToCompany(&req, uint(companyID))
 		changedCompany, err := companyService.PatchCompanyByOwner(c.UserContext(), updatedCompany, userID, req.NewOwnerEmail)
 

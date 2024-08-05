@@ -199,6 +199,43 @@ func PatchTrip(tripService *service.TripService) fiber.Handler { // tansactional
 	}
 }
 
+
+func SetTechTeamToTrip(tripService *service.TripService) fiber.Handler {
+	return func(c *fiber.Ctx) error {
+
+		var req presenter.SetTechTeamRequest
+
+		if err := c.BodyParser(&req); err != nil {
+			return presenter.BadRequest(c, err)
+		}
+
+		// userClaims, ok := c.Locals(UserClaimKey).(*jwt.UserClaims)
+		// if !ok {
+		// 	return SendError(c, errWrongClaimType, fiber.StatusBadRequest)
+		// }
+		tripID, err := c.ParamsInt("tripID")
+		if err != nil {
+			return presenter.BadRequest(c, errWrongIDType)
+		}
+
+		if tripID < 0 {
+			return presenter.BadRequest(c, errWrongIDType)
+		}
+
+		changedTrip, err := tripService.SetTechTeamToTrip(c.UserContext(), uint(tripID), req.TechTeamID)
+
+		if err != nil {
+			if errors.Is(err, trip.ErrCanNotUpdate) || errors.Is(err, trip.ErrNotUpdated) || errors.Is(err, trip.ErrRecordNotFound) {
+				return presenter.BadRequest(c, err)
+			}
+			// trace ID : TODO
+			return presenter.InternalServerError(c, err)
+		}
+		res := presenter.TripToOwnerAdminTechTeamOperatorTripResponse(*changedTrip)
+		return presenter.OK(c, "Team set successfully", res)
+	}
+}
+
 // TODO : transactional
 func CancelTrip(tripService *service.TripService) fiber.Handler { // tansactional!!!! TO DO:
 	return func(c *fiber.Ctx) error {

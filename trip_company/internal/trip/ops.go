@@ -241,3 +241,7 @@ func (o *Ops) UpdateEndDateTrip(ctx context.Context, id uint, updates map[string
 func (o *Ops) UpdateTripTechTimID(ctx context.Context, id uint, updates map[string]interface{}) error {
 	return o.repo.UpdateTrip(ctx, id, updates)
 }
+
+func (o *Ops)CheckAvailabilityTechTeam(ctx context.Context, tripID uint, techTeamID uint, startDate time.Time, endDate time.Time) (bool, error){
+	return o.repo.CheckAvailabilityTechTeam(ctx, tripID, techTeamID, startDate, endDate)
+}

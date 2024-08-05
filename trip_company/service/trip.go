@@ -140,6 +140,10 @@ func (s *TripService) SetTechTeamToTrip(ctx context.Context, tripID, techteamID 
 
 	techteam, err := s.techTeamOps.GetTechTeamByID(ctx, techteamID)
 
+	if techteam.TransportCompanyID != t.TransportCompanyID{
+		return nil, ErrForbidden
+	}
+
 	if err != nil {
 		return nil, err
 	}
@@ -148,6 +152,15 @@ func (s *TripService) SetTechTeamToTrip(ctx context.Context, tripID, techteamID 
 		return nil, ErrInvalidAssignment
 	}
 
+	endDate := t.StartDate.Add(5 * time.Hour)
+	// check team availability
+	isAvailable, err := s.tripOps.CheckAvailabilityTechTeam(ctx, tripID, techteamID, *t.StartDate, endDate)
+	if err!=nil{
+		return nil, err
+	}
+	if !isAvailable{
+		return nil, errors.New("team is unavailable at this date")
+	}
 	updates := make(map[string]interface{})
 
 	updates["tech_team_id"] = techteamID
@@ -297,7 +310,9 @@ func (s *TripService) FinishTrip(ctx context.Context, tripID uint, requesterID u
 	if t.IsFinished == isFinished {
 		return nil, errors.New("same state")
 	}
-
+	if t.EndDate.After(time.Now()) {
+		return nil, errors.New("you can not finish future trips")
+	}
 	updates := make(map[string]interface{})
 
 	updates["is_finished"] = isFinished

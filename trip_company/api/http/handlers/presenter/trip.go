@@ -145,8 +145,8 @@ type OwnerAdminTechTeamOperatorTripResponse struct {
 	EndDate                Timestamp                      `json:"end_date"`
 	IsConfirmed            bool                           `json:"is_confirmed"`
 	VehicleRequest         *CreateVehicleRes              `json:"vehicle_req"`
-	TechTeam               *TechTeamRe      `json:"tech_team"`
-	Profit      float64  `json:"profit"`
+	TechTeam               *TechTeamRe                    `json:"tech_team"`
+	Profit                 float64                        `json:"profit"`
 }
 
 func TripToOwnerAdminTechTeamOperatorTripResponse(t trip.Trip) OwnerAdminTechTeamOperatorTripResponse {
@@ -199,7 +199,7 @@ func TripToOwnerAdminTechTeamOperatorTripResponse(t trip.Trip) OwnerAdminTechTea
 		IsFinished:             t.IsFinished,
 		IsConfirmed:            t.IsConfirmed,
 		TechTeam:               &team,
-		Profit: t.Profit,
+		Profit:                 t.Profit,
 	}
 }
 
@@ -296,18 +296,16 @@ func BatchTripToAgencyTripResponse(trips []trip.Trip) []AgencyTripResponse {
 	return fp.Map(trips, TripToAgencyTripResponse)
 }
 
-type CancelTripReq struct{
-	IsCanceled  bool `json:"is_canceled"`
+type CancelTripReq struct {
+	IsCanceled bool `json:"is_canceled"`
 }
 
-
-type ConfirmTripReq struct{
-	IsConfirmed  bool `json:"is_confirmed"`
+type ConfirmTripReq struct {
+	IsConfirmed bool `json:"is_confirmed"`
 }
 
-
-type FinishTripReq struct{
-	IsFinished  bool `json:"is_finished"`
+type FinishTripReq struct {
+	IsFinished bool `json:"is_finished"`
 }
 
 type UpdateTripRequest struct {
@@ -345,4 +343,8 @@ func UpdateTripReqToTrip(t *UpdateTripRequest) *trip.Trip {
 		IsFinished:      t.IsFinished,
 		IsConfirmed:     t.IsConfirmed,
 	}
+}
+
+type SetTechTeamRequest struct {
+	TechTeamID uint `json:"team_id"`
 }

@@ -91,7 +91,7 @@ func (r *tripRepo) GetFullTripByID(ctx context.Context, id uint) (*trip.Trip, er
 		Preload("TripCancelingPenalty"). // Preload related TripCancelingPenalty
 		Preload("VehicleRequest").
 		Preload("TechTeam").
-		Preload("TechTeam.TechTeamMember").
+		Preload("TechTeam.Members").
 		First(&t, id).Error; err != nil {
 		if strings.Contains(err.Error(), "record not found") {
 			return nil, nil
@@ -164,14 +164,22 @@ func (r *tripRepo) GetTrips(ctx context.Context, originCity, destinationCity, pa
 }
 
 func (r *tripRepo) UpdateTrip(ctx context.Context, id uint, updates map[string]interface{}) error {
-	var t entities.Trip
+    // Ensure updates is not empty
+    if len(updates) == 0 {
+        return nil
+    }
 
-	if err := r.db.WithContext(ctx).Model(&t).Updates(updates).Error; err != nil {
-		return fmt.Errorf("%w %w", trip.ErrNotUpdated, err)
-	}
+    if err := r.db.WithContext(ctx).
+        Model(&entities.Trip{}).  
+        Where("id = ?", id).      
+        Updates(updates).Error;  
+    err != nil {
+        return fmt.Errorf("failed to update trip: %w", err)
+    }
 
-	return nil
+    return nil
 }
+
 
 func (r *tripRepo) GetCountPathUnfinishedTrips(ctx context.Context, pathID uint) (uint, error) {
 	var count int64
@@ -205,4 +213,23 @@ func (r *tripRepo) GetUpcomingUnconfirmedTripIDsToCancel(ctx context.Context) ([
 	}
 
 	return tripIDs, nil
+}
+
+func (r *tripRepo) CheckAvailabilityTechTeam(ctx context.Context, tripID uint, techTeamID uint, startDate time.Time, endDate time.Time) (bool, error) {
+    var conflictingTrips []entities.Trip
+
+    err := r.db.WithContext(ctx).
+        Where("tech_team_id = ?", techTeamID).
+        Where("(start_date <= ? AND end_date >= ?)", endDate, startDate).
+        Where("id <> ?", tripID).
+        Find(&conflictingTrips).Error
+
+    if err != nil {
+        return false, fmt.Errorf("failed to check for conflicting trips: %w", err)
+    }
+
+    if len(conflictingTrips) > 0 {
+        return false, nil
+    }
+	return true, nil
 }
