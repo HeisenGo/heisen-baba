@@ -178,6 +178,7 @@ func (s *TripService) SetTechTeamToTrip(ctx context.Context, tripID, techteamID 
 		return nil, err
 	}
 	t.TechTeamID = &techteamID
+	t.TechTeam = techteam
 	return t, nil
 }
 
