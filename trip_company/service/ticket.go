@@ -13,7 +13,7 @@ import (
 var (
 	ErrImpossibleToBuy = errors.New("not possible to buy")
 	ErrUnableToCancel  = errors.New("unable to cancel")
-	ErrUnAuthorized = errors.New("not logged in")
+	ErrUnAuthorized    = errors.New("not logged in")
 )
 
 type TicketService struct {
@@ -105,23 +105,27 @@ func (s *TicketService) ProcessUserTicket(ctx context.Context, t *ticket.Ticket)
 	s.tripOps.UpdateTrip(ctx, trp.ID, newTrip, trp)
 	t.Status = "Paid"
 	newInvoice.Status = "Paid"                                   //sold tickets
-	s.ticketOps.UpdateTicketStatus(ctx, t.ID, "Paid")       //state
+	s.ticketOps.UpdateTicketStatus(ctx, t.ID, "Paid")            //state
 	s.invoiceOps.UpdateInvoiceStatus(ctx, newInvoice.ID, "Paid") //state
 	// notif with bank?
 	return nil
 }
 
 func (s *TicketService) GetTicketsByUserOrAgency(ctx context.Context, userID uint, agencyID uint, page, pageSize uint) ([]ticket.Ticket, uint, error) {
-	if userID == 0 && agencyID == 0{
+	if userID == 0 && agencyID == 0 {
 		return nil, 0, ErrUnAuthorized
 	}
-	return s.ticketOps.GetTicketsByUserOrAgency(ctx, &userID, &agencyID, page, pageSize)
+	if userID == 0 {
+		return s.ticketOps.GetTicketsByUserOrAgency(ctx, nil, &agencyID, page, pageSize)
+	} else {
+		return s.ticketOps.GetTicketsByUserOrAgency(ctx, &userID, nil, page, pageSize)
+	}
 }
 
 func (s *TicketService) CancelTicket(ctx context.Context, ticketID uint, userID *uint, agencyID *uint) (*invoice.Invoice, error) {
 	// check permisson of requester if AgencyID!=nil!!!
 	fullTicket, err := s.ticketOps.GetFullTicketByID(ctx, ticketID)
-	
+
 	if err != nil {
 		return nil, err
 	}
@@ -131,7 +135,7 @@ func (s *TicketService) CancelTicket(ctx context.Context, ticketID uint, userID 
 		if *fullTicket.AgencyID != *agencyID {
 			return nil, ErrForbidden
 		}
-		if fullTicket.Status == "Canceled"{
+		if fullTicket.Status == "Canceled" {
 			return &fullTicket.Invoice, fmt.Errorf("ticket is already")
 		}
 		perTripCost = fullTicket.Trip.AgencyPrice
@@ -142,7 +146,7 @@ func (s *TicketService) CancelTicket(ctx context.Context, ticketID uint, userID 
 		if *fullTicket.UserID != *userID {
 			return nil, ErrForbidden
 		}
-		if fullTicket.Status == "Canceled"{
+		if fullTicket.Status == "Canceled" {
 			return &fullTicket.Invoice, fmt.Errorf("ticket is already")
 		}
 		perTripCost = fullTicket.Trip.UserPrice
@@ -196,8 +200,8 @@ func (s *TicketService) CancelTicket(ctx context.Context, ticketID uint, userID 
 	}
 	trip_updates := make(map[string]interface{})
 	trip_updates["sold_tickets"] = fullTicket.Trip.SoldTickets - uint(fullTicket.Quantity)
-	err = s.tripOps.UpdateTripTechTimID(ctx,fullTicket.TripID, trip_updates)
-	if err!=nil{
+	err = s.tripOps.UpdateTripTechTimID(ctx, fullTicket.TripID, trip_updates)
+	if err != nil {
 		return inv, err
 	}
 	// send to bank TODO: from alibaba to UserID/ AgnecyID owner: id by company owner !
