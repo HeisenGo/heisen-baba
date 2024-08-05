@@ -4,16 +4,19 @@ import (
 	"authservice/config"
 	"authservice/internal/user"
 	"authservice/pkg/adapters/consul"
+	"authservice/pkg/adapters/rabbitmq"
 	"authservice/pkg/adapters/storage"
+	"authservice/pkg/ports"
 	"log"
 
 	"gorm.io/gorm"
 )
 
 type AppContainer struct {
-	cfg         config.Config
-	dbConn      *gorm.DB
-	authService *AuthService
+	cfg           config.Config
+	messageBroker ports.IMessageBroker
+	dbConn        *gorm.DB
+	authService   *AuthService
 }
 
 func NewAppContainer(cfg config.Config) (*AppContainer, error) {
@@ -21,6 +24,7 @@ func NewAppContainer(cfg config.Config) (*AppContainer, error) {
 		cfg: cfg,
 	}
 
+	app.setMessageBroker(cfg.MessageBroker)
 	app.mustInitDB()
 
 	// service registry
@@ -34,7 +38,7 @@ func NewAppContainer(cfg config.Config) (*AppContainer, error) {
 func (a *AppContainer) mustRegisterService(srvCfg config.Server) {
 	registry := consul.NewConsul(srvCfg.ServiceRegistry.Address)
 
-	err := registry.RegisterService(srvCfg.ServiceRegistry.ServiceName, srvCfg.ServiceHostAddress, srvCfg.ServiceGRPCPrefixPath, srvCfg.ServiceGRPCHealthPath, srvCfg.GRPCPort)
+	err := registry.RegisterService(srvCfg.ServiceRegistry.ServiceName, srvCfg.ServiceHostAddress, srvCfg.ServiceHTTPPrefixPath, srvCfg.ServiceHTTPHealthPath, srvCfg.GRPCPort, srvCfg.HTTPPort)
 	if err != nil {
 		log.Fatalf("Failed to register service with Consul: %v", err)
 	}
@@ -66,6 +70,17 @@ func (a *AppContainer) mustInitDB() {
 		log.Fatal("Migration failed: ", err)
 	}
 }
+func (a *AppContainer) MessageBroker() ports.IMessageBroker {
+	return a.messageBroker
+}
+
+func (a *AppContainer) setMessageBroker(messageBrokerCfg config.MessageBroker) {
+	if a.messageBroker != nil {
+		return
+	}
+
+	a.messageBroker = rabbitmq.NewRabbitMQ(messageBrokerCfg.Username, messageBrokerCfg.Password, messageBrokerCfg.Host, messageBrokerCfg.Port)
+}
 
 func (a *AppContainer) AuthService() *AuthService {
 	return a.authService
@@ -76,7 +91,7 @@ func (a *AppContainer) setAuthService() {
 		return
 	}
 
-	a.authService = NewAuthService(user.NewOps(storage.NewUserRepo(a.dbConn)), []byte(a.cfg.Server.TokenSecret),
+	a.authService = NewAuthService(user.NewOps(storage.NewUserRepo(a.dbConn)), a.MessageBroker(), []byte(a.cfg.Server.TokenSecret),
 		a.cfg.Server.TokenExpMinutes,
 		a.cfg.Server.RefreshTokenExpMinutes)
 }

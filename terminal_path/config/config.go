@@ -3,7 +3,7 @@ package config
 type Config struct {
 	Server Server `mapstructure:"server"`
 	DB     DB     `mapstructure:"db"`
-	//SQLite SQLite `mapstructure:"sqlite"` // New field for SQLite configuration
+	Redis  Redis  `mapstructure:"redis"`
 }
 
 type Server struct {
@@ -19,8 +19,8 @@ type Server struct {
 }
 
 type ServiceRegistry struct {
-	Address         string `mapstructure:"address"`
-	AuthServiceName string `mapstructure:"auth_service_name"`
+	Address                string `mapstructure:"address"`
+	AuthServiceName        string `mapstructure:"auth_service_name"`
 	TripCompanyServiceName string `mapstructure:"trip_company_service_name"`
 }
 
@@ -32,6 +32,8 @@ type DB struct {
 	DBName string `mapstructure:"db_name"`
 }
 
-//type SQLite struct {
-//	Path string `mapstructure:"path"`
-//}
+type Redis struct {
+	Pass string `mapstructure:"pass"`
+	Host string `mapstructure:"host"`
+	Port int    `mapstructure:"port"`
+}

@@ -3,6 +3,7 @@ package service
 import (
 	"authservice/internal/user"
 	"authservice/pkg/jwt"
+	"authservice/pkg/ports"
 	"context"
 	"time"
 
@@ -11,15 +12,17 @@ import (
 
 type AuthService struct {
 	userOps                *user.Ops
+	messageBroker          ports.IMessageBroker
 	secret                 []byte
 	tokenExpiration        uint
 	refreshTokenExpiration uint
 }
 
-func NewAuthService(userOps *user.Ops, secret []byte,
+func NewAuthService(userOps *user.Ops, messageBroker ports.IMessageBroker, secret []byte,
 	tokenExpiration uint, refreshTokenExpiration uint) *AuthService {
 	return &AuthService{
 		userOps:                userOps,
+		messageBroker:          messageBroker,
 		secret:                 secret,
 		tokenExpiration:        tokenExpiration,
 		refreshTokenExpiration: refreshTokenExpiration,
@@ -33,7 +36,12 @@ type UserToken struct {
 }
 
 func (s *AuthService) CreateUser(ctx context.Context, user *user.User) (*user.User, error) {
-	return s.userOps.Create(ctx, user)
+	createdUser, err := s.userOps.Create(ctx, user)
+	if err != nil {
+		return nil, err
+	}
+	go s.messageBroker.Publish("users", createdUser.ID.String())
+	return createdUser, nil
 }
 
 func (s *AuthService) Login(ctx context.Context, email, pass string) (*UserToken, error) {
