@@ -1,7 +1,10 @@
 package handlers
 
 import (
+	"errors"
 	"tripcompanyservice/api/http/handlers/presenter"
+	"tripcompanyservice/internal/company"
+	"tripcompanyservice/internal/techteam"
 	"tripcompanyservice/service"
 
 	"github.com/gofiber/fiber/v2"
@@ -27,10 +30,16 @@ func CreateTechTeam(techService *service.TechTeamService) fiber.Handler {
 		}
 		team := presenter.TechTeamReqToTechTeam(&req)
 		// TODO: from context
+		// requester
 		creatorID := uint(1)
 		if err := techService.CreateTechTeam(c.UserContext(), team, creatorID); err != nil {
+			if errors.Is(err, service.ErrForbidden) {
+				return presenter.Unauthorized(c, err)
+			}
+			if errors.Is(err, company.ErrCompanyNotFound) || errors.Is(err, techteam.ErrDuplication) {
+				return presenter.BadRequest(c, err)
+			}
 			return presenter.InternalServerError(c, err)
-			//TODO error handeling
 		}
 		res := presenter.TechTeamToTechTeamRe(*team)
 		return presenter.Created(c, "team created successfully", res)
@@ -57,10 +66,16 @@ func CreateTechMember(techService *service.TechTeamService) fiber.Handler {
 		}
 		m := presenter.TechTeamMemberReToTechTeamMember(&req)
 		// TODO: from context
+		// requester
 		creatorID := uint(1)
 		if err := techService.CreateTechTeamMember(c.UserContext(), m, creatorID); err != nil {
+			if errors.Is(err, service.ErrForbidden) {
+				return presenter.Forbidden(c, err)
+			}
+			if errors.Is(err, company.ErrCompanyNotFound) || errors.Is(err, techteam.ErrTeamNotFound) {
+				return presenter.BadRequest(c, err)
+			}
 			return presenter.InternalServerError(c, err)
-			//TODO error handeling
 		}
 		res := presenter.TechMemberToTechTeamMemberRe(*m)
 		return presenter.Created(c, "Member created successfully", res)
@@ -83,10 +98,16 @@ func GetTechTeamsOfCompany(techService *service.TechTeamService) fiber.Handler {
 		if companyID < 0 {
 			return presenter.BadRequest(c, errWrongIDType)
 		}
+		// TODO: requester // admin/owner/operator can do this
 		requesterID := uint(1) // get from contex
 		teams, total, err := techService.GetTechTeamsOfCompany(c.UserContext(), uint(companyID), requesterID, uint(page), uint(pageSize))
 		if err != nil {
-
+			if errors.Is(err, service.ErrForbidden) {
+				return presenter.Forbidden(c, err)
+			}
+			if errors.Is(err, company.ErrCompanyNotFound) {
+				presenter.BadRequest(c, err)
+			}
 			return presenter.InternalServerError(c, err)
 		}
 		data := presenter.NewPagination(

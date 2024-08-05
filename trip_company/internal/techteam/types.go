@@ -7,6 +7,9 @@ import (
 
 var(
 	ErrMemberNotFound = errors.New("member not found")
+	ErrTeamNotFound =  errors.New("tech team not found")
+	ErrDuplication = errors.New("team already exists")
+	ErrFailedToFetchRecords = errors.New("records not found")
 )
 
 type Repo interface {

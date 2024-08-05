@@ -18,12 +18,8 @@ func CreateTransportCompany(companyService *service.TransportCompanyService) fib
 		if err := c.BodyParser(&req); err != nil {
 			return SendError(c, err, fiber.StatusBadRequest)
 		}
-
-		//userClaims, ok := c.Locals(UserClaimKey).(*jwt.UserClaims)
-		// if !ok {
-		// 	return SendError(c, errWrongClaimType, fiber.StatusBadRequest)
-		// }
-		// get owner and owner_ID existance check!!!!!! TODO:
+		// owner id and the user claimer id ==
+		// owner_ID existance check!!!!!! TODO:
 		err := BodyValidator(req)
 		if err != nil {
 			return presenter.BadRequest(c, err)
@@ -49,6 +45,7 @@ func GetUserCompanies(companyService *service.TransportCompanyService) fiber.Han
 		// 	return SendError(c, errWrongClaimType, fiber.StatusBadRequest)
 		// }
 		//query parameter
+		// TO DO no need I get it from claims!!!!
 		ownerID, err := c.ParamsInt("ownerID")
 		if err != nil {
 			return SendError(c, errWrongIDType, fiber.StatusBadRequest)
@@ -185,6 +182,7 @@ func PatchCompany(companyService *service.TransportCompanyService) fiber.Handler
 			return presenter.BadRequest(c, errWrongIDType)
 		}
 		userID := uint(1) //ownerID
+		//requesterID TODO:
 		updatedCompany := presenter.UpdateCompanyToCompany(&req, uint(companyID))
 		changedCompany, err := companyService.PatchCompanyByOwner(c.UserContext(), updatedCompany, userID, req.NewOwnerEmail)
 
@@ -199,6 +197,6 @@ func PatchCompany(companyService *service.TransportCompanyService) fiber.Handler
 			return presenter.InternalServerError(c, err)
 		}
 		res := presenter.CompanyToCompanyRes(*changedCompany)
-		return presenter.OK(c, "Terminal updated successfully", res)
+		return presenter.OK(c, "Company updated successfully", res)
 	}
 }

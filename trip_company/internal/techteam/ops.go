@@ -2,7 +2,6 @@ package techteam
 
 import (
 	"context"
-	"fmt"
 )
 
 type Ops struct {
@@ -28,7 +27,7 @@ func (o *Ops) GetTechTeamByID(ctx context.Context, id uint) (*TechTeam, error) {
 		return nil, err
 	}
 	if t == nil {
-		return nil, fmt.Errorf("tech team not found")
+		return nil, ErrTeamNotFound
 	}
 
 	return t, nil

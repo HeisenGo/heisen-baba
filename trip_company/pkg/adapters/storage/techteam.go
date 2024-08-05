@@ -76,7 +76,7 @@ func (r *techTeamRepo) GetTechTeamsOfCompany(ctx context.Context, companyId uint
 	var teams []entities.TechTeam
 	if err := query.Find(&teams).Error; err != nil {
 		if strings.Contains(err.Error(), "record not found") {
-			return nil, 0, nil
+			return nil, 0, techteam.ErrFailedToFetchRecords
 		}
 		return nil, 0, fmt.Errorf("failed to fetch tech teams: %w", err)
 	}

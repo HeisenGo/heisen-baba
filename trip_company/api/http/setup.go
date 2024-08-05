@@ -100,8 +100,8 @@ func registerTransportCompanyRoutes(router fiber.Router, app *service.AppContain
 		handlers.BlockCompany(app.CompanyService()))
 
 	router.Post("/trips",
-		middlerwares.SetTransaction(adapter.NewGormCommiter(app.RawDBConnection())),
 		//middlewares.Auth(),
+		middlerwares.SetTransaction(adapter.NewGormCommiter(app.RawDBConnection())),
 		//handlers.CreateTrip(app.TripServiceFromCtx)),
 		handlers.CreateTrip(app.TripServiceFromCtx))
 
