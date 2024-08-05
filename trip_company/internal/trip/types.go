@@ -50,6 +50,7 @@ type Repo interface {
 	GetCountPathUnfinishedTrips(ctx context.Context, pathID uint) (uint, error)
 	GetUpcomingUnconfirmedTripIDsToCancel(ctx context.Context) ([]uint, error)
 
+	GetCountCompanyUnfinishedUncanceledTrips(ctx context.Context, companyID uint) (uint, error)
 	CheckAvailabilityTechTeam(ctx context.Context, tripID uint, techTeamID uint, startDate time.Time, endDate time.Time) (bool, error)
 
 	// TODO: remove if no tickets are sold

@@ -106,6 +106,7 @@ func (a *AppContainer) CompanyServiceFromCtx(ctx context.Context) *TransportComp
 
 	return NewTransportCompanyService(
 		company.NewOps(storage.NewTransportCompanyRepo(gc)),
+		trip.NewOps(storage.NewTripRepo(gc)),
 	)
 }
 
@@ -113,7 +114,7 @@ func (a *AppContainer) setCompanyService() {
 	if a.companyService != nil {
 		return
 	}
-	a.companyService = NewTransportCompanyService(company.NewOps(storage.NewTransportCompanyRepo(a.dbConn)))
+	a.companyService = NewTransportCompanyService(company.NewOps(storage.NewTransportCompanyRepo(a.dbConn)), trip.NewOps(storage.NewTripRepo(a.dbConn)))
 }
 
 // Trip service

@@ -245,3 +245,7 @@ func (o *Ops) UpdateTripTechTimID(ctx context.Context, id uint, updates map[stri
 func (o *Ops)CheckAvailabilityTechTeam(ctx context.Context, tripID uint, techTeamID uint, startDate time.Time, endDate time.Time) (bool, error){
 	return o.repo.CheckAvailabilityTechTeam(ctx, tripID, techTeamID, startDate, endDate)
 }
+
+func (o *Ops)GetCountCompanyUnfinishedUncanceledTrips(ctx context.Context, companyID uint) (uint, error){
+	return o.repo.GetCountCompanyUnfinishedUncanceledTrips(ctx, companyID)
+}

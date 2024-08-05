@@ -122,6 +122,7 @@ func DeleteCompany(companyService *service.TransportCompanyService) fiber.Handle
 		}
 
 		//TO DO: check whether it has unfinihed trips if so do not delete that
+		// tO DO add requesterID only owner can delete company
 		err = companyService.DeleteCompany(c.UserContext(), uint(companyID))
 		if err != nil {
 			if errors.Is(err, company.ErrCompanyNotFound) {

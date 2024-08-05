@@ -210,7 +210,7 @@ func (r *tripRepo) GetCountPathUnfinishedTrips(ctx context.Context, pathID uint)
 	var count int64
 
 	err := r.db.WithContext(ctx).Model(&entities.Trip{}).
-		Where("is_finished = ?", false).
+		Where("is_finished = ? and is_canceled=?", false, false).
 		Where("path_id = ?", pathID).
 		Count(&count).Error
 
@@ -257,4 +257,18 @@ func (r *tripRepo) CheckAvailabilityTechTeam(ctx context.Context, tripID uint, t
         return false, nil
     }
 	return true, nil
+}
+
+func (r *tripRepo) GetCountCompanyUnfinishedUncanceledTrips(ctx context.Context, companyID uint) (uint, error) {
+	var count int64
+
+	err := r.db.WithContext(ctx).Model(&entities.Trip{}).
+		Where("is_finished = ? and is_canceled=?", false, false).
+		Where("transport_company_id = ?", companyID).
+		Count(&count).Error
+
+	if err != nil {
+		return 100, err
+	}
+	return uint(count), nil
 }

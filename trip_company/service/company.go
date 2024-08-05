@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"tripcompanyservice/internal/company"
+	"tripcompanyservice/internal/trip"
 )
 
 var (
@@ -12,11 +13,13 @@ var (
 
 type TransportCompanyService struct {
 	companyOps *company.Ops
+	tripOps    *trip.Ops
 }
 
-func NewTransportCompanyService(companyOps *company.Ops) *TransportCompanyService {
+func NewTransportCompanyService(companyOps *company.Ops, tripOps *trip.Ops) *TransportCompanyService {
 	return &TransportCompanyService{
 		companyOps: companyOps,
+		tripOps:    tripOps,
 	}
 }
 
@@ -61,6 +64,16 @@ func (s *TransportCompanyService) DeleteCompany(ctx context.Context, companyID u
 	if err != nil {
 		return err
 	}
+
+	nActiveTrips, err := s.tripOps.GetCountCompanyUnfinishedUncanceledTrips(ctx, companyID)
+
+	if err!=nil{
+		return err
+	}
+	if nActiveTrips > 0 {
+		return company.ErrCanNotDelete
+	}
+
 	err = s.companyOps.Delete(ctx, companyID)
 	if err != nil {
 		return err
@@ -77,7 +90,7 @@ func (s *TransportCompanyService) PatchCompanyByOwner(ctx context.Context, updat
 		return nil, ErrForbidden
 	}
 
-	if newOwnerEmail!=""{
+	if newOwnerEmail != "" {
 		//******
 		// TO DO: check this user exists and get it!!!!
 		updatedCompany.OwnerID = 1

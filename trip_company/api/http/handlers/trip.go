@@ -275,7 +275,7 @@ func CancelTrip(tripService *service.TripService) fiber.Handler { // tansactiona
 		}
 
 		// USERID from context TODO:
-		requesterID := uint(1)
+		requesterID := uint(2)
 		changedTrip, err := tripService.CancelTrip(c.UserContext(), uint(tripID), requesterID, req.IsCanceled)
 
 		if err != nil {
