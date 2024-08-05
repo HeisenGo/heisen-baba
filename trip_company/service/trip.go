@@ -14,6 +14,13 @@ import (
 var (
 	ErrAlreadyHasATeam   = errors.New("already has a team")
 	ErrInvalidAssignment = errors.New("types are different")
+
+	ErrSameState    = errors.New("same state")
+	ErrFinishedTrip = errors.New("this trip finished")
+
+	ErrCanceled    = errors.New("trip is canceled")
+	ErrUnConfirmed = errors.New("trip is not confirmed")
+	ErrFutureTrip  = errors.New("you can not finish future trips")
 )
 
 type TripService struct {
@@ -42,7 +49,7 @@ func (s *TripService) GetUpcomingUnconfirmedTripIDsToCancel(ctx context.Context)
 	return s.tripOps.GetUpcomingUnconfirmedTripIDsToCancel(ctx)
 }
 
-func (s *TripService) GetCompanyTrips(ctx context.Context,originCity, destinationCity, pathType string, startDate *time.Time , companyID uint, page, pageSize uint) ([]trip.Trip, uint, error) {
+func (s *TripService) GetCompanyTrips(ctx context.Context, originCity, destinationCity, pathType string, startDate *time.Time, companyID uint, page, pageSize uint) ([]trip.Trip, uint, error) {
 	tCompany, err := s.companyOps.GetByID(ctx, companyID)
 	if err != nil {
 		return nil, 0, err
@@ -52,7 +59,7 @@ func (s *TripService) GetCompanyTrips(ctx context.Context,originCity, destinatio
 		return nil, 0, company.ErrCompanyNotFound
 	}
 
-	return s.tripOps.CompanyTrips(ctx,originCity, destinationCity, pathType,startDate, companyID, page, pageSize)
+	return s.tripOps.CompanyTrips(ctx, originCity, destinationCity, pathType, startDate, companyID, page, pageSize)
 }
 
 func (s *TripService) CreateTrip(ctx context.Context, t *trip.Trip, creatorID uint) error {
@@ -140,7 +147,7 @@ func (s *TripService) SetTechTeamToTrip(ctx context.Context, tripID, techteamID 
 
 	techteam, err := s.techTeamOps.GetTechTeamByID(ctx, techteamID)
 
-	if techteam.TransportCompanyID != t.TransportCompanyID{
+	if techteam.TransportCompanyID != t.TransportCompanyID {
 		return nil, ErrForbidden
 	}
 
@@ -155,10 +162,10 @@ func (s *TripService) SetTechTeamToTrip(ctx context.Context, tripID, techteamID 
 	endDate := t.StartDate.Add(5 * time.Hour)
 	// check team availability
 	isAvailable, err := s.tripOps.CheckAvailabilityTechTeam(ctx, tripID, techteamID, *t.StartDate, endDate)
-	if err!=nil{
+	if err != nil {
 		return nil, err
 	}
-	if !isAvailable{
+	if !isAvailable {
 		return nil, errors.New("team is unavailable at this date")
 	}
 	updates := make(map[string]interface{})
@@ -204,11 +211,11 @@ func (s *TripService) CancelTrip(ctx context.Context, tripID uint, requesterID u
 	}
 
 	if t.IsCanceled == isCanceled {
-		return nil, errors.New("same state")
+		return nil, ErrSameState
 	}
 
 	if t.IsFinished {
-		return nil, errors.New("this trip finished")
+		return nil, ErrFinishedTrip
 	}
 
 	updates := make(map[string]interface{})
@@ -239,7 +246,7 @@ func (s *TripService) CancelTrip(ctx context.Context, tripID uint, requesterID u
 		} else {
 			receiverID = *ticks[i].AgencyID
 		}
-		if ticks[i].Penalty != 0 { // already canceled by user
+		if ticks[i].Penalty != 0 { // cause already canceled by user
 			refund = ticks[i].Penalty
 		} else {
 			refund = ticks[i].TotalPrice
@@ -265,15 +272,15 @@ func (s *TripService) ConfirmTrip(ctx context.Context, tripID uint, requesterID 
 		return nil, ErrForbidden
 	}
 	if t.IsCanceled {
-		return nil, errors.New("trip is canceled")
+		return nil, ErrCanceled
 	}
 
 	if t.IsConfirmed == isConfirmed {
-		return nil, errors.New("same state")
+		return nil, ErrSameState
 	}
 
 	if t.IsFinished {
-		return nil, errors.New("this trip finished")
+		return nil, ErrFinishedTrip
 	}
 
 	updates := make(map[string]interface{})
@@ -303,17 +310,17 @@ func (s *TripService) FinishTrip(ctx context.Context, tripID uint, requesterID u
 	}
 
 	if !t.IsConfirmed {
-		return nil, errors.New("trip is not confirmed")
+		return nil, ErrUnConfirmed
 	}
 
 	if t.IsCanceled {
-		return nil, errors.New("trip is canceled")
+		return nil, ErrCanceled
 	}
 	if t.IsFinished == isFinished {
-		return nil, errors.New("same state")
+		return nil, ErrSameState
 	}
 	if t.EndDate.After(time.Now()) {
-		return nil, errors.New("you can not finish future trips")
+		return nil, ErrFutureTrip
 	}
 	updates := make(map[string]interface{})
 

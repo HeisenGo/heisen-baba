@@ -6,7 +6,9 @@ import (
 	"os"
 	"path/filepath"
 	"tripcompanyservice/api/http/handlers"
+	middlerwares "tripcompanyservice/api/http/middlewares"
 	"tripcompanyservice/config"
+	adapter "tripcompanyservice/pkg/adapters"
 	"tripcompanyservice/service"
 
 	"github.com/gofiber/fiber/v2"
@@ -21,7 +23,7 @@ func Run(cfg config.Server, app *service.AppContainer) {
 
 	registerGlobalRoutes(api)
 	registerTransportCompanyRoutes(api, app, createGroupLogger("companies"))
-	
+
 	log.Fatal(fiberApp.Listen(fmt.Sprintf("%s:%d", cfg.Host, cfg.HttpPort)))
 }
 
@@ -98,10 +100,10 @@ func registerTransportCompanyRoutes(router fiber.Router, app *service.AppContain
 		handlers.BlockCompany(app.CompanyService()))
 
 	router.Post("/trips",
-		//middlewares.SetTransaction(adapters.NewGormCommitter(app.RawDBConnection())),
+		middlerwares.SetTransaction(adapter.NewGormCommiter(app.RawDBConnection())),
 		//middlewares.Auth(),
 		//handlers.CreateTrip(app.TripServiceFromCtx)),
-		handlers.CreateTrip(app.TripService()))
+		handlers.CreateTrip(app.TripServiceFromCtx))
 
 	router.Get("/trips", handlers.GetTrips(app.TripService()))
 	router.Get("/one-trip/:tripID", handlers.GetFullTripByID(app.TripService()))
@@ -119,10 +121,10 @@ func registerTransportCompanyRoutes(router fiber.Router, app *service.AppContain
 	router.Post("/tech-teams", handlers.CreateTechTeam(app.TechTeamService()))
 	router.Post("/tech-members", handlers.CreateTechMember(app.TechTeamService()))
 	router.Get("/tech-teams/:companyID", handlers.GetTechTeamsOfCompany(app.TechTeamService()))
-	router.Patch("/set-team/:tripID", handlers.SetTechTeamToTrip(app.TripService()))
-	router.Patch("/cancel-trip/:tripID", handlers.CancelTrip(app.TripService()))
-	router.Patch("/finish-trip/:tripID", handlers.FinishTrip(app.TripService()))
-	router.Patch("/confirm-trip/:tripID", handlers.ConfirmTrip(app.TripService()))
+	router.Patch("/set-team/:tripID", handlers.SetTechTeamToTrip(app.TripServiceFromCtx))
+	router.Patch("/cancel-trip/:tripID", handlers.CancelTrip(app.TripServiceFromCtx))
+	router.Patch("/finish-trip/:tripID", handlers.FinishTrip(app.TripServiceFromCtx))
+	router.Patch("/confirm-trip/:tripID", handlers.ConfirmTrip(app.TripServiceFromCtx))
 
 	router.Get("/path-trips/:pathID", handlers.GetCountPathUnfinishedTrips(app.TripService()))
 }

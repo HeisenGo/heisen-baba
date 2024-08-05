@@ -22,11 +22,11 @@ func (o *Ops) GetUpcomingUnconfirmedTripIDsToCancel(ctx context.Context) ([]uint
 }
 
 // TO Do implement other layers!!!
-func (o *Ops) CompanyTrips(ctx context.Context, originCity, destinationCity, pathType string, startDate *time.Time ,companyID uint, page, pageSize uint) ([]Trip, uint, error) {
+func (o *Ops) CompanyTrips(ctx context.Context, originCity, destinationCity, pathType string, startDate *time.Time, companyID uint, page, pageSize uint) ([]Trip, uint, error) {
 	limit := pageSize
 	offset := (page - 1) * pageSize
 
-	return o.repo.GetCompanyTrips(ctx,originCity,destinationCity,pathType, startDate ,companyID, limit, offset)
+	return o.repo.GetCompanyTrips(ctx, originCity, destinationCity, pathType, startDate, companyID, limit, offset)
 }
 
 func (o *Ops) Create(ctx context.Context, trip *Trip) error {
@@ -204,15 +204,11 @@ func (o *Ops) UpdateTrip(ctx context.Context, id uint, newTrip, oldTrip *Trip) e
 	}
 
 	if newTrip.IsCanceled {
-		updates["is_canceled"] = newTrip.IsCanceled
-		oldTrip.IsCanceled = newTrip.IsCanceled
-		// To DO notify sold tickets and move money
+		return ErrCanNotUpdate
 	}
 
 	if newTrip.IsFinished {
-		updates["is_finished"] = newTrip.IsFinished
-		oldTrip.IsFinished = newTrip.IsFinished
-		// TO DO move money from alibaba to company's owner wallet
+		return ErrCanNotUpdate
 	}
 
 	if newTrip.StartDate != nil {
@@ -242,10 +238,10 @@ func (o *Ops) UpdateTripTechTimID(ctx context.Context, id uint, updates map[stri
 	return o.repo.UpdateTrip(ctx, id, updates)
 }
 
-func (o *Ops)CheckAvailabilityTechTeam(ctx context.Context, tripID uint, techTeamID uint, startDate time.Time, endDate time.Time) (bool, error){
+func (o *Ops) CheckAvailabilityTechTeam(ctx context.Context, tripID uint, techTeamID uint, startDate time.Time, endDate time.Time) (bool, error) {
 	return o.repo.CheckAvailabilityTechTeam(ctx, tripID, techTeamID, startDate, endDate)
 }
 
-func (o *Ops)GetCountCompanyUnfinishedUncanceledTrips(ctx context.Context, companyID uint) (uint, error){
+func (o *Ops) GetCountCompanyUnfinishedUncanceledTrips(ctx context.Context, companyID uint) (uint, error) {
 	return o.repo.GetCountCompanyUnfinishedUncanceledTrips(ctx, companyID)
 }

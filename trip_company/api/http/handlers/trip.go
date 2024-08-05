@@ -4,16 +4,16 @@ import (
 	"errors"
 	"time"
 	"tripcompanyservice/api/http/handlers/presenter"
+	"tripcompanyservice/internal/company"
 	"tripcompanyservice/internal/trip"
 	"tripcompanyservice/service"
 
 	"github.com/gofiber/fiber/v2"
 )
 
-func CreateTrip(tripService *service.TripService) fiber.Handler { //serviceFactory ServiceFactory[*service.TripService])fiber.Handler {
+func CreateTrip(serviceFactory ServiceFactory[*service.TripService]) fiber.Handler {
 	return func(c *fiber.Ctx) error {
-		//tripService := serviceFactory(c.UserContext())
-
+		tripService := serviceFactory(c.UserContext())
 		var req presenter.CreateTripReq
 
 		if err := c.BodyParser(&req); err != nil {
@@ -34,9 +34,9 @@ func CreateTrip(tripService *service.TripService) fiber.Handler { //serviceFacto
 		creatorID := uint(1) // TO DO
 
 		if err := tripService.CreateTrip(c.UserContext(), t, creatorID); err != nil {
-			// if errors.Is(err, trip.CompanyNotExist) || errors.Is(err, trip.ErrPathNotExist) || errors.Is(err, trip.ErrDuplication) || errors.Is(err, trip.ErrWrongPrice) || errors.Is(err, trip.ErrWrongReleaseDate) {
-			// 	return presenter.BadRequest(c, err)
-			// }
+			if errors.Is(err, company.ErrCompanyNotFound) || errors.Is(err, trip.ErrInvalidPercentage) || errors.Is(err, trip.ErrStartTime) || errors.Is(err, trip.ErrSecondPenalty) || errors.Is(err, trip.ErrInvalidPercentage) || errors.Is(err, trip.ErrDuplication) || errors.Is(err, trip.ErrFirstPenalty) || errors.Is(err, trip.ErrNegativePrice) {
+				return presenter.BadRequest(c, err)
+			}
 			//err := errors.New("Error")
 			// apply trace ID here .... TODO
 			return presenter.InternalServerError(c, err)
@@ -68,14 +68,12 @@ func GetCompanyTrips(tripService *service.TripService) fiber.Handler {
 				return presenter.BadRequest(c, errors.New("invalid start date format"))
 			}
 		}
-		// Parse dates
 		// TO DO check requester!!!
 		companyID, err := c.ParamsInt("companyID")
 		if err != nil {
 			return presenter.BadRequest(c, err)
 		}
-		//startDateStr := startDate.Format("2006-01-02") // Convert to YYYY-MM-DD
-		//requester
+		//requester // how to show the result
 		trips, total, err := tripService.GetCompanyTrips(c.UserContext(), originCity, destinationCity, pathType, &startDate, uint(companyID), uint(page), uint(pageSize))
 		if err != nil {
 			if errors.Is(err, trip.ErrRecordsNotFound) {
@@ -84,12 +82,31 @@ func GetCompanyTrips(tripService *service.TripService) fiber.Handler {
 			err := errors.New("Error")
 			return presenter.InternalServerError(c, err)
 		}
-		data := presenter.NewPagination(
-			presenter.BatchTripToOwnerAdminTechTeamOperatorTripResponse(trips),
-			uint(page),
-			uint(pageSize),
-			total,
-		)
+		requester := "owner" //user // admin // agency // unknown
+		var data interface{}
+		if requester == "owner" || requester == "operator" || requester == "technician" || requester == "admin" {
+			data = presenter.NewPagination(
+				presenter.BatchTripToOwnerAdminTechTeamOperatorTripResponse(trips),
+				uint(page),
+				uint(pageSize),
+				total,
+			)
+		} else if requester == "agency" {
+			data = presenter.NewPagination(
+				presenter.BatchTripToAgencyTripResponse(trips),
+				uint(page),
+				uint(pageSize),
+				total,
+			)
+		} else {
+			data = presenter.NewPagination(
+				presenter.BatchTripToUserTripResponse(trips),
+				uint(page),
+				uint(pageSize),
+				total,
+			)
+		}
+
 		return presenter.OK(c, "Trips fetched successfully", data)
 	}
 }
@@ -120,7 +137,7 @@ func GetFullTripByID(tripService *service.TripService) fiber.Handler {
 			return presenter.InternalServerError(c, err)
 		}
 		var data interface{}
-		if requester == "owner" || requester == "operator" {
+		if requester == "owner" || requester == "operator" || requester == "technician" || requester == "admin" {
 			data = presenter.TripToOwnerAdminTechTeamOperatorTripResponse(*t)
 		} else if requester == "agency" {
 			data = presenter.TripToAgencyTripResponse(*t)
@@ -156,7 +173,6 @@ func GetTrips(tripService *service.TripService) fiber.Handler {
 				return presenter.BadRequest(c, errors.New("invalid start date format"))
 			}
 		}
-		//startDateStr := startDate.Format("2006-01-02") // Convert to YYYY-MM-DD
 
 		trips, total, err := tripService.GetTrips(c.UserContext(), originCity, destinationCity, pathType, &startDate, requesterType, uint(page), uint(pageSize))
 		if err != nil {
@@ -166,13 +182,31 @@ func GetTrips(tripService *service.TripService) fiber.Handler {
 			err := errors.New("Error")
 			return presenter.InternalServerError(c, err)
 		}
-		// TODO: if admin or not!!!!
-		data := presenter.NewPagination(
-			presenter.BatchTripToOwnerAdminTechTeamOperatorTripResponse(trips),
-			uint(page),
-			uint(pageSize),
-			total,
-		)
+		requester := "owner" //user // admin // agency // unknown
+		var data interface{}
+		if requester == "owner" || requester == "operator" || requester == "technician" || requester == "admin" {
+			data = presenter.NewPagination(
+				presenter.BatchTripToOwnerAdminTechTeamOperatorTripResponse(trips),
+				uint(page),
+				uint(pageSize),
+				total,
+			)
+		} else if requester == "agency" {
+			data = presenter.NewPagination(
+				presenter.BatchTripToAgencyTripResponse(trips),
+				uint(page),
+				uint(pageSize),
+				total,
+			)
+		} else {
+			data = presenter.NewPagination(
+				presenter.BatchTripToUserTripResponse(trips),
+				uint(page),
+				uint(pageSize),
+				total,
+			)
+		}
+
 		return presenter.OK(c, "Trips fetched successfully", data)
 	}
 }
@@ -200,7 +234,7 @@ func PatchTrip(tripService *service.TripService) fiber.Handler { // tansactional
 		}
 
 		newTrip := presenter.UpdateTripReqToTrip(&req)
-
+		// only operator and owner can do this
 		changedTrip, err := tripService.UpdateTrip(c.UserContext(), uint(tripID), newTrip)
 
 		if err != nil {
@@ -215,9 +249,9 @@ func PatchTrip(tripService *service.TripService) fiber.Handler { // tansactional
 	}
 }
 
-func SetTechTeamToTrip(tripService *service.TripService) fiber.Handler {
+func SetTechTeamToTrip(serviceFactory ServiceFactory[*service.TripService]) fiber.Handler {
 	return func(c *fiber.Ctx) error {
-
+		tripService := serviceFactory(c.UserContext())
 		var req presenter.SetTechTeamRequest
 
 		if err := c.BodyParser(&req); err != nil {
@@ -237,13 +271,13 @@ func SetTechTeamToTrip(tripService *service.TripService) fiber.Handler {
 			return presenter.BadRequest(c, errWrongIDType)
 		}
 
+		// only owner and operator
 		changedTrip, err := tripService.SetTechTeamToTrip(c.UserContext(), uint(tripID), req.TechTeamID)
 
 		if err != nil {
 			if errors.Is(err, trip.ErrCanNotUpdate) || errors.Is(err, trip.ErrNotUpdated) || errors.Is(err, trip.ErrRecordNotFound) {
 				return presenter.BadRequest(c, err)
 			}
-			// trace ID : TODO
 			return presenter.InternalServerError(c, err)
 		}
 		res := presenter.TripToOwnerAdminTechTeamOperatorTripResponse(*changedTrip)
@@ -251,10 +285,9 @@ func SetTechTeamToTrip(tripService *service.TripService) fiber.Handler {
 	}
 }
 
-// TODO : transactional
-func CancelTrip(tripService *service.TripService) fiber.Handler { // tansactional!!!! TO DO:
+func CancelTrip(serviceFactory ServiceFactory[*service.TripService]) fiber.Handler {
 	return func(c *fiber.Ctx) error {
-
+		tripService := serviceFactory(c.UserContext())
 		var req presenter.CancelTripReq
 
 		if err := c.BodyParser(&req); err != nil {
@@ -275,14 +308,17 @@ func CancelTrip(tripService *service.TripService) fiber.Handler { // tansactiona
 		}
 
 		// USERID from context TODO:
+		// only owner and operator
 		requesterID := uint(2)
 		changedTrip, err := tripService.CancelTrip(c.UserContext(), uint(tripID), requesterID, req.IsCanceled)
 
 		if err != nil {
-			if errors.Is(err, trip.ErrCanNotUpdate) || errors.Is(err, trip.ErrNotUpdated) || errors.Is(err, trip.ErrRecordNotFound) {
+			if errors.Is(err, service.ErrForbidden) {
+				return presenter.Unauthorized(c, err)
+			}
+			if errors.Is(err, service.ErrFinishedTrip) || errors.Is(err, service.ErrSameState) || errors.Is(err, trip.ErrCanNotUpdate) || errors.Is(err, trip.ErrNotUpdated) || errors.Is(err, trip.ErrRecordNotFound) {
 				return presenter.BadRequest(c, err)
 			}
-			// trace ID : TODO
 			return presenter.InternalServerError(c, err)
 		}
 		res := presenter.TripToOwnerAdminTechTeamOperatorTripResponse(*changedTrip)
@@ -290,9 +326,9 @@ func CancelTrip(tripService *service.TripService) fiber.Handler { // tansactiona
 	}
 }
 
-func ConfirmTrip(tripService *service.TripService) fiber.Handler { // tansactional!!!! TO DO:
+func ConfirmTrip(serviceFactory ServiceFactory[*service.TripService]) fiber.Handler {
 	return func(c *fiber.Ctx) error {
-
+		tripService := serviceFactory(c.UserContext())
 		var req presenter.ConfirmTripReq
 
 		if err := c.BodyParser(&req); err != nil {
@@ -311,15 +347,18 @@ func ConfirmTrip(tripService *service.TripService) fiber.Handler { // tansaction
 		if tripID < 0 {
 			return presenter.BadRequest(c, errWrongIDType)
 		}
-
+		// check role of requester
 		requesterID := uint(5)
 		changedTrip, err := tripService.ConfirmTrip(c.UserContext(), uint(tripID), requesterID, req.IsConfirmed)
 
 		if err != nil {
-			if errors.Is(err, trip.ErrCanNotUpdate) || errors.Is(err, trip.ErrNotUpdated) || errors.Is(err, trip.ErrRecordNotFound) {
+			if errors.Is(err, service.ErrForbidden) {
+				return presenter.Unauthorized(c, err)
+			}
+			if errors.Is(err, service.ErrFinishedTrip) || errors.Is(err, service.ErrSameState) || errors.Is(err, trip.ErrCanNotUpdate) || errors.Is(err, trip.ErrNotUpdated) || errors.Is(err, trip.ErrRecordNotFound) {
 				return presenter.BadRequest(c, err)
 			}
-			// trace ID : TODO
+
 			return presenter.InternalServerError(c, err)
 		}
 		res := presenter.TripToOwnerAdminTechTeamOperatorTripResponse(*changedTrip)
@@ -327,10 +366,9 @@ func ConfirmTrip(tripService *service.TripService) fiber.Handler { // tansaction
 	}
 }
 
-// TODO: transactional
-func FinishTrip(tripService *service.TripService) fiber.Handler { // tansactional!!!! TO DO:
+func FinishTrip(serviceFactory ServiceFactory[*service.TripService]) fiber.Handler { // tansactional!!!! TO DO:
 	return func(c *fiber.Ctx) error {
-
+		tripService := serviceFactory(c.UserContext())
 		var req presenter.FinishTripReq
 
 		if err := c.BodyParser(&req); err != nil {
@@ -349,15 +387,19 @@ func FinishTrip(tripService *service.TripService) fiber.Handler { // tansactiona
 		if tripID < 0 {
 			return presenter.BadRequest(c, errWrongIDType)
 		}
-
+		// TO DO
 		requesterID := uint(1)
 		changedTrip, err := tripService.FinishTrip(c.UserContext(), uint(tripID), requesterID, req.IsFinished)
 
 		if err != nil {
-			if errors.Is(err, trip.ErrCanNotUpdate) || errors.Is(err, trip.ErrNotUpdated) || errors.Is(err, trip.ErrRecordNotFound) {
+
+			if errors.Is(err, service.ErrForbidden) {
+				return presenter.Unauthorized(c, err)
+			}
+			if errors.Is(err, service.ErrUnConfirmed) || errors.Is(err, service.ErrFutureTrip) || errors.Is(err, service.ErrFinishedTrip) || errors.Is(err, service.ErrSameState) || errors.Is(err, trip.ErrCanNotUpdate) || errors.Is(err, trip.ErrNotUpdated) || errors.Is(err, trip.ErrRecordNotFound) {
 				return presenter.BadRequest(c, err)
 			}
-			// trace ID : TODO
+
 			return presenter.InternalServerError(c, err)
 		}
 		res := presenter.TripToOwnerAdminTechTeamOperatorTripResponse(*changedTrip)
@@ -365,14 +407,9 @@ func FinishTrip(tripService *service.TripService) fiber.Handler { // tansactiona
 	}
 }
 
-// GET unfinished trips of a path => between services => : TODO: GRPc
+// REST FOR TERMINAL PATH SERVICE
 func GetCountPathUnfinishedTrips(tripService *service.TripService) fiber.Handler {
 	return func(c *fiber.Ctx) error {
-		// userClaims, ok := c.Locals(UserClaimKey).(*jwt.UserClaims)
-		// if !ok {
-		// 	return SendError(c, errWrongClaimType, fiber.StatusBadRequest)
-		// }
-		//query parameter
 		pathID, err := c.ParamsInt("pathID")
 		if err != nil {
 			return presenter.BadRequest(c, errWrongIDType)
@@ -391,6 +428,6 @@ func GetCountPathUnfinishedTrips(tripService *service.TripService) fiber.Handler
 			return presenter.InternalServerError(c, err)
 		}
 
-		return presenter.OK(c, "Trips fetched successfully", fiber.Map{"count": total})
+		return presenter.OK(c, "Number of Trips fetched successfully", fiber.Map{"count": total})
 	}
 }
