@@ -96,7 +96,7 @@ func (r *invoiceRepo) GetInvoiceByTicketID(ctx context.Context, ticketID uint) (
 func (r *invoiceRepo) UpdateInvoice(ctx context.Context, id uint, updates map[string]interface{}) error {
 	var t entities.Invoice
 
-	if err := r.db.WithContext(ctx).Model(&t).Updates(updates).Error; err != nil {
+	if err := r.db.WithContext(ctx).Model(&t).Where("id = ?", id).Updates(updates).Error; err != nil {
 		return fmt.Errorf("%w %w", invoice.ErrFailedToUpdate, err)
 	}
 

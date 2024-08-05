@@ -52,11 +52,35 @@ func (r *tripRepo) Insert(ctx context.Context, t *trip.Trip) error {
 	return nil
 }
 
-func (r *tripRepo) GetCompanyTrips(ctx context.Context, companyID uint, limit, offset uint) ([]trip.Trip, uint, error) {
+func (r *tripRepo) GetCompanyTrips(ctx context.Context,originCity, destinationCity, pathType string, startDate *time.Time ,companyID uint, limit, offset uint) ([]trip.Trip, uint, error) {
 	query := r.db.WithContext(ctx).
 		Model(&entities.Trip{}).
-		Where("transport_company_id = ?", companyID).
+		Where("transport_company_id = ?", companyID).Preload("TransportCompany").     // Preload related TransportCompany
+		Preload("TripCancelingPenalty"). // Preload related TripCancelingPenalty
+		Preload("VehicleRequest").
+		Preload("TechTeam").
+		Preload("TechTeam.Members").
 		Order("created_at DESC")
+
+		if originCity != "" {
+			query = query.Where("origin = ?", originCity)
+		}
+	
+		if destinationCity != "" {
+			query = query.Where("destination = ?", destinationCity)
+		}
+	
+		if pathType != "" {
+			query = query.Where("trip_type = ?", pathType)
+		}
+	
+		if startDate != nil {
+			startDateStr := startDate.Format("2006-01-02")
+			if startDateStr != "0001-01-01" {
+				query = query.Where("DATE(start_date) = ?", startDateStr)
+			}
+		}
+	
 
 	var total int64
 
@@ -102,13 +126,14 @@ func (r *tripRepo) GetFullTripByID(ctx context.Context, id uint) (*trip.Trip, er
 	return &dPath, nil
 }
 
-func (r *tripRepo) GetTrips(ctx context.Context, originCity, destinationCity, pathType string, startDate *time.Time, requesterType string, limit, offset uint) ([]trip.Trip, uint, error) {
+func (r *tripRepo) GetTrips(ctx context.Context, originCity, destinationCity, pathType string, startDate *time.Time, requesterType string, limit, offset uint, ) ([]trip.Trip, uint, error) {
 	// Start the query for trips
 	query := r.db.WithContext(ctx).
 		Model(&entities.Trip{}).
 		Joins("JOIN transport_companies ON transport_companies.id = trips.transport_company_id").
 		Preload("TransportCompany").
-		Preload("TripCancelingPenalty").
+		Preload("TripCancelingPenalty").Preload("VehicleRequest").
+		Preload("TechTeam").Preload("TechTeam.Members").
 		Where("start_date > ?", time.Now()).
 		Where("sold_tickets < max_tickets").
 		Where("vehicle_id IS NOT NULL").

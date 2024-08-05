@@ -37,9 +37,9 @@ func (s *VehicleReService) CreateVehicleReq(ctx context.Context, vR *vehiclerequ
 	if t.IsFinished {
 		return ErrUnableToVehicleReq
 	}
-	if t.VehicleID != nil { // TODO: should be able to remove vehicle !!!!!
-		return ErrUnableToVehicleReq
-	}
+	// if t.VehicleID != nil { // TODO: should be able to remove vehicle !!!!!
+	// 	return ErrUnableToVehicleReq
+	// }
 	vR.VehicleType = string(t.TripType)
 	err = s.vehicleReqOps.Create(ctx, vR)
 	if err != nil {
@@ -50,6 +50,7 @@ func (s *VehicleReService) CreateVehicleReq(ctx context.Context, vR *vehiclerequ
 	vR.VehicleName = "new bmb"
 	vR.VehicleProductionYear = 2021
 	vR.MatchVehicleSpeed = 220
+	vR.Status = "matched"
 	travelTimeHours := t.Path.DistanceKM / vR.MatchVehicleSpeed
 	travelDuration := time.Duration(travelTimeHours * float64(time.Hour))
 	endDate := t.StartDate.Add(travelDuration)
@@ -69,8 +70,9 @@ func (s *VehicleReService) CreateVehicleReq(ctx context.Context, vR *vehiclerequ
 	updates2["matched_vehicle_id"] = vR.MatchedVehicleID
 	updates2["vehicle_name"] = vR.VehicleName
 	updates2["vehicle_production_year"] = vR.VehicleProductionYear
-	updates2["matched_vehicle_speed"] = vR.MatchVehicleSpeed
+	updates2["match_vehicle_speed"] = vR.MatchVehicleSpeed
 	updates2["vehicle_reservation_fee"] = vR.VehicleReservationFee
+	updates2["status"] = "matched"
 
 	err = s.vehicleReqOps.UpdateVehicleReq(ctx, vR.ID, updates2)
 	if err != nil {

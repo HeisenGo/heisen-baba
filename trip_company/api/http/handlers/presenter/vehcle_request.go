@@ -34,6 +34,7 @@ func CreateVehicleRequestToVehicleRequest(r *CreateVehicleRequest) *vehiclereque
 }
 
 func VehicleToCreateVehicleRes(v vehiclerequest.VehicleRequest) CreateVehicleRes{
+	
 	return CreateVehicleRes{
 		ID: v.ID,
 		TripID: v.TripID,
@@ -45,5 +46,6 @@ func VehicleToCreateVehicleRes(v vehiclerequest.VehicleRequest) CreateVehicleRes
 		MinCapacity: v.MinCapacity,
 		ProductionYearMin: v.ProductionYearMin,
 		MatchVehicleSpeed: v.MatchVehicleSpeed,
+		Status: v.Status,
 	}
 }

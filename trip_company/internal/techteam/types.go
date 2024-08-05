@@ -1,6 +1,13 @@
 package techteam
 
-import "context"
+import (
+	"context"
+	"errors"
+)
+
+var(
+	ErrMemberNotFound = errors.New("member not found")
+)
 
 type Repo interface {
 	GetTechTeamMemberByUserIDAndTechTeamID(ctx context.Context, userID uint, techTeamID uint) (*TechTeamMember, error) 

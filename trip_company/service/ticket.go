@@ -119,25 +119,34 @@ func (s *TicketService) GetTicketsByUserOrAgency(ctx context.Context, userID *ui
 func (s *TicketService) CancelTicket(ctx context.Context, ticketID uint, userID *uint, agencyID *uint) (*invoice.Invoice, error) {
 	// check permisson of requester if AgencyID!=nil!!!
 	fullTicket, err := s.ticketOps.GetFullTicketByID(ctx, ticketID)
+	
 	if err != nil {
 		return nil, err
 	}
 	var perTripCost float64
 	if agencyID != nil {
 		// check validation of agency TODO:
-		if fullTicket.AgencyID != agencyID {
+		if *fullTicket.AgencyID != *agencyID {
 			return nil, ErrForbidden
+		}
+		if fullTicket.Status == "Canceled"{
+			return &fullTicket.Invoice, fmt.Errorf("ticket is already")
 		}
 		perTripCost = fullTicket.Trip.AgencyPrice
 		// id = ownerID
 	} else {
 		// check user TODO:
-		if fullTicket.UserID != userID {
+		fmt.Println(userID, fullTicket.UserID, *fullTicket.UserID == *userID)
+		if *fullTicket.UserID != *userID {
 			return nil, ErrForbidden
+		}
+		if fullTicket.Status == "Canceled"{
+			return &fullTicket.Invoice, fmt.Errorf("ticket is already")
 		}
 		perTripCost = fullTicket.Trip.UserPrice
 		// id = ownerID
 	}
+
 	fullTicket.Trip.TripCancellingPenalty.FirstDate = fullTicket.Trip.StartDate.AddDate(0, 0, int(-fullTicket.Trip.TripCancellingPenalty.FirstDays))
 	fullTicket.Trip.TripCancellingPenalty.SecondDate = fullTicket.Trip.StartDate.AddDate(0, 0, int(-fullTicket.Trip.TripCancellingPenalty.SecondDays))
 	fullTicket.Trip.TripCancellingPenalty.ThirdDate = fullTicket.Trip.StartDate.AddDate(0, 0, int(-fullTicket.Trip.TripCancellingPenalty.ThirdDays))
@@ -182,6 +191,12 @@ func (s *TicketService) CancelTicket(ctx context.Context, ticketID uint, userID 
 	err = s.invoiceOps.UpdateInvoice(ctx, inv.ID, updates)
 	if err != nil {
 		return nil, err
+	}
+	trip_updates := make(map[string]interface{})
+	trip_updates["sold_tickets"] = fullTicket.Trip.SoldTickets - uint(fullTicket.Quantity)
+	err = s.tripOps.UpdateTripTechTimID(ctx,fullTicket.TripID, trip_updates)
+	if err!=nil{
+		return inv, err
 	}
 	// send to bank TODO: from alibaba to UserID/ AgnecyID owner: id by company owner !
 	return inv, nil

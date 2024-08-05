@@ -40,7 +40,7 @@ var (
 )
 
 type Repo interface {
-	GetCompanyTrips(ctx context.Context, companyID uint, limit, offset uint) ([]Trip, uint, error)
+	GetCompanyTrips(ctx context.Context, originCity, destinationCity, pathType string, startDate *time.Time ,companyID uint, limit, offset uint) ([]Trip, uint, error)
 	Insert(ctx context.Context, t *Trip) error
 
 	GetFullTripByID(ctx context.Context, id uint) (*Trip, error)

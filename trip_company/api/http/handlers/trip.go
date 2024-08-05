@@ -54,17 +54,29 @@ func GetCompanyTrips(tripService *service.TripService) fiber.Handler {
 		// }
 		//query parameter
 		page, pageSize := PageAndPageSize(c)
-		// get from auth!!!!! TODO:
+		startDateStr := c.Query("start_date")
+		originCity := c.Query("from")
+		destinationCity := c.Query("to")
+		pathType := c.Query("type")
 
-		// Parse dates
+		var startDate time.Time
 		var err error
+
+		if startDateStr != "" {
+			startDate, err = time.Parse("2006-01-02", startDateStr)
+			if err != nil {
+				return presenter.BadRequest(c, errors.New("invalid start date format"))
+			}
+		}
+		// Parse dates
+		// TO DO check requester!!!
 		companyID, err := c.ParamsInt("companyID")
 		if err != nil {
 			return presenter.BadRequest(c, err)
 		}
 		//startDateStr := startDate.Format("2006-01-02") // Convert to YYYY-MM-DD
-
-		trips, total, err := tripService.GetCompanyTrips(c.UserContext(), uint(companyID), uint(page), uint(pageSize))
+		//requester
+		trips, total, err := tripService.GetCompanyTrips(c.UserContext(), originCity, destinationCity, pathType, &startDate, uint(companyID), uint(page), uint(pageSize))
 		if err != nil {
 			if errors.Is(err, trip.ErrRecordsNotFound) {
 				return presenter.BadRequest(c, err)
@@ -108,8 +120,12 @@ func GetFullTripByID(tripService *service.TripService) fiber.Handler {
 			return presenter.InternalServerError(c, err)
 		}
 		var data interface{}
-		if requester == "owner" {
+		if requester == "owner" || requester == "operator" {
 			data = presenter.TripToOwnerAdminTechTeamOperatorTripResponse(*t)
+		} else if requester == "agency" {
+			data = presenter.TripToAgencyTripResponse(*t)
+		} else {
+			data = presenter.TripToUserTripResponse(*t)
 		}
 		// TO DO implement else
 		return presenter.OK(c, "Trip fetched successfully", data)
@@ -150,6 +166,7 @@ func GetTrips(tripService *service.TripService) fiber.Handler {
 			err := errors.New("Error")
 			return presenter.InternalServerError(c, err)
 		}
+		// TODO: if admin or not!!!!
 		data := presenter.NewPagination(
 			presenter.BatchTripToOwnerAdminTechTeamOperatorTripResponse(trips),
 			uint(page),
@@ -159,7 +176,6 @@ func GetTrips(tripService *service.TripService) fiber.Handler {
 		return presenter.OK(c, "Trips fetched successfully", data)
 	}
 }
-
 
 func PatchTrip(tripService *service.TripService) fiber.Handler { // tansactional!!!! TO DO:
 	return func(c *fiber.Ctx) error {
@@ -198,7 +214,6 @@ func PatchTrip(tripService *service.TripService) fiber.Handler { // tansactional
 		return presenter.OK(c, "Trip updated successfully", res)
 	}
 }
-
 
 func SetTechTeamToTrip(tripService *service.TripService) fiber.Handler {
 	return func(c *fiber.Ctx) error {
@@ -297,7 +312,7 @@ func ConfirmTrip(tripService *service.TripService) fiber.Handler { // tansaction
 			return presenter.BadRequest(c, errWrongIDType)
 		}
 
-		requesterID := uint(1)
+		requesterID := uint(5)
 		changedTrip, err := tripService.ConfirmTrip(c.UserContext(), uint(tripID), requesterID, req.IsConfirmed)
 
 		if err != nil {
@@ -350,8 +365,6 @@ func FinishTrip(tripService *service.TripService) fiber.Handler { // tansactiona
 	}
 }
 
-
-
 // GET unfinished trips of a path => between services => : TODO: GRPc
 func GetCountPathUnfinishedTrips(tripService *service.TripService) fiber.Handler {
 	return func(c *fiber.Ctx) error {
@@ -381,4 +394,3 @@ func GetCountPathUnfinishedTrips(tripService *service.TripService) fiber.Handler
 		return presenter.OK(c, "Trips fetched successfully", fiber.Map{"count": total})
 	}
 }
-

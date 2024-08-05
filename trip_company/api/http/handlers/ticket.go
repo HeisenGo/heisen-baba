@@ -64,7 +64,7 @@ func GetTickets(ticketService *service.TicketService) fiber.Handler {
 		// Parse dates
 		//var err error
 		//companyID, err := c.ParamsInt("companyID")
-		UserID := uint(1)
+		UserID := uint(7)
 		var data interface{}
 		if UserID != 0 { // TODO :
 
@@ -139,7 +139,7 @@ func CancelTicketByID(ticketService *service.TicketService) fiber.Handler {
 			res = presenter.InvoiceToAgencyInvoice(*invoice)
 		} else {
 			// USER ID is needed ! TODO :
-			userID := uint(1)
+			userID := uint(4)
 			invoice, err := ticketService.CancelTicket(c.UserContext(), uint(ticketID), &userID, nil)
 			if err != nil { //err = "failed to process agency ticket"
 				return presenter.BadRequest(c, err)

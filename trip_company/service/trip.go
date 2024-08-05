@@ -42,7 +42,7 @@ func (s *TripService) GetUpcomingUnconfirmedTripIDsToCancel(ctx context.Context)
 	return s.tripOps.GetUpcomingUnconfirmedTripIDsToCancel(ctx)
 }
 
-func (s *TripService) GetCompanyTrips(ctx context.Context, companyID uint, page, pageSize uint) ([]trip.Trip, uint, error) {
+func (s *TripService) GetCompanyTrips(ctx context.Context,originCity, destinationCity, pathType string, startDate *time.Time , companyID uint, page, pageSize uint) ([]trip.Trip, uint, error) {
 	tCompany, err := s.companyOps.GetByID(ctx, companyID)
 	if err != nil {
 		return nil, 0, err
@@ -52,7 +52,7 @@ func (s *TripService) GetCompanyTrips(ctx context.Context, companyID uint, page,
 		return nil, 0, company.ErrCompanyNotFound
 	}
 
-	return s.GetCompanyTrips(ctx, companyID, page, pageSize)
+	return s.tripOps.CompanyTrips(ctx,originCity, destinationCity, pathType,startDate, companyID, page, pageSize)
 }
 
 func (s *TripService) CreateTrip(ctx context.Context, t *trip.Trip, creatorID uint) error {
@@ -91,8 +91,8 @@ func (s *TripService) CreateTrip(ctx context.Context, t *trip.Trip, creatorID ui
 	t.TripType = trip.TripType(t.Path.Type)
 	t.TripType = "rail"
 	t.Path.DistanceKM = 220
-	v := uint(1)
-	t.VehicleID = &v
+	//v := uint(1)
+	//t.VehicleID = &v
 	//********************************************************
 	if err := s.tripOps.Create(ctx, t); err != nil {
 		return err
@@ -219,6 +219,7 @@ func (s *TripService) CancelTrip(ctx context.Context, tripID uint, requesterID u
 	}
 
 	err = s.tripOps.UpdateTripTechTimID(ctx, tripID, updates)
+	t.IsCanceled = isCanceled
 	if err != nil {
 		return nil, err
 	}
@@ -285,6 +286,7 @@ func (s *TripService) ConfirmTrip(ctx context.Context, tripID uint, requesterID 
 	if err != nil {
 		return nil, err
 	}
+	t.IsConfirmed = true
 
 	return t, nil
 }

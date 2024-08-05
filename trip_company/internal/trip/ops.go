@@ -22,11 +22,11 @@ func (o *Ops) GetUpcomingUnconfirmedTripIDsToCancel(ctx context.Context) ([]uint
 }
 
 // TO Do implement other layers!!!
-func (o *Ops) CompanyTrips(ctx context.Context, companyID uint, page, pageSize uint) ([]Trip, uint, error) {
+func (o *Ops) CompanyTrips(ctx context.Context, originCity, destinationCity, pathType string, startDate *time.Time ,companyID uint, page, pageSize uint) ([]Trip, uint, error) {
 	limit := pageSize
 	offset := (page - 1) * pageSize
 
-	return o.repo.GetCompanyTrips(ctx, companyID, limit, offset)
+	return o.repo.GetCompanyTrips(ctx,originCity,destinationCity,pathType, startDate ,companyID, limit, offset)
 }
 
 func (o *Ops) Create(ctx context.Context, trip *Trip) error {

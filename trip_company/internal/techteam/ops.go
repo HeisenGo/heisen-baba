@@ -42,5 +42,12 @@ func (o *Ops) GetTechTeamsOfCompany(ctx context.Context, companyId uint, page, p
 }
 
 func (o *Ops) GetTechTeamMemberByUserIDAndTechTeamID(ctx context.Context, userID uint, techTeamID uint) (*TechTeamMember, error) {
-	return o.repo.GetTechTeamMemberByUserIDAndTechTeamID(ctx, userID, techTeamID)
+	m, err:= o.repo.GetTechTeamMemberByUserIDAndTechTeamID(ctx, userID, techTeamID)
+	if err!=nil{
+		return nil, err
+	}
+	if m == nil {
+		return nil, ErrMemberNotFound
+	}
+	return m, nil
 }

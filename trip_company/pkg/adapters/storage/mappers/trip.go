@@ -205,3 +205,51 @@ func SimpleTripEntityToDomain(tripEntity entities.Trip) trip.Trip {
 		Profit:                 tripEntity.Profit,
 	}
 }
+
+func SimpleTripEntityToDomainWithPenalty(tripEntity entities.Trip) trip.Trip {
+	path := &trip.Path{
+		ID:         tripEntity.PathID,
+		Name:       tripEntity.PathName,
+		Type:       tripEntity.TripType,
+		DistanceKM: tripEntity.PathDistanceKM,
+		FromTerminal: &trip.Terminal{
+			City: tripEntity.Origin,
+			Name: tripEntity.FromTerminalName,
+			Type: tripEntity.TripType,
+		},
+		ToTerminal: &trip.Terminal{
+			City: tripEntity.Destination,
+			Name: tripEntity.ToTerminalName,
+			Type: tripEntity.TripType,
+		},
+	}
+	penalty := PenaltyEntityToDomain(*tripEntity.TripCancelingPenalty)
+	return trip.Trip{
+		TripCancellingPenalty: &penalty,
+		ID:                     tripEntity.ID,
+		TransportCompanyID:     tripEntity.TransportCompanyID,
+		TripType:               trip.TripType(tripEntity.TripType),
+		UserReleaseDate:        tripEntity.UserReleaseDate,
+		TourReleaseDate:        tripEntity.TourReleaseDate,
+		UserPrice:              tripEntity.UserPrice,
+		AgencyPrice:            tripEntity.AgencyPrice,
+		PathID:                 tripEntity.PathID,
+		Origin:                 tripEntity.Origin,
+		Destination:            tripEntity.Destination,
+		Path:                   path,
+		Status:                 tripEntity.Status,
+		MinPassengers:          tripEntity.MinPassengers,
+		TechTeamID:             tripEntity.TechTeamID,
+		VehicleRequestID:       tripEntity.VehicleRequestID,
+		TripCancelingPenaltyID: tripEntity.TripCancellingPenaltyID,
+		MaxTickets:             tripEntity.MaxTickets,
+		VehicleID:              tripEntity.VehicleID,
+		IsCanceled:             tripEntity.IsCanceled,
+		IsFinished:             tripEntity.IsFinished,
+		StartDate:              tripEntity.StartDate,
+		EndDate:                tripEntity.EndDate,
+		SoldTickets:            tripEntity.SoldTickets,
+		IsConfirmed:            tripEntity.IsConfirmed,
+		Profit:                 tripEntity.Profit,
+	}
+}

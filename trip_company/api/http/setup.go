@@ -126,28 +126,3 @@ func registerTransportCompanyRoutes(router fiber.Router, app *service.AppContain
 
 	router.Get("/path-trips/:pathID", handlers.GetCountPathUnfinishedTrips(app.TripService()))
 }
-
-// func registerTerminalRouts(router fiber.Router, app *service.AppContainer, secret []byte) {
-// 	terminalGroup := router.Group("/terminals") //, middlerwares.Auth(secret), middlerwares.RoleChecker("user", "admin"))
-// 	fmt.Print(secret)
-// 	terminalGroup.Post("",
-// 		handlers.CreateTerminal(app.TerminalService()),
-// 	)
-
-// 	terminalGroup.Get("", handlers.CityTerminals(app.TerminalService()))
-
-// 	terminalGroup.Patch(":terminalID", handlers.PatchTerminal(app.TerminalService()))
-// 	terminalGroup.Delete(":terminalID", handlers.DeleteTerminal(app.TerminalService()))
-// }
-
-// func registerPathRouts(router fiber.Router, app *service.AppContainer, secret []byte) {
-// 	pathGroup := router.Group("/paths") //, middlerwares.Auth(secret), middlerwares.RoleChecker("user", "admin"))
-// 	fmt.Print(secret)
-// 	pathGroup.Post("",
-// 		handlers.CreatePath(app.PathService()),
-// 	)
-// 	pathGroup.Get(":pathID", handlers.GetFullPathByID(app.PathService()))
-// 	pathGroup.Get("", handlers.GetPathsByOriginDestinationType(app.PathService()))
-// 	pathGroup.Patch(":pathID", handlers.PatchPath(app.PathService()))
-// 	pathGroup.Delete(":pathID", handlers.DeletePath(app.PathService()))
-// }

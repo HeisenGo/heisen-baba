@@ -32,7 +32,7 @@ func (r *vehicleReqRepo) Insert(ctx context.Context, vR *vehiclerequest.VehicleR
 func (r *vehicleReqRepo) UpdateVehicleReq(ctx context.Context, id uint, updates map[string]interface{}) error {
 	var t entities.VehicleRequest
 
-	if err := r.db.WithContext(ctx).Model(&t).Updates(updates).Error; err != nil {
+	if err := r.db.WithContext(ctx).Model(&t).Where("id = ?", id).Updates(updates).Error; err != nil {
 		return fmt.Errorf("%w", err)
 	}
 
