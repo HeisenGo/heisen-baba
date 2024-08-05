@@ -1,9 +1,10 @@
 package config
 
 type Config struct {
-	Server Server `mapstructure:"server"`
-	DB     DB     `mapstructure:"db"`
-	Redis  Redis  `mapstructure:"redis"`
+	Server        Server        `mapstructure:"server"`
+	DB            DB            `mapstructure:"db"`
+	Redis         Redis         `mapstructure:"redis"`
+	MessageBroker MessageBroker `mapstructure:"message_broker"`
 }
 
 type Server struct {
@@ -35,4 +36,11 @@ type Redis struct {
 	Pass string `mapstructure:"pass"`
 	Host string `mapstructure:"host"`
 	Port int    `mapstructure:"port"`
+}
+
+type MessageBroker struct {
+	Username string `mapstructure:"username"`
+	Password string `mapstructure:"password"`
+	Host     string `mapstructure:"host"`
+	Port     int    `mapstructure:"port"`
 }

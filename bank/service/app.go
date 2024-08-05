@@ -6,6 +6,7 @@ import (
 	"bankservice/internal/wallet/wallet"
 	"bankservice/pkg/adapters/clients/grpc"
 	"bankservice/pkg/adapters/consul"
+	"bankservice/pkg/adapters/rabbitmq"
 	"bankservice/pkg/adapters/storage"
 	"bankservice/pkg/ports"
 	"bankservice/pkg/ports/clients/clients"
@@ -22,6 +23,7 @@ type AppContainer struct {
 	walletService   *WalletService
 	serviceRegistry ports.IServiceRegistry
 	authClient      clients.IAuthClient
+	messageBroker   ports.IMessageBroker
 }
 
 func NewAppContainer(cfg config.Config) (*AppContainer, error) {
@@ -29,6 +31,7 @@ func NewAppContainer(cfg config.Config) (*AppContainer, error) {
 		cfg: cfg,
 	}
 
+	app.setMessageBroker(cfg.MessageBroker)
 	app.mustInitDB()
 	app.mustRegisterService(cfg.Server)
 	app.setAuthClient(cfg.Server.ServiceRegistry.AuthServiceName)
@@ -42,6 +45,17 @@ func (a *AppContainer) RawDBConnection() *gorm.DB {
 	return a.dbConn
 }
 
+func (a *AppContainer) MessageBroker() ports.IMessageBroker {
+	return a.messageBroker
+}
+
+func (a *AppContainer) setMessageBroker(messageBrokerCfg config.MessageBroker) {
+	if a.messageBroker != nil {
+		return
+	}
+
+	a.messageBroker = rabbitmq.NewRabbitMQ(messageBrokerCfg.Username, messageBrokerCfg.Password, messageBrokerCfg.Host, messageBrokerCfg.Port)
+}
 func (a *AppContainer) mustInitDB() {
 	if a.dbConn != nil {
 		return
@@ -100,7 +114,7 @@ func (a *AppContainer) WalletServiceFromCtx(ctx context.Context) *WalletService 
 
 func (a *AppContainer) mustRegisterService(srvCfg config.Server) {
 	registry := consul.NewConsul(srvCfg.ServiceRegistry.Address)
-	err := registry.RegisterService(srvCfg.ServiceRegistry.ServiceName, srvCfg.ServiceHostAddress, srvCfg.ServiceHTTPPrefixPath, srvCfg.ServiceHTTPHealthPath, srvCfg.HTTPPort)
+	err := registry.RegisterService(srvCfg.ServiceRegistry.ServiceName, srvCfg.ServiceHostAddress, srvCfg.ServiceHTTPPrefixPath, srvCfg.ServiceHTTPHealthPath, srvCfg.GRPCPort, srvCfg.HTTPPort)
 	if err != nil {
 		log.Fatalf("Failed to register service with Consul: %v", err)
 	}
