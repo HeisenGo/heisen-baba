@@ -229,7 +229,7 @@ func (r *tripRepo) GetUpcomingUnconfirmedTripIDsToCancel(ctx context.Context) ([
 	err := r.db.WithContext(ctx).Model(&entities.Trip{}).
 		Select("id").
 		Where("start_date BETWEEN ? AND ?", now, in24Hours).
-		Where("is_confirmed = ?", false).
+		Where("is_confirmed = ? and is_canceled = ? and is_finished = ?", false, false, false).
 		Pluck("id", &tripIDs).
 		Error
 

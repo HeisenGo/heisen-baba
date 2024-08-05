@@ -8,7 +8,7 @@ type TechTeam struct {
 	Description        string `gorm:"type:text"`
 	TripType           string `gorm:"type:varchar(20);not null"`
 	TransportCompanyID uint
-	TransportCompany   TransportCompany `gorm:"foreignKey:TransportCompanyID"`
+	TransportCompany   TransportCompany `gorm:"foreignKey:TransportCompanyID;constraint:OnDelete:CASCADE;"`
 	Members            []TechTeamMember `gorm:"foreignKey:TechTeamID;constraint:OnDelete:CASCADE;"`
 }
 
