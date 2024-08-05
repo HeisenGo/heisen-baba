@@ -2,6 +2,7 @@ package main
 
 import (
 	grpcServer "bankservice/api/grpc"
+	"bankservice/api/message_broker"
 	"bankservice/config"
 	"bankservice/service"
 	"flag"
@@ -23,7 +24,7 @@ func main() {
 	}
 
 	var wg sync.WaitGroup
-	wg.Add(2) // We are running two servers
+	wg.Add(3) // We are running two servers
 
 	// Start the Fiber server
 	go func() {
@@ -34,6 +35,10 @@ func main() {
 	go func() {
 		defer wg.Done()
 		grpcServer.Run(cfg, app)
+	}()
+	go func() {
+		defer wg.Done()
+		message_broker.Run(app)
 	}()
 
 	wg.Wait()

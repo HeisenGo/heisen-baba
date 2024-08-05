@@ -8,8 +8,6 @@ services:
       - "8500:8500"   # Consul UI and API
       - "8600:8600/udp" # Consul DNS
     restart: always
-    networks:
-      - backend-network
 
   traefik:
     restart: always
@@ -18,8 +16,6 @@ services:
     # Enables the web UI and tells Traefik to listen to docker
     command:
       - "--configFile=/etc/traefik/traefik.yaml"
-    networks:
-      - backend-network
 
     ports:
       # The HTTP port
@@ -44,40 +40,31 @@ services:
     volumes:
       - pg-data:/var/lib/postgresql/data
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
-    networks:
-      - backend-network
 
-  terminal_path:
-    hostname: terminal_path
-    build:
-      context: ./terminal_path
-      dockerfile: Dockerfile
+  redis:
+    image: redis:6.2-alpine
+    command: redis-server
     restart: always
     ports:
-      - "8081:8081"
-    depends_on:
-      - postgres
-      - consul
-    networks:
-      - backend-network
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
 
-  auth:
-    hostname: auth
-    build:
-      context: ./auth
-      dockerfile: Dockerfile
+  rabbitmq:
+    image: rabbitmq:3.10.7-management
     restart: always
     ports:
-      - "50051:50051"
-    depends_on:
-      - postgres
-      - consul
-    networks:
-      - backend-network
-
-networks:
-  backend-network:
-    driver: bridge
+      - "5672:5672"   # RabbitMQ default port
+      - "15672:15672" # RabbitMQ Management Plugin
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
 
 volumes:
   pg-data:
+  redis-data:
+    driver: local
+  rabbitmq-data:
+    driver: local
