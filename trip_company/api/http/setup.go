@@ -111,10 +111,12 @@ func registerTransportCompanyRoutes(router fiber.Router, app *service.AppContain
 		handlers.PatchTrip(app.TripService()),
 	)
 	router.Get("/company-trips/:companyID", handlers.GetCompanyTrips(app.TripService()))
-	router.Post("/buy", handlers.BuyTicket(app.TicketService())) // TODO : should be transactional
 
-	router.Patch("/cancel-ticket/:ticketID", handlers.CancelTicketByID(app.TicketService()))
-	router.Get("/tickets", handlers.GetTickets(app.TicketService())) // configure a way o separate agnecy and user TODO:
+	router.Post("/buy", handlers.BuyTicket(app.TicketServiceFromCtx))
+	router.Patch("/cancel-ticket/:ticketID", handlers.CancelTicketByID(app.TicketServiceFromCtx))
+	
+	router.Get("/user-tickets", handlers.GetUserTickets(app.TicketService()))
+	router.Get("/agency-tickets/:agencyID", handlers.GetAgencyTickets(app.TicketService())) 
 
 	router.Post("/vehicle-req", handlers.CreateVehicleRequest(app.VehicleReqService()))
 

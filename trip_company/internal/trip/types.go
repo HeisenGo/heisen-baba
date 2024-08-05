@@ -20,7 +20,7 @@ const (
 )
 
 var (
-	ErrInvalidPercentage = errors.New("invlaid percent")
+	ErrInvalidPercentage = errors.New("invalid percent")
 	ErrCanNotUpdate    = errors.New("can not update")
 	ErrNotUpdated      = errors.New("could not update trip")
 	ErrRecordsNotFound = errors.New("no records found")

@@ -13,6 +13,7 @@ import (
 var (
 	ErrImpossibleToBuy = errors.New("not possible to buy")
 	ErrUnableToCancel  = errors.New("unable to cancel")
+	ErrUnAuthorized = errors.New("not logged in")
 )
 
 type TicketService struct {
@@ -87,8 +88,7 @@ func (s *TicketService) ProcessUserTicket(ctx context.Context, t *ticket.Ticket)
 	if err != nil {
 		return err
 	}
-	username := "new_user"
-	info := fmt.Sprintf("User %s bought %d trips of from %s %s to %s %s in %s for date %v", username, t.Quantity, trp.Origin, trp.Path.FromTerminal.Name, trp.Destination, trp.Path.ToTerminal.Name, trp.TripType, trp.StartDate)
+	info := fmt.Sprintf("User %v bought %d trips of from %s %s to %s %s in %s for date %v", t.UserID, t.Quantity, trp.Origin, trp.Path.FromTerminal.Name, trp.Destination, trp.Path.ToTerminal.Name, trp.TripType, trp.StartDate)
 
 	newInvoice := invoice.NewInvoice(t.ID, time.Now(), info, trp.UserPrice, t.TotalPrice, 0)
 
@@ -111,9 +111,11 @@ func (s *TicketService) ProcessUserTicket(ctx context.Context, t *ticket.Ticket)
 	return nil
 }
 
-func (s *TicketService) GetTicketsByUserOrAgency(ctx context.Context, userID *uint, agencyID *uint, page, pageSize uint) ([]ticket.Ticket, uint, error) {
-	// check one of them should be nill !!!
-	return s.ticketOps.GetTicketsByUserOrAgency(ctx, userID, agencyID, page, pageSize)
+func (s *TicketService) GetTicketsByUserOrAgency(ctx context.Context, userID uint, agencyID uint, page, pageSize uint) ([]ticket.Ticket, uint, error) {
+	if userID == 0 && agencyID == 0{
+		return nil, 0, ErrUnAuthorized
+	}
+	return s.ticketOps.GetTicketsByUserOrAgency(ctx, &userID, &agencyID, page, pageSize)
 }
 
 func (s *TicketService) CancelTicket(ctx context.Context, ticketID uint, userID *uint, agencyID *uint) (*invoice.Invoice, error) {
