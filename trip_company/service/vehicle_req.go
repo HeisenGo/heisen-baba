@@ -10,6 +10,7 @@ import (
 
 var (
 	ErrUnableToVehicleReq = errors.New("unable to make vehicle req for this trip")
+	ErrAlreadyHasVehicle  = errors.New("already has vehicle at first remove it")
 )
 
 type VehicleReService struct {
@@ -37,9 +38,10 @@ func (s *VehicleReService) CreateVehicleReq(ctx context.Context, vR *vehiclerequ
 	if t.IsFinished {
 		return ErrUnableToVehicleReq
 	}
-	// if t.VehicleID != nil { // TODO: should be able to remove vehicle !!!!!
-	// 	return ErrUnableToVehicleReq
-	// }
+
+	if t.VehicleRequest != nil {
+		return ErrAlreadyHasVehicle
+	}
 	vR.VehicleType = string(t.TripType)
 	err = s.vehicleReqOps.Create(ctx, vR)
 	if err != nil {
@@ -78,8 +80,37 @@ func (s *VehicleReService) CreateVehicleReq(ctx context.Context, vR *vehiclerequ
 	if err != nil {
 		return err
 	}
-	// update vR
-	// trip update end_date
 	// sen to bank? TODO:
+	return nil
+}
+
+func (s *VehicleReService) Delete(ctx context.Context, vRID uint, creatorID uint) error {
+	vr, err := s.vehicleReqOps.GetVehicleReqByID(ctx, vRID)
+	if err != nil {
+		return err
+	}
+	company, err := s.vehicleReqOps.GetTransportCompanyByVehicleRequestID(ctx, vRID)
+	if err != nil {
+		return err
+	}
+
+	if company.OwnerID != creatorID {
+		return ErrForbidden
+	}
+
+	err = s.vehicleReqOps.Delete(ctx, vRID)
+	if err != nil {
+		return err
+	}
+	updates := make(map[string]interface{})
+	updates["end_date"] = nil
+	updates["vehicle_id"] = nil
+	updates["vehicle_name"] = ""
+	updates["vehicle_request_id"] = nil
+	err = s.tripOps.UpdateEndDateTrip(ctx, vr.TripID, updates)
+	if err != nil {
+		return err
+	}
+	// TODO: send invoice to the bank and cancel vehicle with reservationfEE
 	return nil
 }

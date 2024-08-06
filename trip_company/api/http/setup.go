@@ -124,7 +124,8 @@ func registerTransportCompanyRoutes(router fiber.Router, app *service.AppContain
 	router.Get("/user-tickets", handlers.GetUserTickets(app.TicketService()))
 	router.Get("/agency-tickets/:agencyID", handlers.GetAgencyTickets(app.TicketService())) 
 
-	router.Post("/vehicle-req", handlers.CreateVehicleRequest(app.VehicleReqService()))
+	router.Post("/vehicle-req", handlers.CreateVehicleRequest(app.VehicleReqServiceFromCtx))
+	router.Delete("/vehicle-req:vRID", handlers.DeleteVR(app.VehicleReqServiceFromCtx))
 
 	router.Post("/tech-teams", handlers.CreateTechTeam(app.TechTeamService()))
 	router.Post("/tech-members", handlers.CreateTechMember(app.TechTeamService()))
