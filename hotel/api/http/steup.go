@@ -87,7 +87,7 @@ func registerRoomRoutes(router fiber.Router, app *service.AppContainer) {
 }
 
 func registerReservationRoutes(router fiber.Router, app *service.AppContainer) {
-	router = router.Group("/reservations")
+	router = router.Group("/hotels/reservations")
 	router.Post("",
 		middlewares.SetTransaction(adapters.NewGormCommitter(app.RawDBConnection())),
 		handlers.CreateReservation(app.ReservationService()),

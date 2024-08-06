@@ -3,8 +3,8 @@ package reservation
 import (
 	"context"
 	"errors"
-	"time"
 	"github.com/google/uuid"
+	"time"
 )
 
 type Repo interface {
@@ -18,7 +18,7 @@ type Repo interface {
 
 type Reservation struct {
 	ID         uint
-	OwnerID    uuid.UUID 
+	OwnerID    uuid.UUID
 	RoomID     uint
 	UserID     uuid.UUID
 	CheckIn    time.Time
@@ -41,7 +41,8 @@ func ValidateReservationStatus(status string) error {
 		"checked_out": true,
 		"canceled":    true,
 	}
-	if !validStatuses[status] {
+	_, ok := validStatuses[status]
+	if !ok {
 		return ErrInvalidReservationStatus
 	}
 	return nil

@@ -15,9 +15,9 @@ func NewOps(repo Repo) *Ops {
 }
 
 func (o *Ops) Create(ctx context.Context, reservation *Reservation) error {
-	if err := ValidateReservationStatus(reservation.Status); err != nil {
-		return err
-	}
+	//if err := ValidateReservationStatus(reservation.Status); err != nil {
+	//	return err
+	//}
 
 	if err := ValidateAmount(reservation.TotalPrice); err != nil {
 		return err

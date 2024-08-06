@@ -22,6 +22,7 @@ type AppContainer struct {
 	cfg                config.Config
 	serviceRegistry    ports.IServiceRegistry
 	authClient         clients.IAuthClient
+	bankClient         clients.IBankClient
 	dbConn             *gorm.DB
 	hotelService       *HotelService
 	roomService        *RoomService
@@ -37,6 +38,7 @@ func NewAppContainer(cfg config.Config) (*AppContainer, error) {
 	app.mustInitDB()
 	app.mustRegisterService(cfg.Server)
 	app.setAuthClient(cfg.Server.ServiceRegistry.AuthServiceName)
+	app.setBankClient(cfg.Server.ServiceRegistry.BankServiceName)
 	app.setHotelService()
 	app.setRoomService()
 	app.setReservationService()
@@ -68,12 +70,21 @@ func (a *AppContainer) mustInitDB() {
 func (a *AppContainer) AuthClient() clients.IAuthClient {
 	return a.authClient
 }
+func (a *AppContainer) BankClient() clients.IBankClient {
+	return a.bankClient
+}
 
 func (a *AppContainer) setAuthClient(authServiceName string) {
 	if a.authClient != nil {
 		return
 	}
 	a.authClient = grpc.NewGRPCAuthClient(a.serviceRegistry, authServiceName)
+}
+func (a *AppContainer) setBankClient(bankServiceName string) {
+	if a.bankClient != nil {
+		return
+	}
+	a.bankClient = grpc.NewGRPCBankClient(a.serviceRegistry, bankServiceName)
 }
 
 func (a *AppContainer) HotelService() *HotelService {
@@ -153,6 +164,7 @@ func (a *AppContainer) ReservationServiceFromCtx(ctx context.Context) *Reservati
 	}
 
 	return NewReservationService(
+		a.BankClient(),
 		reservation.NewOps(storage.NewReservationRepo(gc)),
 		invoice.NewOps(storage.NewInvoiceRepo(gc)),
 	)
@@ -163,6 +175,7 @@ func (a *AppContainer) setReservationService() {
 		return
 	}
 	a.reservationService = NewReservationService(
+		a.BankClient(),
 		reservation.NewOps(storage.NewReservationRepo(a.dbConn)),
 		invoice.NewOps(storage.NewInvoiceRepo(a.dbConn)),
 	)

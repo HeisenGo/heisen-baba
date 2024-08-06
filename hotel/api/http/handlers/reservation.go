@@ -1,11 +1,13 @@
 package handlers
 
 import (
-	"hotel/api/http/handlers/presenter"
-	"hotel/service"
-	"strconv"
+	"errors"
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
+	"hotel/api/http/handlers/presenter"
+	"hotel/internal/bank"
+	"hotel/service"
+	"strconv"
 )
 
 // CreateReservation creates a new reservation
@@ -29,6 +31,9 @@ func CreateReservation(reservationService *service.ReservationService) fiber.Han
 		reservation := presenter.ReservationReqToReservationDomain(&req)
 		err := reservationService.CreateReservation(c.UserContext(), reservation)
 		if err != nil {
+			if errors.Is(err, bank.ErrNotEnoughMoney) {
+				return presenter.BadRequest(c, err)
+			}
 			return presenter.InternalServerError(c, err)
 		}
 
