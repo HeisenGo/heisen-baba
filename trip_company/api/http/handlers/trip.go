@@ -6,6 +6,8 @@ import (
 	"tripcompanyservice/api/http/handlers/presenter"
 	"tripcompanyservice/internal/company"
 	"tripcompanyservice/internal/trip"
+	"tripcompanyservice/internal/user"
+	"tripcompanyservice/pkg/valuecontext"
 	"tripcompanyservice/service"
 
 	"github.com/gofiber/fiber/v2"
@@ -25,15 +27,14 @@ func CreateTrip(serviceFactory ServiceFactory[*service.TripService]) fiber.Handl
 			return presenter.BadRequest(c, err)
 		}
 
-		//userClaims, ok := c.Locals(UserClaimKey).(*jwt.UserClaims)
-		// if !ok {
-		// 	return SendError(c, errWrongClaimType, fiber.StatusBadRequest)
-		// }
+		userReq, ok := c.Locals(valuecontext.UserClaimKey).(*user.User)
+		if !ok {
+			return SendError(c, errWrongClaimType, fiber.StatusBadRequest)
+		}
 
 		t := presenter.CreateTripReqToTrip(&req)
-		creatorID := uint(1) // TO DO
 
-		if err := tripService.CreateTrip(c.UserContext(), t, creatorID); err != nil {
+		if err := tripService.CreateTrip(c.UserContext(), t, userReq.ID); err != nil {
 			if errors.Is(err, service.ErrPathNotFound) || errors.Is(err, company.ErrCompanyNotFound) || errors.Is(err, trip.ErrInvalidPercentage) || errors.Is(err, trip.ErrStartTime) || errors.Is(err, trip.ErrSecondPenalty) || errors.Is(err, trip.ErrInvalidPercentage) || errors.Is(err, trip.ErrDuplication) || errors.Is(err, trip.ErrFirstPenalty) || errors.Is(err, trip.ErrNegativePrice) {
 				return presenter.BadRequest(c, err)
 			}
@@ -49,11 +50,7 @@ func CreateTrip(serviceFactory ServiceFactory[*service.TripService]) fiber.Handl
 
 func GetCompanyTrips(tripService *service.TripService) fiber.Handler {
 	return func(c *fiber.Ctx) error {
-		// userClaims, ok := c.Locals(UserClaimKey).(*jwt.UserClaims)
-		// if !ok {
-		// 	return SendError(c, errWrongClaimType, fiber.StatusBadRequest)
-		// }
-		//query parameter
+		
 		page, pageSize := PageAndPageSize(c)
 		startDateStr := c.Query("start_date")
 		originCity := c.Query("from")
@@ -69,14 +66,19 @@ func GetCompanyTrips(tripService *service.TripService) fiber.Handler {
 				return presenter.BadRequest(c, errors.New("invalid start date format"))
 			}
 		}
-		// TO DO check requester!!!
 		companyID, err := c.ParamsInt("companyID")
 		if err != nil {
 			return presenter.BadRequest(c, err)
 		}
-		//requester // how to show the result
-		requester := "admin" //user // admin // agency // unknown
-		userID := uint(1)
+		userReq, ok := c.Locals(valuecontext.UserClaimKey).(*user.User)
+		if !ok {
+			return SendError(c, errWrongClaimType, fiber.StatusBadRequest)
+		}
+		var requester string
+		userID := userReq.ID
+		if userReq.IsAdmin{
+			requester = "admin"
+		}
 		// check isOwner / isAdmin / isTechinician
 		trips, total, role, err := tripService.GetCompanyTrips(c.UserContext(), originCity, destinationCity, pathType, &startDate, requester, uint(companyID),userID, uint(page), uint(pageSize))
 		if err != nil {
@@ -117,11 +119,7 @@ func GetCompanyTrips(tripService *service.TripService) fiber.Handler {
 
 func GetCompanyAgencyTrips(tripService *service.TripService) fiber.Handler {
 	return func(c *fiber.Ctx) error {
-		// userClaims, ok := c.Locals(UserClaimKey).(*jwt.UserClaims)
-		// if !ok {
-		// 	return SendError(c, errWrongClaimType, fiber.StatusBadRequest)
-		// }
-		//query parameter
+		
 		page, pageSize := PageAndPageSize(c)
 		startDateStr := c.Query("start_date")
 		originCity := c.Query("from")
@@ -141,11 +139,15 @@ func GetCompanyAgencyTrips(tripService *service.TripService) fiber.Handler {
 		if err != nil {
 			return presenter.BadRequest(c, err)
 		}
-		// only get this 
-		var userID uint
-		requester := "agency" //no other type
 
-		trips, total, _, err := tripService.GetCompanyTrips(c.UserContext(), originCity, destinationCity, pathType, &startDate, requester, uint(companyID),userID, uint(page), uint(pageSize))
+		userReq, ok := c.Locals(valuecontext.UserClaimKey).(*user.User)
+		if !ok {
+			return SendError(c, errWrongClaimType, fiber.StatusBadRequest)
+		}
+		var requester string
+		requester = "agency" //no other type
+
+		trips, total, _, err := tripService.GetCompanyTrips(c.UserContext(), originCity, destinationCity, pathType, &startDate, requester, uint(companyID),userReq.ID, uint(page), uint(pageSize))
 		if err != nil {
 			if errors.Is(err, trip.ErrRecordsNotFound) {
 				return presenter.BadRequest(c, err)
@@ -182,10 +184,7 @@ func GetCompanyAgencyTrips(tripService *service.TripService) fiber.Handler {
 
 func GetFullTripByID(tripService *service.TripService) fiber.Handler {
 	return func(c *fiber.Ctx) error {
-		// userClaims, ok := c.Locals(UserClaimKey).(*jwt.UserClaims)
-		// if !ok {
-		// 	return SendError(c, errWrongClaimType, fiber.StatusBadRequest)
-		// }
+		
 		//query parameter
 		tripID, err := c.ParamsInt("tripID")
 		if err != nil {
@@ -195,10 +194,16 @@ func GetFullTripByID(tripService *service.TripService) fiber.Handler {
 		if tripID < 0 {
 			return presenter.BadRequest(c, errWrongIDType)
 		}
-		//check isAdmin isOwner isTechnician
-		userID := uint(8)
-		requester := "admin"
-		t, requesterRole, err := tripService.GetFullTripByID(c.UserContext(), uint(tripID), userID, requester)
+		
+		userReq, ok := c.Locals(valuecontext.UserClaimKey).(*user.User)
+		if !ok {
+			return SendError(c, errWrongClaimType, fiber.StatusBadRequest)
+		}
+		var requester string
+		if userReq.IsAdmin {
+			requester = "admin"
+		}
+		t, requesterRole, err := tripService.GetFullTripByID(c.UserContext(), uint(tripID), userReq.ID, requester)
 		if err != nil {
 			if errors.Is(err, trip.ErrRecordNotFound) {
 				return presenter.BadRequest(c, err)
@@ -220,10 +225,7 @@ func GetFullTripByID(tripService *service.TripService) fiber.Handler {
 
 func GetFullAgencyTripByID(tripService *service.TripService) fiber.Handler {
 	return func(c *fiber.Ctx) error {
-		// userClaims, ok := c.Locals(UserClaimKey).(*jwt.UserClaims)
-		// if !ok {
-		// 	return SendError(c, errWrongClaimType, fiber.StatusBadRequest)
-		// }
+		
 		//query parameter
 		tripID, err := c.ParamsInt("tripID")
 		if err != nil {
@@ -234,9 +236,13 @@ func GetFullAgencyTripByID(tripService *service.TripService) fiber.Handler {
 			return presenter.BadRequest(c, errWrongIDType)
 		}
 		//TO do from local context
-		userID := uint(4)
+		
+		userReq, ok := c.Locals(valuecontext.UserClaimKey).(*user.User)
+		if !ok {
+			return SendError(c, errWrongClaimType, fiber.StatusBadRequest)
+		}
 		requester := "agency" // "user" // "admin" // "operator" // "employee" // "techteam"
-		t, _, err := tripService.GetFullTripByID(c.UserContext(), uint(tripID), userID, requester)
+		t, _, err := tripService.GetFullTripByID(c.UserContext(), uint(tripID), userReq.ID, requester)
 		if err != nil {
 			if errors.Is(err, trip.ErrRecordNotFound) {
 				return presenter.BadRequest(c, err)
@@ -257,10 +263,12 @@ func GetFullAgencyTripByID(tripService *service.TripService) fiber.Handler {
 
 func GetTrips(tripService *service.TripService) fiber.Handler {
 	return func(c *fiber.Ctx) error {
-		// userClaims, ok := c.Locals(UserClaimKey).(*jwt.UserClaims)
-		// if !ok {
-		// 	return SendError(c, errWrongClaimType, fiber.StatusBadRequest)
-		// }
+		
+		userReq, ok := c.Locals(valuecontext.UserClaimKey).(*user.User)
+		if !ok {
+			return SendError(c, errWrongClaimType, fiber.StatusBadRequest)
+		}
+		var requester string
 		//query parameter
 		page, pageSize := PageAndPageSize(c)
 		startDateStr := c.Query("start_date")
@@ -278,9 +286,9 @@ func GetTrips(tripService *service.TripService) fiber.Handler {
 				return presenter.BadRequest(c, errors.New("invalid start date format"))
 			}
 		}
-		requester := "user"
-		// check isAdmin or Not
-		//requesterType := c.Query("requester_type") // get from auth!!!!! TODO:
+		if userReq.IsAdmin{
+			requester = "admin"
+		}
 
 		trips, total, err := tripService.GetTrips(c.UserContext(), originCity, destinationCity, pathType, &startDate, requester, uint(page), uint(pageSize))
 		if err != nil {
@@ -321,18 +329,19 @@ func GetTrips(tripService *service.TripService) fiber.Handler {
 
 func GetAgencyTrips(tripService *service.TripService) fiber.Handler {
 	return func(c *fiber.Ctx) error {
-		// userClaims, ok := c.Locals(UserClaimKey).(*jwt.UserClaims)
-		// if !ok {
-		// 	return SendError(c, errWrongClaimType, fiber.StatusBadRequest)
-		// }
+		
 		//query parameter
 		page, pageSize := PageAndPageSize(c)
 		startDateStr := c.Query("start_date")
 		originCity := c.Query("from")
 		destinationCity := c.Query("to")
 		pathType := c.Query("type")
-		//requesterType := c.Query("requester_type") // get from auth!!!!! TODO:
 
+
+		_, ok := c.Locals(valuecontext.UserClaimKey).(*user.User)
+		if !ok {
+			return SendError(c, errWrongClaimType, fiber.StatusBadRequest)
+		}
 		// Parse dates
 		var startDate time.Time
 		var err error
@@ -372,10 +381,11 @@ func PatchTrip(serviceFactory ServiceFactory[*service.TripService]) fiber.Handle
 			return presenter.BadRequest(c, err)
 		}
 
-		// userClaims, ok := c.Locals(UserClaimKey).(*jwt.UserClaims)
-		// if !ok {
-		// 	return SendError(c, errWrongClaimType, fiber.StatusBadRequest)
-		// }
+		
+		userReq, ok := c.Locals(valuecontext.UserClaimKey).(*user.User)
+		if !ok {
+			return SendError(c, errWrongClaimType, fiber.StatusBadRequest)
+		}
 		tripID, err := c.ParamsInt("tripID")
 		if err != nil {
 			return presenter.BadRequest(c, errWrongIDType)
@@ -387,7 +397,7 @@ func PatchTrip(serviceFactory ServiceFactory[*service.TripService]) fiber.Handle
 
 		newTrip := presenter.UpdateTripReqToTrip(&req)
 		// only operator and owner can do this
-		changedTrip, err := tripService.UpdateTrip(c.UserContext(), uint(tripID), newTrip)
+		changedTrip, err := tripService.UpdateTrip(c.UserContext(), uint(tripID), newTrip, userReq.ID)
 
 		if err != nil {
 			if errors.Is(err, trip.ErrCanNotUpdate) || errors.Is(err, trip.ErrNotUpdated) || errors.Is(err, trip.ErrRecordNotFound) {
@@ -410,10 +420,11 @@ func SetTechTeamToTrip(serviceFactory ServiceFactory[*service.TripService]) fibe
 			return presenter.BadRequest(c, err)
 		}
 
-		// userClaims, ok := c.Locals(UserClaimKey).(*jwt.UserClaims)
-		// if !ok {
-		// 	return SendError(c, errWrongClaimType, fiber.StatusBadRequest)
-		// }
+		
+		userReq, ok := c.Locals(valuecontext.UserClaimKey).(*user.User)
+		if !ok {
+			return SendError(c, errWrongClaimType, fiber.StatusBadRequest)
+		}
 		tripID, err := c.ParamsInt("tripID")
 		if err != nil {
 			return presenter.BadRequest(c, errWrongIDType)
@@ -424,7 +435,7 @@ func SetTechTeamToTrip(serviceFactory ServiceFactory[*service.TripService]) fibe
 		}
 
 		// only owner and operator
-		changedTrip, err := tripService.SetTechTeamToTrip(c.UserContext(), uint(tripID), req.TechTeamID)
+		changedTrip, err := tripService.SetTechTeamToTrip(c.UserContext(), uint(tripID), req.TechTeamID, userReq.ID)
 
 		if err != nil {
 			if errors.Is(err, trip.ErrCanNotUpdate) || errors.Is(err, trip.ErrNotUpdated) || errors.Is(err, trip.ErrRecordNotFound) {
@@ -446,10 +457,11 @@ func CancelTrip(serviceFactory ServiceFactory[*service.TripService]) fiber.Handl
 			return presenter.BadRequest(c, err)
 		}
 
-		// userClaims, ok := c.Locals(UserClaimKey).(*jwt.UserClaims)
-		// if !ok {
-		// 	return SendError(c, errWrongClaimType, fiber.StatusBadRequest)
-		// }
+		
+		userReq, ok := c.Locals(valuecontext.UserClaimKey).(*user.User)
+		if !ok {
+			return SendError(c, errWrongClaimType, fiber.StatusBadRequest)
+		}
 		tripID, err := c.ParamsInt("tripID")
 		if err != nil {
 			return presenter.BadRequest(c, errWrongIDType)
@@ -461,8 +473,7 @@ func CancelTrip(serviceFactory ServiceFactory[*service.TripService]) fiber.Handl
 
 		// USERID from context TODO:
 		// only owner and operator
-		requesterID := uint(2)
-		changedTrip, err := tripService.CancelTrip(c.UserContext(), uint(tripID), requesterID, req.IsCanceled)
+		changedTrip, err := tripService.CancelTrip(c.UserContext(), uint(tripID), userReq.ID, req.IsCanceled)
 
 		if err != nil {
 			if errors.Is(err, service.ErrForbidden) {
@@ -487,10 +498,11 @@ func ConfirmTrip(serviceFactory ServiceFactory[*service.TripService]) fiber.Hand
 			return presenter.BadRequest(c, err)
 		}
 
-		// userClaims, ok := c.Locals(UserClaimKey).(*jwt.UserClaims)
-		// if !ok {
-		// 	return SendError(c, errWrongClaimType, fiber.StatusBadRequest)
-		// }
+		
+		userReq, ok := c.Locals(valuecontext.UserClaimKey).(*user.User)
+		if !ok {
+			return SendError(c, errWrongClaimType, fiber.StatusBadRequest)
+		}
 		tripID, err := c.ParamsInt("tripID")
 		if err != nil {
 			return presenter.BadRequest(c, errWrongIDType)
@@ -499,9 +511,7 @@ func ConfirmTrip(serviceFactory ServiceFactory[*service.TripService]) fiber.Hand
 		if tripID < 0 {
 			return presenter.BadRequest(c, errWrongIDType)
 		}
-		// check role of requester
-		requesterID := uint(5)
-		changedTrip, err := tripService.ConfirmTrip(c.UserContext(), uint(tripID), requesterID, req.IsConfirmed)
+		changedTrip, err := tripService.ConfirmTrip(c.UserContext(), uint(tripID), userReq.ID, req.IsConfirmed)
 
 		if err != nil {
 			if errors.Is(err, service.ErrForbidden) {
@@ -527,10 +537,11 @@ func FinishTrip(serviceFactory ServiceFactory[*service.TripService]) fiber.Handl
 			return presenter.BadRequest(c, err)
 		}
 
-		// userClaims, ok := c.Locals(UserClaimKey).(*jwt.UserClaims)
-		// if !ok {
-		// 	return SendError(c, errWrongClaimType, fiber.StatusBadRequest)
-		// }
+		
+		userReq, ok := c.Locals(valuecontext.UserClaimKey).(*user.User)
+		if !ok {
+			return SendError(c, errWrongClaimType, fiber.StatusBadRequest)
+		}
 		tripID, err := c.ParamsInt("tripID")
 		if err != nil {
 			return presenter.BadRequest(c, errWrongIDType)
@@ -539,9 +550,7 @@ func FinishTrip(serviceFactory ServiceFactory[*service.TripService]) fiber.Handl
 		if tripID < 0 {
 			return presenter.BadRequest(c, errWrongIDType)
 		}
-		// TO DO
-		requesterID := uint(1)
-		changedTrip, err := tripService.FinishTrip(c.UserContext(), uint(tripID), requesterID, req.IsFinished)
+		changedTrip, err := tripService.FinishTrip(c.UserContext(), uint(tripID), userReq.ID, req.IsFinished)
 
 		if err != nil {
 

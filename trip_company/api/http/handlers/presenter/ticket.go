@@ -3,6 +3,8 @@ package presenter
 import (
 	"tripcompanyservice/internal/ticket"
 	"tripcompanyservice/pkg/fp"
+
+	"github.com/google/uuid"
 )
 
 type AgencyTicketReq struct {
@@ -13,7 +15,7 @@ type AgencyTicketReq struct {
 
 type UserTicketReq struct {
 	TripID   uint  `json:"trip_id" validate:"required"`
-	UserID   *uint `json:"user_id" validate:"required"`
+	UserID   *uuid.UUID `json:"user_id" validate:"required"`
 	Quantity int   `json:"quantity" validate:"required"`
 }
 
@@ -48,7 +50,7 @@ type UserTicket struct {
 	ID         uint             `json:"id"`
 	TripID     uint             `json:"trip_id"`
 	Trip       UserTripResponse `json:"trip"`
-	UserID     *uint            `json:"user_id"`
+	UserID     *uuid.UUID           `json:"user_id"`
 	Quantity   int              `json:"quantity"`
 	TotalPrice float64          `json:"total_price"`
 	Status     string           `json:"status"`

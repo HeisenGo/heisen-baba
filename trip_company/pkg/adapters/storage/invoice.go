@@ -8,6 +8,7 @@ import (
 	"tripcompanyservice/pkg/adapters/storage/entities"
 	"tripcompanyservice/pkg/adapters/storage/mappers"
 
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -39,7 +40,7 @@ func (r *invoiceRepo) UpdateInvoiceStatus(ctx context.Context, invoiceID uint, s
 	return r.db.WithContext(ctx).Model(&entities.Invoice{}).Where("id = ?", invoiceID).Update("status", status).Error
 }
 
-func (r *invoiceRepo) GetInvoicesByUserOrAgency(ctx context.Context, userID *uint, agencyID *uint, limit, offset uint) ([]invoice.Invoice, uint, error) {
+func (r *invoiceRepo) GetInvoicesByUserOrAgency(ctx context.Context, userID *uuid.UUID, agencyID *uint, limit, offset uint) ([]invoice.Invoice, uint, error) {
 	query := r.db.WithContext(ctx).Model(&entities.Invoice{}).
 		Preload("Ticket").
 		Preload("Ticket.Trip")

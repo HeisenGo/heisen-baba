@@ -1,6 +1,7 @@
 package entities
 
 import (
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -8,7 +9,7 @@ type TransportCompany struct {
 	gorm.Model
 	Name        string `gorm:"type:varchar(100);not null;uniqueIndex:idx_owner_name"`
 	Description string `gorm:"type:text"`
-	OwnerID     uint   `gorm:"not null;uniqueIndex:idx_owner_name"`
+	OwnerID     uuid.UUID   `gorm:"type:uuid;not null;uniqueIndex:idx_owner_name"`
 	Address     string `gorm:"type:varchar(255)"`
 	//PhoneNumber string `gorm:"type:varchar(20);uniqueIndex:idx_phone_email"`
 	//Email       string `gorm:"type:varchar(100);uniqueIndex:idx_phone_email"`

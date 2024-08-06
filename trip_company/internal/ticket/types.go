@@ -5,6 +5,8 @@ import (
 	"errors"
 	"tripcompanyservice/internal/invoice"
 	"tripcompanyservice/internal/trip"
+
+	"github.com/google/uuid"
 )
 
 var(
@@ -16,7 +18,7 @@ var(
 type Repo interface {
 	Insert(ctx context.Context, t *Ticket) error
     UpdateTicketStatus(ctx context.Context, ticketID uint, status string) error
-    GetTicketsByUserOrAgency(ctx context.Context, userID *uint, agencyID *uint, limit, offset uint) ([]Ticket,uint, error) 
+    GetTicketsByUserOrAgency(ctx context.Context, userID *uuid.UUID, agencyID *uint, limit, offset uint) ([]Ticket,uint, error) 
     GetFullTicketByID(ctx context.Context, id uint) (*Ticket, error)
     UpdateTicket(ctx context.Context, id uint, updates map[string]interface{}) error
 	GetTicketsWithInvoicesByTripID(ctx context.Context, tripID uint) ([]Ticket, error)
@@ -26,7 +28,7 @@ type Ticket struct {
 	ID         uint
 	TripID     uint
 	Trip       *trip.Trip
-	UserID     *uint // Use `default:NULL` for nullable field
+	UserID     *uuid.UUID // Use `default:NULL` for nullable field
 	AgencyID   *uint
 	Quantity   int
 	TotalPrice float64

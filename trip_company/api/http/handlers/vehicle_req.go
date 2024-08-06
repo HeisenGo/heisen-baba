@@ -4,7 +4,9 @@ import (
 	"errors"
 	"tripcompanyservice/api/http/handlers/presenter"
 	"tripcompanyservice/internal/company"
+	"tripcompanyservice/internal/user"
 	vehiclerequest "tripcompanyservice/internal/vehicle_request"
+	"tripcompanyservice/pkg/valuecontext"
 	"tripcompanyservice/service"
 
 	"github.com/gofiber/fiber/v2"
@@ -28,16 +30,19 @@ func CreateVehicleRequest(serviceFactory ServiceFactory[*service.VehicleReServic
 		}
 
 		v := presenter.CreateVehicleRequestToVehicleRequest(&req)
-		creatorID := uint(1) // TO DO
 
-		if err := vehicleREqService.CreateVehicleReq(c.UserContext(), v, creatorID); err != nil {
-			if errors.Is(err,service.ErrForbidden){
+		userReq, ok := c.Locals(valuecontext.UserClaimKey).(*user.User)
+		if !ok {
+			return SendError(c, errWrongClaimType, fiber.StatusBadRequest)
+		}
+		if err := vehicleREqService.CreateVehicleReq(c.UserContext(), v, userReq.ID); err != nil {
+			if errors.Is(err, service.ErrForbidden) {
 				return presenter.Forbidden(c, err)
 			}
-			if errors.Is(err, company.ErrCompanyNotFound) || errors.Is(err, vehiclerequest.ErrNotFound){
+			if errors.Is(err, company.ErrCompanyNotFound) || errors.Is(err, vehiclerequest.ErrNotFound) {
 				return presenter.BadRequest(c, err)
 			}
-			
+
 			return presenter.InternalServerError(c, err)
 		}
 		res := presenter.VehicleToCreateVehicleRes(*v)
@@ -47,16 +52,11 @@ func CreateVehicleRequest(serviceFactory ServiceFactory[*service.VehicleReServic
 
 func DeleteVR(serviceFactory ServiceFactory[*service.VehicleReService]) fiber.Handler {
 	return func(c *fiber.Ctx) error {
-		// userClaims, ok := c.Locals(UserClaimKey).(*jwt.UserClaims)
-		// if !ok {
-		// 	return SendError(c, errWrongClaimType, fiber.StatusBadRequest)
-		// }
-		//query parameter
-		// TODo: check it is admin!
-		//ownerID, err :=  //uuid.Parse(c.Params("ownerID"))
-		// if err != nil {
-		// 	return presenter.BadRequest(c, errors.New("given owner_id format in path is not correct"))
-		// }
+
+		userReq, ok := c.Locals(valuecontext.UserClaimKey).(*user.User)
+		if !ok {
+			return SendError(c, errWrongClaimType, fiber.StatusBadRequest)
+		}
 		vehicleREqService := serviceFactory(c.UserContext())
 
 		vrID, err := c.ParamsInt("vRID")
@@ -64,15 +64,13 @@ func DeleteVR(serviceFactory ServiceFactory[*service.VehicleReService]) fiber.Ha
 			return presenter.BadRequest(c, errWrongIDType)
 		}
 
-		//TO DO: check whether it has unfinihed trips if so do not delete that
-		// tO DO add requesterID only owner can delete company
-		creatorID := uint(1)
-		err = vehicleREqService.Delete(c.UserContext(), uint(vrID), creatorID)
+		// only owner can delete company
+		err = vehicleREqService.Delete(c.UserContext(), uint(vrID), userReq.ID)
 		if err != nil {
-			if errors.Is(err,service.ErrForbidden){
+			if errors.Is(err, service.ErrForbidden) {
 				return presenter.Forbidden(c, err)
 			}
-			if errors.Is(err, company.ErrCompanyNotFound) || errors.Is(err, vehiclerequest.ErrNotFound){
+			if errors.Is(err, company.ErrCompanyNotFound) || errors.Is(err, vehiclerequest.ErrNotFound) {
 				return presenter.BadRequest(c, err)
 			}
 			return presenter.InternalServerError(c, err)

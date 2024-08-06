@@ -9,6 +9,8 @@ import (
 	"tripcompanyservice/internal/techteam"
 	"tripcompanyservice/internal/ticket"
 	"tripcompanyservice/internal/trip"
+
+	"github.com/google/uuid"
 )
 
 var (
@@ -50,7 +52,7 @@ func (s *TripService) GetUpcomingUnconfirmedTripIDsToCancel(ctx context.Context)
 	return s.tripOps.GetUpcomingUnconfirmedTripIDsToCancel(ctx)
 }
 
-func (s *TripService) GetCompanyTrips(ctx context.Context, originCity, destinationCity, pathType string, startDate *time.Time, requesterType string, companyID uint, userID uint, page, pageSize uint) ([]trip.Trip, uint, string, error) {
+func (s *TripService) GetCompanyTrips(ctx context.Context, originCity, destinationCity, pathType string, startDate *time.Time, requesterType string, companyID uint, userID uuid.UUID, page, pageSize uint) ([]trip.Trip, uint, string, error) {
 	tCompany, err := s.companyOps.GetByID(ctx, companyID)
 	if err != nil {
 		return nil, 0, string(company.UserRole), err
@@ -76,7 +78,7 @@ func (s *TripService) GetCompanyTrips(ctx context.Context, originCity, destinati
 	return trips, total, string(role), nil
 }
 
-func (s *TripService) CreateTrip(ctx context.Context, t *trip.Trip, creatorID uint) error {
+func (s *TripService) CreateTrip(ctx context.Context, t *trip.Trip, creatorID uuid.UUID) error {
 	// user, err := s.userOps.GetUserByID(ctx, o.UserID)
 	// if err != nil {
 	// 	return err
@@ -94,8 +96,10 @@ func (s *TripService) CreateTrip(ctx context.Context, t *trip.Trip, creatorID ui
 	if tCompany == nil {
 		return company.ErrCompanyNotFound
 	}
-
-	// GET PATH TODO:
+	if tCompany.OwnerID != creatorID{
+		return ErrForbidden
+	}
+	// GET PATH TODO: //****************************
 	t.Path = &trip.Path{
 		FromTerminal: &trip.Terminal{},
 		ToTerminal:   &trip.Terminal{},
@@ -130,7 +134,7 @@ func (s *TripService) GetTrips(ctx context.Context, originCity, destinationCity,
 	return s.tripOps.GetTrips(ctx, originCity, destinationCity, pathType, startDate, requesterType, pageSize, page)
 }
 
-func (s *TripService) GetFullTripByID(ctx context.Context, id uint, requesterID uint, requester string) (*trip.Trip, string, error) {
+func (s *TripService) GetFullTripByID(ctx context.Context, id uint, requesterID uuid.UUID, requester string) (*trip.Trip, string, error) {
 	t, err := s.tripOps.GetFullTripByID(ctx, id)
 	if err != nil {
 		return nil, string(company.UserRole), err
@@ -142,7 +146,7 @@ func (s *TripService) GetFullTripByID(ctx context.Context, id uint, requesterID 
 		if t.TourReleaseDate.After(time.Now()) {
 			return nil, requester, trip.ErrTripUnAvailable
 		}
-		if t.TransportCompany.IsBlocked{
+		if t.TransportCompany.IsBlocked {
 			return nil, requester, trip.ErrTripUnAvailable
 		}
 		return t, requester, nil
@@ -155,7 +159,7 @@ func (s *TripService) GetFullTripByID(ctx context.Context, id uint, requesterID 
 			return nil, string(role), trip.ErrTripUnAvailable
 		}
 
-		if t.TransportCompany.IsBlocked{
+		if t.TransportCompany.IsBlocked {
 			return nil, string(role), trip.ErrTripUnAvailable
 		}
 		return t, string(role), nil
@@ -163,7 +167,7 @@ func (s *TripService) GetFullTripByID(ctx context.Context, id uint, requesterID 
 	return t, string(role), nil
 }
 
-func (s *TripService) UpdateTrip(ctx context.Context, id uint, newTrip *trip.Trip) (*trip.Trip, error) {
+func (s *TripService) UpdateTrip(ctx context.Context, id uint, newTrip *trip.Trip, requesterID uuid.UUID) (*trip.Trip, error) {
 	oldTrip, err := s.tripOps.GetFullTripByID(ctx, id)
 
 	if err != nil {
@@ -173,7 +177,9 @@ func (s *TripService) UpdateTrip(ctx context.Context, id uint, newTrip *trip.Tri
 	// TO DO check permissions and roles ex: tech team can only update is_confirmed
 	// admin can update is_finished
 	// owner/operator can update everything according to the conditions of trip
-
+	if oldTrip.TransportCompany.OwnerID!=requesterID{
+		return nil, ErrForbidden
+	}
 	err = s.tripOps.UpdateTrip(ctx, id, newTrip, oldTrip)
 	if err != nil {
 		return nil, err
@@ -181,10 +187,14 @@ func (s *TripService) UpdateTrip(ctx context.Context, id uint, newTrip *trip.Tri
 	return oldTrip, nil
 }
 
-func (s *TripService) SetTechTeamToTrip(ctx context.Context, tripID, techteamID uint) (*trip.Trip, error) {
+func (s *TripService) SetTechTeamToTrip(ctx context.Context, tripID, techteamID uint, requesterID uuid.UUID) (*trip.Trip, error) {
 	t, err := s.tripOps.GetFullTripByID(ctx, tripID)
 	if err != nil {
 		return nil, err
+	}
+
+	if requesterID!=t.TransportCompany.OwnerID{
+		return nil, ErrForbidden
 	}
 
 	if t.TechTeamID != nil {
@@ -227,7 +237,7 @@ func (s *TripService) SetTechTeamToTrip(ctx context.Context, tripID, techteamID 
 	return t, nil
 }
 
-func (s *TripService) UpdateInvoiceTicket(ctx context.Context, t ticket.Ticket, state string, penalty float64, refund float64, receiverID uint) error {
+func (s *TripService) UpdateInvoiceTicket(ctx context.Context, t ticket.Ticket, state string, penalty float64, refund float64, receiverID uuid.UUID) error {
 
 	updates := make(map[string]interface{})
 	updates["status"] = state
@@ -248,7 +258,7 @@ func (s *TripService) UpdateInvoiceTicket(ctx context.Context, t ticket.Ticket, 
 	return nil
 }
 
-func (s *TripService) CancelTrip(ctx context.Context, tripID uint, requesterID uint, isCanceled bool) (*trip.Trip, error) {
+func (s *TripService) CancelTrip(ctx context.Context, tripID uint, requesterID uuid.UUID, isCanceled bool) (*trip.Trip, error) {
 	t, err := s.tripOps.GetFullTripByID(ctx, tripID)
 
 	if err != nil {
@@ -286,27 +296,30 @@ func (s *TripService) CancelTrip(ctx context.Context, tripID uint, requesterID u
 	}
 	var state string
 	var refund, penalty float64
-	var receiverID uint
+	//var receiverID uint
+	var userRecieverID uuid.UUID
 	state = "Canceled"
 	penalty = 0
 	for i := range len(ticks) {
 		if ticks[i].AgencyID == nil {
-			receiverID = *ticks[i].UserID
+			userRecieverID = *ticks[i].UserID
 		} else {
-			receiverID = *ticks[i].AgencyID
+			//receiverID = *ticks[i].AgencyID
+			// get owner of agency id !!! TO Do
+			userRecieverID = uuid.Nil
 		}
 		if ticks[i].Penalty != 0 { // cause already canceled by user
 			refund = ticks[i].Penalty
 		} else {
 			refund = ticks[i].TotalPrice
 		}
-		s.UpdateInvoiceTicket(ctx, ticks[i], state, penalty, refund, receiverID)
+		s.UpdateInvoiceTicket(ctx, ticks[i], state, penalty, refund, userRecieverID)
 	}
 	return t, nil
 
 }
 
-func (s *TripService) ConfirmTrip(ctx context.Context, tripID uint, requesterID uint, isConfirmed bool) (*trip.Trip, error) {
+func (s *TripService) ConfirmTrip(ctx context.Context, tripID uint, requesterID uuid.UUID, isConfirmed bool) (*trip.Trip, error) {
 	t, err := s.tripOps.GetFullTripByID(ctx, tripID)
 
 	if err != nil {
@@ -344,7 +357,7 @@ func (s *TripService) ConfirmTrip(ctx context.Context, tripID uint, requesterID 
 	return t, nil
 }
 
-func (s *TripService) FinishTrip(ctx context.Context, tripID uint, requesterID uint, isFinished bool) (*trip.Trip, error) {
+func (s *TripService) FinishTrip(ctx context.Context, tripID uint, requesterID uuid.UUID, isFinished bool) (*trip.Trip, error) {
 	t, err := s.tripOps.GetFullTripByID(ctx, tripID)
 
 	if err != nil {
@@ -391,7 +404,7 @@ func (s *TripService) FinishTrip(ctx context.Context, tripID uint, requesterID u
 	return t, nil
 }
 
-func (s *TripService) GetLoggedInUserRole(ctx context.Context, companyID uint, userID uint) (company.CompanyRoleType, error) {
+func (s *TripService) GetLoggedInUserRole(ctx context.Context, companyID uint, userID uuid.UUID) (company.CompanyRoleType, error) {
 	isOwner, _ := s.companyOps.IsUserOwnerOfCompany(ctx, companyID, userID)
 	if isOwner {
 		return company.OwnerRole, nil

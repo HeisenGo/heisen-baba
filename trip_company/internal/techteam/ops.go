@@ -2,6 +2,8 @@ package techteam
 
 import (
 	"context"
+
+	"github.com/google/uuid"
 )
 
 type Ops struct {
@@ -40,7 +42,7 @@ func (o *Ops) GetTechTeamsOfCompany(ctx context.Context, companyId uint, page, p
 	return o.repo.GetTechTeamsOfCompany(ctx, companyId, limit, offset)
 }
 
-func (o *Ops) GetTechTeamMemberByUserIDAndTechTeamID(ctx context.Context, userID uint, techTeamID uint) (*TechTeamMember, error) {
+func (o *Ops) GetTechTeamMemberByUserIDAndTechTeamID(ctx context.Context, userID uuid.UUID, techTeamID uint) (*TechTeamMember, error) {
 	m, err := o.repo.GetTechTeamMemberByUserIDAndTechTeamID(ctx, userID, techTeamID)
 	if err != nil {
 		return nil, err
@@ -51,7 +53,7 @@ func (o *Ops) GetTechTeamMemberByUserIDAndTechTeamID(ctx context.Context, userID
 	return m, nil
 }
 
-func (o *Ops) IsUserTechnicianInCompany(ctx context.Context, companyID uint, userID uint) (bool, error) {
+func (o *Ops) IsUserTechnicianInCompany(ctx context.Context, companyID uint, userID uuid.UUID) (bool, error) {
 	return o.repo.IsUserTechnicianInCompany(ctx, companyID, userID)
 }
 

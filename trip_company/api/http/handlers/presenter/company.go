@@ -3,6 +3,8 @@ package presenter
 import (
 	"tripcompanyservice/internal/company"
 	"tripcompanyservice/pkg/fp"
+
+	"github.com/google/uuid"
 )
 
 type BlockCompany struct{
@@ -34,7 +36,7 @@ func UpdateCompanyToCompany(req *UpdateCompanyReq, id uint) *company.TransportCo
 type CompanyReq struct {
 	Name        string `json:"name" validate:"required"`
 	Description string `json:"desc"`
-	OwnerID     uint   `json:"owner_id" validate:"required"`
+	OwnerID     uuid.UUID   `json:"owner_id" validate:"required"`
 	Address     string `json:"address"`
 	//PhoneNumber string `json:"phone"`
 	//Email       string `json:"email"`
@@ -48,7 +50,7 @@ type CompanyRes struct {
 	ID          uint   `json:"id"`
 	Name        string `json:"name" validate:"required"`
 	Description string `json:"desc"`
-	OwnerID     uint   `json:"owner_id" validate:"required"`
+	OwnerID     uuid.UUID   `json:"owner_id" validate:"required"`
 	Address     string `json:"address"`
 	IsBlocked   bool   `json:"is_blocked"`
 	//PhoneNumber string `json:"phone"`

@@ -3,6 +3,8 @@ package presenter
 import (
 	"tripcompanyservice/internal/techteam"
 	"tripcompanyservice/pkg/fp"
+
+	"github.com/google/uuid"
 )
 
 type TechTeamRe struct {
@@ -17,7 +19,7 @@ type TechTeamRe struct {
 type TechTeamMemberRe struct {
 	ID         uint   `json:"id"`
 	TechTeamID uint   `json:"team_id"`
-	UserID     uint   `json:"user_id"`
+	UserID     uuid.UUID   `json:"user_id"`
 	Email      string `json:"email"`
 	Role       string `json:"role"`
 }

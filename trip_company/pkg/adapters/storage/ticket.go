@@ -8,6 +8,7 @@ import (
 	"tripcompanyservice/pkg/adapters/storage/entities"
 	"tripcompanyservice/pkg/adapters/storage/mappers"
 
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -55,7 +56,7 @@ func (r *ticketRepo) UpdateTicketStatus(ctx context.Context, ticketID uint, stat
 	return r.db.WithContext(ctx).Model(&entities.Ticket{}).Where("id = ?", ticketID).Update("status", status).Error
 }
 
-func (r *ticketRepo) GetTicketsByUserOrAgency(ctx context.Context, userID *uint, agencyID *uint, limit, offset uint) ([]ticket.Ticket, uint, error) {
+func (r *ticketRepo) GetTicketsByUserOrAgency(ctx context.Context, userID *uuid.UUID, agencyID *uint, limit, offset uint) ([]ticket.Ticket, uint, error) {
 	query := r.db.WithContext(ctx).Model(&entities.Ticket{}).
 		Preload("Trip").Preload("Trip.TripCancelingPenalty").Preload("Invoice")
 

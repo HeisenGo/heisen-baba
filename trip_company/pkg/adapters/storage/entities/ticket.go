@@ -1,12 +1,15 @@
 package entities
 
-import "gorm.io/gorm"
+import (
+	"github.com/google/uuid"
+	"gorm.io/gorm"
+)
 
 type Ticket struct {
     gorm.Model
     TripID     uint            `gorm:"not null"`
     Trip       *Trip            `gorm:"foreignKey:TripID; constraint:OnDelete:CASCADE;"`
-    UserID     *uint           `gorm:"default:NULL"` // Use `default:NULL` for nullable field
+    UserID     *uuid.UUID           `gorm:"type:uuid;default:NULL"` // Use `default:NULL` for nullable field
     AgencyID   *uint           `gorm:"default:NULL"`
     Quantity   int
     TotalPrice float64

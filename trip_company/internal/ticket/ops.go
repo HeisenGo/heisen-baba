@@ -2,6 +2,8 @@ package ticket
 
 import (
 	"context"
+
+	"github.com/google/uuid"
 )
 
 type Ops struct {
@@ -20,7 +22,7 @@ func (o *Ops) UpdateTicketStatus(ctx context.Context, ticketID uint, status stri
 	return o.repo.UpdateTicketStatus(ctx, ticketID, status)
 }
 
-func (o *Ops) GetTicketsByUserOrAgency(ctx context.Context, userID *uint, agencyID *uint, page, pageSize uint) ([]Ticket, uint, error) {
+func (o *Ops) GetTicketsByUserOrAgency(ctx context.Context, userID *uuid.UUID, agencyID *uint, page, pageSize uint) ([]Ticket, uint, error) {
 	limit := pageSize
 	offset := (page - 1) * pageSize
 	return o.repo.GetTicketsByUserOrAgency(ctx, userID, agencyID, limit, offset)

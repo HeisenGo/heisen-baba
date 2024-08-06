@@ -8,6 +8,8 @@ import (
 	"tripcompanyservice/internal/invoice"
 	"tripcompanyservice/internal/ticket"
 	"tripcompanyservice/internal/trip"
+
+	"github.com/google/uuid"
 )
 
 var (
@@ -118,18 +120,19 @@ func (s *TicketService) ProcessUserTicket(ctx context.Context, t *ticket.Ticket)
 	return nil
 }
 
-func (s *TicketService) GetTicketsByUserOrAgency(ctx context.Context, userID uint, agencyID uint, page, pageSize uint) ([]ticket.Ticket, uint, error) {
-	if userID == 0 && agencyID == 0 {
+func (s *TicketService) GetTicketsByUserOrAgency(ctx context.Context, userID uuid.UUID, agencyID uint, page, pageSize uint) ([]ticket.Ticket, uint, error) {
+	if userID == uuid.Nil && agencyID == 0 {
 		return nil, 0, ErrUnAuthorized
 	}
-	if userID == 0 {
+	if userID == uuid.Nil {
+		// TODO is this person from the agency?
 		return s.ticketOps.GetTicketsByUserOrAgency(ctx, nil, &agencyID, page, pageSize)
 	} else {
 		return s.ticketOps.GetTicketsByUserOrAgency(ctx, &userID, nil, page, pageSize)
 	}
 }
 
-func (s *TicketService) CancelTicket(ctx context.Context, ticketID uint, userID *uint, agencyID *uint) (*invoice.Invoice, error) {
+func (s *TicketService) CancelTicket(ctx context.Context, ticketID uint, userID *uuid.UUID, agencyID *uint) (*invoice.Invoice, error) {
 	// check permisson of requester if AgencyID!=nil!!!
 	fullTicket, err := s.ticketOps.GetFullTicketByID(ctx, ticketID)
 

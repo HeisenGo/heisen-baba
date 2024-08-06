@@ -5,6 +5,8 @@ import (
 	"tripcompanyservice/api/http/handlers/presenter"
 	"tripcompanyservice/internal/company"
 	"tripcompanyservice/internal/techteam"
+	"tripcompanyservice/internal/user"
+	"tripcompanyservice/pkg/valuecontext"
 	"tripcompanyservice/service"
 
 	"github.com/gofiber/fiber/v2"
@@ -19,11 +21,11 @@ func CreateTechTeam(techService *service.TechTeamService) fiber.Handler {
 			return SendError(c, err, fiber.StatusBadRequest)
 		}
 
-		//userClaims, ok := c.Locals(UserClaimKey).(*jwt.UserClaims)
-		// if !ok {
-		// 	return SendError(c, errWrongClaimType, fiber.StatusBadRequest)
-		// }
-		// get owner and owner_ID existance check!!!!!! TODO:
+		userReq, ok := c.Locals(valuecontext.UserClaimKey).(*user.User)
+		if !ok {
+			return SendError(c, errWrongClaimType, fiber.StatusBadRequest)
+		}
+
 		err := BodyValidator(req)
 		if err != nil {
 			return presenter.BadRequest(c, err)
@@ -31,8 +33,7 @@ func CreateTechTeam(techService *service.TechTeamService) fiber.Handler {
 		team := presenter.TechTeamReqToTechTeam(&req)
 		// TODO: from context
 		// requester
-		creatorID := uint(1)
-		if err := techService.CreateTechTeam(c.UserContext(), team, creatorID); err != nil {
+		if err := techService.CreateTechTeam(c.UserContext(), team, userReq.ID); err != nil {
 			if errors.Is(err, service.ErrForbidden) {
 				return presenter.Forbidden(c, err)
 			}
@@ -55,20 +56,17 @@ func CreateTechMember(techService *service.TechTeamService) fiber.Handler {
 			return SendError(c, err, fiber.StatusBadRequest)
 		}
 
-		//userClaims, ok := c.Locals(UserClaimKey).(*jwt.UserClaims)
-		// if !ok {
-		// 	return SendError(c, errWrongClaimType, fiber.StatusBadRequest)
-		// }
-		// get owner and owner_ID existance check!!!!!! TODO:
 		err := BodyValidator(req)
 		if err != nil {
 			return presenter.BadRequest(c, err)
 		}
 		m := presenter.TechTeamMemberReToTechTeamMember(&req)
-		// TODO: from context
-		// requester
-		creatorID := uint(1)
-		if err := techService.CreateTechTeamMember(c.UserContext(), m, creatorID); err != nil {
+		userReq, ok := c.Locals(valuecontext.UserClaimKey).(*user.User)
+		if !ok {
+			return SendError(c, errWrongClaimType, fiber.StatusBadRequest)
+		}
+
+		if err := techService.CreateTechTeamMember(c.UserContext(), m, userReq.ID); err != nil {
 			if errors.Is(err, service.ErrForbidden) {
 				return presenter.Forbidden(c, err)
 			}
@@ -84,11 +82,7 @@ func CreateTechMember(techService *service.TechTeamService) fiber.Handler {
 
 func GetTechTeamsOfCompany(techService *service.TechTeamService) fiber.Handler {
 	return func(c *fiber.Ctx) error {
-		// userClaims, ok := c.Locals(UserClaimKey).(*jwt.UserClaims)
-		// if !ok {
-		// 	return SendError(c, errWrongClaimType, fiber.StatusBadRequest)
-		// }
-		//query parameter
+
 		page, pageSize := PageAndPageSize(c)
 		companyID, err := c.ParamsInt("companyID")
 		if err != nil {
@@ -98,9 +92,12 @@ func GetTechTeamsOfCompany(techService *service.TechTeamService) fiber.Handler {
 		if companyID < 0 {
 			return presenter.BadRequest(c, errWrongIDType)
 		}
-		// TODO: requester // admin/owner/operator can do this
-		requesterID := uint(1) // get from contex
-		teams, total, err := techService.GetTechTeamsOfCompany(c.UserContext(), uint(companyID), requesterID, uint(page), uint(pageSize))
+		userReq, ok := c.Locals(valuecontext.UserClaimKey).(*user.User)
+		if !ok {
+			return SendError(c, errWrongClaimType, fiber.StatusBadRequest)
+		}
+
+		teams, total, err := techService.GetTechTeamsOfCompany(c.UserContext(), uint(companyID), userReq.ID, uint(page), uint(pageSize))
 		if err != nil {
 			if errors.Is(err, service.ErrForbidden) {
 				return presenter.Forbidden(c, err)
@@ -122,27 +119,21 @@ func GetTechTeamsOfCompany(techService *service.TechTeamService) fiber.Handler {
 
 func DeleteTeam(teamService *service.TechTeamService) fiber.Handler {
 	return func(c *fiber.Ctx) error {
-		// userClaims, ok := c.Locals(UserClaimKey).(*jwt.UserClaims)
-		// if !ok {
-		// 	return SendError(c, errWrongClaimType, fiber.StatusBadRequest)
-		// }
-		//query parameter
-		// TODo: check it is admin!
-		//ownerID, err :=  //uuid.Parse(c.Params("ownerID"))
-		// if err != nil {
-		// 	return presenter.BadRequest(c, errors.New("given owner_id format in path is not correct"))
-		// }
+
 		teamID, err := c.ParamsInt("teamID")
 		if err != nil {
 			return presenter.BadRequest(c, errWrongIDType)
 		}
 
-		//TO DO: check whether it has unfinihed trips if so do not delete that
 		// tO DO add requesterID only owner can delete company
-		requesterID := uint(1)
-		err = teamService.DeleteTeam(c.UserContext(), uint(teamID), requesterID)
+		userReq, ok := c.Locals(valuecontext.UserClaimKey).(*user.User)
+		if !ok {
+			return SendError(c, errWrongClaimType, fiber.StatusBadRequest)
+		}
+
+		err = teamService.DeleteTeam(c.UserContext(), uint(teamID), userReq.ID)
 		if err != nil {
-			if errors.Is(err, service.ErrForbidden){
+			if errors.Is(err, service.ErrForbidden) {
 				return presenter.Forbidden(c, err)
 			}
 			if errors.Is(err, techteam.ErrDeleteTeam) || errors.Is(err, techteam.ErrTeamNotFound) {

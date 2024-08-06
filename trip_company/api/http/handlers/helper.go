@@ -12,6 +12,8 @@ import (
 
 var (
 	errWrongIDType    = errors.New("wrong type for id")
+	errWrongClaimType = errors.New("wrong claim type")
+
 )
 
 type ServiceFactory[T any] func(context.Context) T

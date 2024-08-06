@@ -3,6 +3,8 @@ package company
 import (
 	"context"
 	"tripcompanyservice/internal"
+
+	"github.com/google/uuid"
 )
 
 type Ops struct {
@@ -53,7 +55,7 @@ func (o *Ops) Create(ctx context.Context, c *TransportCompany) error {
 	return o.repo.Insert(ctx, c)
 }
 
-func (o *Ops) GetUserTransportCompanies(ctx context.Context, ownerID uint, page, pageSize uint) ([]TransportCompany, uint, error) {
+func (o *Ops) GetUserTransportCompanies(ctx context.Context, ownerID uuid.UUID, page, pageSize uint) ([]TransportCompany, uint, error) {
 	limit := pageSize
 	offset := (page - 1) * pageSize
 	return o.repo.GetUserTransportCompanies(ctx, ownerID, limit, offset)
@@ -77,6 +79,6 @@ func(o *Ops)PatchCompanyByOwner(ctx context.Context, updatedCompany, originalCom
 	return o.repo.PatchCompany(ctx, updatedCompany, originalCompany)
 }
 
-func (o *Ops)IsUserOwnerOfCompany(ctx context.Context, companyID uint, userID uint) (bool, error) {
+func (o *Ops)IsUserOwnerOfCompany(ctx context.Context, companyID uint, userID uuid.UUID) (bool, error) {
 	return o.repo.IsUserOwnerOfCompany(ctx, companyID, userID)
 }

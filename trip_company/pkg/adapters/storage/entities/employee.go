@@ -1,11 +1,14 @@
 package entities
 
-import "gorm.io/gorm"
+import (
+	"github.com/google/uuid"
+	"gorm.io/gorm"
+)
 
 type Employee struct {
 	gorm.Model
-	UserID             uint `gorm:"not null"`
+	UserID    uuid.UUID `gorm:"type:uuid;not null; uniqueIndex"`
 	TransportCompanyID uint
 	TransportCompany   TransportCompany `gorm:"foreignKey:TransportCompanyID"`
-	Role               string `gorm:"type:varchar(50)"`
+	Role               string           `gorm:"type:varchar(50)"`
 }

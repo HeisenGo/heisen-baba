@@ -6,6 +6,8 @@ import (
 	"time"
 	"tripcompanyservice/internal/trip"
 	vehiclerequest "tripcompanyservice/internal/vehicle_request"
+
+	"github.com/google/uuid"
 )
 
 var (
@@ -25,7 +27,7 @@ func NewVehicleReService(vehicleReqOps *vehiclerequest.Ops, tripOps *trip.Ops) *
 	}
 }
 
-func (s *VehicleReService) CreateVehicleReq(ctx context.Context, vR *vehiclerequest.VehicleRequest, creatorID uint) error {
+func (s *VehicleReService) CreateVehicleReq(ctx context.Context, vR *vehiclerequest.VehicleRequest, creatorID uuid.UUID) error {
 	t, err := s.tripOps.GetFullTripByID(ctx, vR.TripID)
 	if err != nil {
 		return err
@@ -84,7 +86,7 @@ func (s *VehicleReService) CreateVehicleReq(ctx context.Context, vR *vehiclerequ
 	return nil
 }
 
-func (s *VehicleReService) Delete(ctx context.Context, vRID uint, creatorID uint) error {
+func (s *VehicleReService) Delete(ctx context.Context, vRID uint, creatorID uuid.UUID) error {
 	vr, err := s.vehicleReqOps.GetVehicleReqByID(ctx, vRID)
 	if err != nil {
 		return err

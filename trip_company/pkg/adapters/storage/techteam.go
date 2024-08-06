@@ -8,6 +8,7 @@ import (
 	"tripcompanyservice/pkg/adapters/storage/entities"
 	"tripcompanyservice/pkg/adapters/storage/mappers"
 
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -84,7 +85,7 @@ func (r *techTeamRepo) GetTechTeamsOfCompany(ctx context.Context, companyId uint
 	return mappers.BatchTecTeamEnToDo(teams), uint(total), nil
 }
 
-func (r *techTeamRepo) GetTechTeamMemberByUserIDAndTechTeamID(ctx context.Context, userID uint, techTeamID uint) (*techteam.TechTeamMember, error) {
+func (r *techTeamRepo) GetTechTeamMemberByUserIDAndTechTeamID(ctx context.Context, userID uuid.UUID, techTeamID uint) (*techteam.TechTeamMember, error) {
 	var techTeamMember entities.TechTeamMember
 
 	if err := r.db.WithContext(ctx).
@@ -100,7 +101,7 @@ func (r *techTeamRepo) GetTechTeamMemberByUserIDAndTechTeamID(ctx context.Contex
 	return &m, nil
 }
 
-func (r *techTeamRepo) IsUserTechnicianInCompany(ctx context.Context, companyID uint, userID uint) (bool, error) {
+func (r *techTeamRepo) IsUserTechnicianInCompany(ctx context.Context, companyID uint, userID uuid.UUID) (bool, error) {
 	var count int64
 	err := r.db.WithContext(ctx).
 		Model(&entities.TechTeamMember{}).

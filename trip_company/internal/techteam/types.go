@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"tripcompanyservice/internal/company"
+
+	"github.com/google/uuid"
 )
 
 var(
@@ -15,12 +17,12 @@ var(
 )
 
 type Repo interface {
-	GetTechTeamMemberByUserIDAndTechTeamID(ctx context.Context, userID uint, techTeamID uint) (*TechTeamMember, error) 
+	GetTechTeamMemberByUserIDAndTechTeamID(ctx context.Context, userID uuid.UUID, techTeamID uint) (*TechTeamMember, error) 
 	GetTechTeamByID(ctx context.Context, id uint) (*TechTeam, error)
 	Insert(ctx context.Context, t *TechTeam) error
 	InsertMember(ctx context.Context, t *TechTeamMember) error
 	GetTechTeamsOfCompany(ctx context.Context, companyId uint, limit, offset uint) ([]TechTeam, uint, error)
-	IsUserTechnicianInCompany(ctx context.Context, companyID uint, userID uint) (bool, error)
+	IsUserTechnicianInCompany(ctx context.Context, companyID uint, userID uuid.UUID) (bool, error)
 	GetFullTechTeamByID(ctx context.Context, id uint) (*TechTeam, error) 
 	Delete(ctx context.Context, tID uint) error
 }
@@ -39,7 +41,7 @@ type TechTeamMember struct {
 	ID         uint
 	TechTeamID uint
 	TechTeam   TechTeam
-	UserID     uint
+	UserID     uuid.UUID
 	Role       string
 	Email      string
 }

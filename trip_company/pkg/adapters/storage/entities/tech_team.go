@@ -1,6 +1,9 @@
 package entities
 
-import "gorm.io/gorm"
+import (
+	"github.com/google/uuid"
+	"gorm.io/gorm"
+)
 
 type TechTeam struct {
 	gorm.Model
@@ -16,7 +19,7 @@ type TechTeamMember struct {
 	gorm.Model
 	TechTeamID uint     `gorm:"not null; uniqueIndex:idx_tech_team_user"`
 	TechTeam   TechTeam `gorm:"foreignKey:TechTeamID; constraint:OnDelete:CASCADE;"`
-	UserID     uint     `gorm:"not null; uniqueIndex:idx_tech_team_user"`
+	UserID     uuid.UUID     `gorm:"type:uuid;not null; uniqueIndex:idx_tech_team_user"`
 	Role       string   `gorm:"type:varchar(50); default:'technician'"`
 	Email      string
 }
