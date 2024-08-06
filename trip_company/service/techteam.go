@@ -65,3 +65,20 @@ func (s *TechTeamService) GetTechTeamsOfCompany(ctx context.Context, companyId u
 	}
 	return s.techTeamOps.GetTechTeamsOfCompany(ctx, companyId, page, pageSize)
 }
+
+func (s *TechTeamService) DeleteTeam(ctx context.Context, teamID uint, creatorID uint) error {
+	team, err := s.techTeamOps.GetFullTechTeamByID(ctx, teamID)
+	if err != nil {
+		return err
+	}
+
+	if team.TransportCompany.OwnerID != creatorID {
+		return ErrForbidden
+	}
+
+	err = s.techTeamOps.Delete(ctx, teamID)
+	if err != nil {
+		return err
+	}
+	return nil
+}

@@ -41,8 +41,8 @@ func (o *Ops) GetTechTeamsOfCompany(ctx context.Context, companyId uint, page, p
 }
 
 func (o *Ops) GetTechTeamMemberByUserIDAndTechTeamID(ctx context.Context, userID uint, techTeamID uint) (*TechTeamMember, error) {
-	m, err:= o.repo.GetTechTeamMemberByUserIDAndTechTeamID(ctx, userID, techTeamID)
-	if err!=nil{
+	m, err := o.repo.GetTechTeamMemberByUserIDAndTechTeamID(ctx, userID, techTeamID)
+	if err != nil {
 		return nil, err
 	}
 	if m == nil {
@@ -51,6 +51,22 @@ func (o *Ops) GetTechTeamMemberByUserIDAndTechTeamID(ctx context.Context, userID
 	return m, nil
 }
 
-func (o *Ops)IsUserTechnicianInCompany(ctx context.Context, companyID uint, userID uint) (bool, error) {
+func (o *Ops) IsUserTechnicianInCompany(ctx context.Context, companyID uint, userID uint) (bool, error) {
 	return o.repo.IsUserTechnicianInCompany(ctx, companyID, userID)
+}
+
+func (o *Ops) GetFullTechTeamByID(ctx context.Context, id uint) (*TechTeam, error) {
+	t, err := o.repo.GetFullTechTeamByID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	if t == nil {
+		return nil, ErrTeamNotFound
+	}
+
+	return t, nil
+
+}
+func (o *Ops) Delete(ctx context.Context, tID uint) error {
+	return o.repo.Delete(ctx, tID)
 }

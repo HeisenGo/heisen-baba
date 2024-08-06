@@ -59,8 +59,8 @@ func (s *TransportCompanyService) BlockCompany(ctx context.Context, companyID ui
 	return transportCompany, nil
 }
 
-func (s *TransportCompanyService) DeleteCompany(ctx context.Context, companyID uint) error {
-	_, err := s.companyOps.GetByID(ctx, companyID)
+func (s *TransportCompanyService) DeleteCompany(ctx context.Context, companyID uint, requesterID uint) error {
+	co, err := s.companyOps.GetByID(ctx, companyID)
 	if err != nil {
 		return err
 	}
@@ -73,7 +73,9 @@ func (s *TransportCompanyService) DeleteCompany(ctx context.Context, companyID u
 	if nActiveTrips > 0 {
 		return company.ErrCanNotDelete
 	}
-
+	if co.OwnerID != requesterID{
+		return ErrForbidden
+	}
 	err = s.companyOps.Delete(ctx, companyID)
 	if err != nil {
 		return err

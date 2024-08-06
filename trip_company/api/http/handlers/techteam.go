@@ -34,7 +34,7 @@ func CreateTechTeam(techService *service.TechTeamService) fiber.Handler {
 		creatorID := uint(1)
 		if err := techService.CreateTechTeam(c.UserContext(), team, creatorID); err != nil {
 			if errors.Is(err, service.ErrForbidden) {
-				return presenter.Unauthorized(c, err)
+				return presenter.Forbidden(c, err)
 			}
 			if errors.Is(err, company.ErrCompanyNotFound) || errors.Is(err, techteam.ErrDuplication) {
 				return presenter.BadRequest(c, err)
@@ -117,5 +117,39 @@ func GetTechTeamsOfCompany(techService *service.TechTeamService) fiber.Handler {
 			total,
 		)
 		return presenter.OK(c, "Teams fetched successfully", data)
+	}
+}
+
+func DeleteTeam(teamService *service.TechTeamService) fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		// userClaims, ok := c.Locals(UserClaimKey).(*jwt.UserClaims)
+		// if !ok {
+		// 	return SendError(c, errWrongClaimType, fiber.StatusBadRequest)
+		// }
+		//query parameter
+		// TODo: check it is admin!
+		//ownerID, err :=  //uuid.Parse(c.Params("ownerID"))
+		// if err != nil {
+		// 	return presenter.BadRequest(c, errors.New("given owner_id format in path is not correct"))
+		// }
+		teamID, err := c.ParamsInt("teamID")
+		if err != nil {
+			return presenter.BadRequest(c, errWrongIDType)
+		}
+
+		//TO DO: check whether it has unfinihed trips if so do not delete that
+		// tO DO add requesterID only owner can delete company
+		requesterID := uint(1)
+		err = teamService.DeleteTeam(c.UserContext(), uint(teamID), requesterID)
+		if err != nil {
+			if errors.Is(err, service.ErrForbidden){
+				return presenter.Forbidden(c, err)
+			}
+			if errors.Is(err, techteam.ErrDeleteTeam) || errors.Is(err, techteam.ErrTeamNotFound) {
+				return presenter.BadRequest(c, err)
+			}
+			return presenter.InternalServerError(c, err)
+		}
+		return presenter.NoContent(c)
 	}
 }
