@@ -124,6 +124,9 @@ func (s *TripService) CreateTrip(ctx context.Context, t *trip.Trip, creatorID ui
 
 func (s *TripService) GetTrips(ctx context.Context, originCity, destinationCity, pathType string, startDate *time.Time, requesterType string, page, pageSize uint) ([]trip.Trip, uint, error) {
 	//check claim and role!!!
+	if requesterType == "" {
+		requesterType = "user"
+	}
 	return s.tripOps.GetTrips(ctx, originCity, destinationCity, pathType, startDate, requesterType, pageSize, page)
 }
 

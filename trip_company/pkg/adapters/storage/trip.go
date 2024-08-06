@@ -52,40 +52,45 @@ func (r *tripRepo) Insert(ctx context.Context, t *trip.Trip) error {
 	return nil
 }
 
-func (r *tripRepo) GetCompanyTrips(ctx context.Context,originCity, destinationCity, pathType string, startDate *time.Time, requesterType string ,companyID uint, limit, offset uint) ([]trip.Trip, uint, error) {
+func (r *tripRepo) GetCompanyTrips(ctx context.Context, originCity, destinationCity, pathType string, startDate *time.Time, requesterType string, companyID uint, limit, offset uint) ([]trip.Trip, uint, error) {
 	query := r.db.WithContext(ctx).
 		Model(&entities.Trip{}).
-		Where("transport_company_id = ?", companyID).Preload("TransportCompany").     // Preload related TransportCompany
-		Preload("TripCancelingPenalty"). // Preload related TripCancelingPenalty
+		Where("transport_company_id = ?", companyID).Preload("TransportCompany"). // Preload related TransportCompany
+		Preload("TripCancelingPenalty").                                          // Preload related TripCancelingPenalty
 		Preload("VehicleRequest").
 		Preload("TechTeam").
 		Preload("TechTeam.Members").
 		Order("created_at DESC")
 
-		if originCity != "" {
-			query = query.Where("origin = ?", originCity)
+	if originCity != "" {
+		query = query.Where("origin = ?", originCity)
+	}
+
+	if destinationCity != "" {
+		query = query.Where("destination = ?", destinationCity)
+	}
+
+	if pathType != "" {
+		query = query.Where("trip_type = ?", pathType)
+	}
+	if requesterType == "agency" {
+		query = query.Where("tour_release_date <= ?", time.Now()).
+			Where("transport_companies.is_blocked = ?", false).
+			Where("is_canceled = ?", false).
+			Where("is_finished = ?", false)
+	} else if requesterType == "user" {
+		query = query.Where("user_release_date <= ?", time.Now()).
+			Where("transport_companies.is_blocked = ?", false).
+			Where("is_canceled = ?", false).
+			Where("is_finished = ?", false)
+	}
+
+	if startDate != nil {
+		startDateStr := startDate.Format("2006-01-02")
+		if startDateStr != "0001-01-01" {
+			query = query.Where("DATE(start_date) = ?", startDateStr)
 		}
-	
-		if destinationCity != "" {
-			query = query.Where("destination = ?", destinationCity)
-		}
-	
-		if pathType != "" {
-			query = query.Where("trip_type = ?", pathType)
-		}
-		if requesterType == "agency" {
-			query = query.Where("agency_release_date <= ?", time.Now())
-		} else if requesterType == "user" {
-			query = query.Where("user_release_date <= ?", time.Now())
-		}
-	
-		if startDate != nil {
-			startDateStr := startDate.Format("2006-01-02")
-			if startDateStr != "0001-01-01" {
-				query = query.Where("DATE(start_date) = ?", startDateStr)
-			}
-		}
-	
+	}
 
 	var total int64
 
@@ -131,7 +136,7 @@ func (r *tripRepo) GetFullTripByID(ctx context.Context, id uint) (*trip.Trip, er
 	return &dPath, nil
 }
 
-func (r *tripRepo) GetTrips(ctx context.Context, originCity, destinationCity, pathType string, startDate *time.Time, requesterType string, limit, offset uint, ) ([]trip.Trip, uint, error) {
+func (r *tripRepo) GetTrips(ctx context.Context, originCity, destinationCity, pathType string, startDate *time.Time, requesterType string, limit, offset uint) ([]trip.Trip, uint, error) {
 	// Start the query for trips
 	query := r.db.WithContext(ctx).
 		Model(&entities.Trip{}).
@@ -140,9 +145,8 @@ func (r *tripRepo) GetTrips(ctx context.Context, originCity, destinationCity, pa
 		Preload("TripCancelingPenalty").Preload("VehicleRequest").
 		Preload("TechTeam").Preload("TechTeam.Members").
 		Where("start_date > ?", time.Now()).
-		Where("sold_tickets < max_tickets").
-		Where("vehicle_id IS NOT NULL").
-		Where("transport_companies.is_blocked = ?", false)
+		Where("sold_tickets < max_tickets")
+		//Where("vehicle_id IS NOT NULL").
 
 	if originCity != "" {
 		query = query.Where("origin = ?", originCity)
@@ -157,9 +161,16 @@ func (r *tripRepo) GetTrips(ctx context.Context, originCity, destinationCity, pa
 	}
 
 	if requesterType == "agency" {
-		query = query.Where("agency_release_date <= ?", time.Now())
+		query = query.Where("tour_release_date <= ?", time.Now()).
+			Where("transport_companies.is_blocked = ?", false).
+			Where("is_canceled = ?", false).
+			Where("is_finished = ?", false)
+		//Where("trip.is_confirmed = ?", isConfirmed)
 	} else if requesterType == "user" {
-		query = query.Where("user_release_date <= ?", time.Now())
+		query = query.Where("user_release_date <= ?", time.Now()).
+			Where("transport_companies.is_blocked = ?", false).
+			Where("is_canceled = ?", false).
+			Where("is_finished = ?", false)
 	}
 
 	if startDate != nil {
@@ -194,22 +205,20 @@ func (r *tripRepo) GetTrips(ctx context.Context, originCity, destinationCity, pa
 }
 
 func (r *tripRepo) UpdateTrip(ctx context.Context, id uint, updates map[string]interface{}) error {
-    // Ensure updates is not empty
-    if len(updates) == 0 {
-        return nil
-    }
+	// Ensure updates is not empty
+	if len(updates) == 0 {
+		return nil
+	}
 
-    if err := r.db.WithContext(ctx).
-        Model(&entities.Trip{}).  
-        Where("id = ?", id).      
-        Updates(updates).Error;  
-    err != nil {
-        return fmt.Errorf("failed to update trip: %w", err)
-    }
+	if err := r.db.WithContext(ctx).
+		Model(&entities.Trip{}).
+		Where("id = ?", id).
+		Updates(updates).Error; err != nil {
+		return fmt.Errorf("failed to update trip: %w", err)
+	}
 
-    return nil
+	return nil
 }
-
 
 func (r *tripRepo) GetCountPathUnfinishedTrips(ctx context.Context, pathID uint) (uint, error) {
 	var count int64
@@ -246,21 +255,21 @@ func (r *tripRepo) GetUpcomingUnconfirmedTripIDsToCancel(ctx context.Context) ([
 }
 
 func (r *tripRepo) CheckAvailabilityTechTeam(ctx context.Context, tripID uint, techTeamID uint, startDate time.Time, endDate time.Time) (bool, error) {
-    var conflictingTrips []entities.Trip
+	var conflictingTrips []entities.Trip
 
-    err := r.db.WithContext(ctx).
-        Where("tech_team_id = ?", techTeamID).
-        Where("(start_date <= ? AND end_date >= ?)", endDate, startDate).
-        Where("id <> ?", tripID).
-        Find(&conflictingTrips).Error
+	err := r.db.WithContext(ctx).
+		Where("tech_team_id = ?", techTeamID).
+		Where("(start_date <= ? AND end_date >= ?)", endDate, startDate).
+		Where("id <> ?", tripID).
+		Find(&conflictingTrips).Error
 
-    if err != nil {
-        return false, fmt.Errorf("failed to check for conflicting trips: %w", err)
-    }
+	if err != nil {
+		return false, fmt.Errorf("failed to check for conflicting trips: %w", err)
+	}
 
-    if len(conflictingTrips) > 0 {
-        return false, nil
-    }
+	if len(conflictingTrips) > 0 {
+		return false, nil
+	}
 	return true, nil
 }
 

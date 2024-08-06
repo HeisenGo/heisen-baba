@@ -150,7 +150,6 @@ func GetCompanyAgencyTrips(tripService *service.TripService) fiber.Handler {
 			if errors.Is(err, trip.ErrRecordsNotFound) {
 				return presenter.BadRequest(c, err)
 			}
-			err := errors.New("Error")
 			return presenter.InternalServerError(c, err)
 		}
 		var data interface{}
@@ -242,7 +241,6 @@ func GetFullAgencyTripByID(tripService *service.TripService) fiber.Handler {
 			if errors.Is(err, trip.ErrRecordNotFound) {
 				return presenter.BadRequest(c, err)
 			}
-			err := errors.New("Error")
 			return presenter.InternalServerError(c, err)
 		}
 		var data interface{}
@@ -282,9 +280,9 @@ func GetTrips(tripService *service.TripService) fiber.Handler {
 		}
 		requester := "user"
 		// check isAdmin or Not
-		requesterType := c.Query("requester_type") // get from auth!!!!! TODO:
+		//requesterType := c.Query("requester_type") // get from auth!!!!! TODO:
 
-		trips, total, err := tripService.GetTrips(c.UserContext(), originCity, destinationCity, pathType, &startDate, requesterType, uint(page), uint(pageSize))
+		trips, total, err := tripService.GetTrips(c.UserContext(), originCity, destinationCity, pathType, &startDate, requester, uint(page), uint(pageSize))
 		if err != nil {
 			if errors.Is(err, trip.ErrRecordsNotFound) {
 				return presenter.BadRequest(c, err)
@@ -351,7 +349,6 @@ func GetAgencyTrips(tripService *service.TripService) fiber.Handler {
 			if errors.Is(err, trip.ErrRecordsNotFound) {
 				return presenter.BadRequest(c, err)
 			}
-			err := errors.New("Error")
 			return presenter.InternalServerError(c, err)
 		}
 

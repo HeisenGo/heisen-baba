@@ -45,7 +45,7 @@ type Repo interface {
 	Insert(ctx context.Context, t *Trip) error
 
 	GetFullTripByID(ctx context.Context, id uint) (*Trip, error)
-	GetTrips(ctx context.Context, originCity, destinationCity, pathType string, startDate *time.Time, requesterType string, limit, offset uint) ([]Trip, uint, error)
+	GetTrips(ctx context.Context, originCity, destinationCity, pathType string, startDate *time.Time, requesterType string,limit, offset uint) ([]Trip, uint, error)
 	UpdateTrip(ctx context.Context, id uint, updates map[string]interface{}) error
 
 	GetCountPathUnfinishedTrips(ctx context.Context, pathID uint) (uint, error)

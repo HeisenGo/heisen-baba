@@ -1,8 +1,10 @@
 package mappers
 
 import (
+	"tripcompanyservice/internal/company"
 	"tripcompanyservice/internal/techteam"
 	"tripcompanyservice/internal/trip"
+	tripcancellingpenalty "tripcompanyservice/internal/trip_cancelling_penalty"
 	vehiclerequest "tripcompanyservice/internal/vehicle_request"
 	"tripcompanyservice/pkg/adapters/storage/entities"
 	"tripcompanyservice/pkg/fp"
@@ -23,8 +25,14 @@ func TripEntityToDomain(tripEntity entities.Trip) trip.Trip {
 			Name: tripEntity.ToTerminalName,
 		},
 	}
-	penalty := PenaltyEntityToDomain(*tripEntity.TripCancelingPenalty)
-	company := CompanyEntityToDomain(*tripEntity.TransportCompany)
+	var penalty tripcancellingpenalty.TripCancelingPenalty
+	if tripEntity.TripCancelingPenalty != nil {
+		penalty = PenaltyEntityToDomain(*tripEntity.TripCancelingPenalty)
+	}
+	var company company.TransportCompany
+	if tripEntity.TransportCompany != nil {
+		company = CompanyEntityToDomain(*tripEntity.TransportCompany)
+	}
 	var vR vehiclerequest.VehicleRequest
 	if tripEntity.VehicleRequest != nil {
 		vR = VehicleReqEntityToVehicleReqDomain(*tripEntity.VehicleRequest)
@@ -225,7 +233,7 @@ func SimpleTripEntityToDomainWithPenalty(tripEntity entities.Trip) trip.Trip {
 	}
 	penalty := PenaltyEntityToDomain(*tripEntity.TripCancelingPenalty)
 	return trip.Trip{
-		TripCancellingPenalty: &penalty,
+		TripCancellingPenalty:  &penalty,
 		ID:                     tripEntity.ID,
 		TransportCompanyID:     tripEntity.TransportCompanyID,
 		TripType:               trip.TripType(tripEntity.TripType),
