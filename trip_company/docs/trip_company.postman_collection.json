@@ -124,6 +124,24 @@
 					"response": []
 				},
 				{
+					"name": "delete team",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\":\"sabalan\",\n    \"desc\":\"rail tech team\",\n    \"type\": \"rail\",\n    \"company_id\":1\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "localhost:2245/api/v1/companies/tech-teams/1"
+					},
+					"response": []
+				},
+				{
 					"name": "new memeber",
 					"request": {
 						"method": "POST",
@@ -188,6 +206,15 @@
 						"method": "GET",
 						"header": [],
 						"url": "localhost:2245/api/v1/companies/trips"
+					},
+					"response": []
+				},
+				{
+					"name": "trips agency",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "localhost:2245/api/v1/companies/agency-trips"
 					},
 					"response": []
 				},
@@ -360,6 +387,15 @@
 							}
 						},
 						"url": "localhost:2245/api/v1/companies/vehicle-req"
+					},
+					"response": []
+				},
+				{
+					"name": "del vr",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": "localhost:2245/api/v1/companies/vehicle-req/1"
 					},
 					"response": []
 				}
