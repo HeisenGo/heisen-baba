@@ -22,11 +22,11 @@ func (o *Ops) GetUpcomingUnconfirmedTripIDsToCancel(ctx context.Context) ([]uint
 }
 
 // TO Do implement other layers!!!
-func (o *Ops) CompanyTrips(ctx context.Context, originCity, destinationCity, pathType string, startDate *time.Time, companyID uint, page, pageSize uint) ([]Trip, uint, error) {
+func (o *Ops) CompanyTrips(ctx context.Context, originCity, destinationCity, pathType string, startDate *time.Time, requesterType string, companyID uint, page, pageSize uint) ([]Trip, uint, error) {
 	limit := pageSize
 	offset := (page - 1) * pageSize
 
-	return o.repo.GetCompanyTrips(ctx, originCity, destinationCity, pathType, startDate, companyID, limit, offset)
+	return o.repo.GetCompanyTrips(ctx, originCity, destinationCity, pathType, startDate, requesterType, companyID, limit, offset)
 }
 
 func (o *Ops) Create(ctx context.Context, trip *Trip) error {
@@ -75,7 +75,7 @@ func (o *Ops) Create(ctx context.Context, trip *Trip) error {
 	return o.repo.Insert(ctx, trip)
 }
 
-func (o *Ops) GetFullTripByID(ctx context.Context, id uint) (*Trip, error) {
+func (o *Ops) GetFullTripByID(ctx context.Context, id uint, requester string) (*Trip, error) {
 	p, err := o.repo.GetFullTripByID(ctx, id)
 	if err != nil {
 		return nil, err
@@ -84,7 +84,15 @@ func (o *Ops) GetFullTripByID(ctx context.Context, id uint) (*Trip, error) {
 	if p == nil {
 		return nil, ErrTripNotFound
 	}
-
+	if requester == "agency" {
+		if p.TourReleaseDate.After(time.Now()) {
+			return nil, ErrTripUnAvailable
+		}
+	} else if requester == "user" {
+		if p.UserReleaseDate.After(time.Now()) {
+			return nil, ErrTripUnAvailable
+		}
+	}
 	return p, nil
 }
 

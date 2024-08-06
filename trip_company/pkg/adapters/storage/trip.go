@@ -52,7 +52,7 @@ func (r *tripRepo) Insert(ctx context.Context, t *trip.Trip) error {
 	return nil
 }
 
-func (r *tripRepo) GetCompanyTrips(ctx context.Context,originCity, destinationCity, pathType string, startDate *time.Time ,companyID uint, limit, offset uint) ([]trip.Trip, uint, error) {
+func (r *tripRepo) GetCompanyTrips(ctx context.Context,originCity, destinationCity, pathType string, startDate *time.Time, requesterType string ,companyID uint, limit, offset uint) ([]trip.Trip, uint, error) {
 	query := r.db.WithContext(ctx).
 		Model(&entities.Trip{}).
 		Where("transport_company_id = ?", companyID).Preload("TransportCompany").     // Preload related TransportCompany
@@ -72,6 +72,11 @@ func (r *tripRepo) GetCompanyTrips(ctx context.Context,originCity, destinationCi
 	
 		if pathType != "" {
 			query = query.Where("trip_type = ?", pathType)
+		}
+		if requesterType == "agency" {
+			query = query.Where("agency_release_date <= ?", time.Now())
+		} else if requesterType == "user" {
+			query = query.Where("user_release_date <= ?", time.Now())
 		}
 	
 		if startDate != nil {

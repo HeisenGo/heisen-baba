@@ -67,7 +67,7 @@ func (s *TicketService) ProcessAgencyTicket(ctx context.Context, t *ticket.Ticke
 }
 
 func (s *TicketService) ProcessUserTicket(ctx context.Context, t *ticket.Ticket) error {
-	trp, err := s.tripOps.GetFullTripByID(ctx, t.TripID)
+	trp, err := s.tripOps.GetFullTripByID(ctx, t.TripID, "owner")
 	if err != nil {
 		return err
 	}

@@ -20,6 +20,7 @@ const (
 )
 
 var (
+	ErrTripUnAvailable = errors.New("trip is unavailable")
 	ErrInvalidPercentage = errors.New("invalid percent")
 	ErrCanNotUpdate    = errors.New("can not update")
 	ErrNotUpdated      = errors.New("could not update trip")
@@ -40,7 +41,7 @@ var (
 )
 
 type Repo interface {
-	GetCompanyTrips(ctx context.Context, originCity, destinationCity, pathType string, startDate *time.Time ,companyID uint, limit, offset uint) ([]Trip, uint, error)
+	GetCompanyTrips(ctx context.Context, originCity, destinationCity, pathType string, startDate *time.Time,requesterType string ,companyID uint, limit, offset uint) ([]Trip, uint, error)
 	Insert(ctx context.Context, t *Trip) error
 
 	GetFullTripByID(ctx context.Context, id uint) (*Trip, error)

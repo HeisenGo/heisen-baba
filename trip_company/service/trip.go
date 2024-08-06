@@ -50,7 +50,7 @@ func (s *TripService) GetUpcomingUnconfirmedTripIDsToCancel(ctx context.Context)
 	return s.tripOps.GetUpcomingUnconfirmedTripIDsToCancel(ctx)
 }
 
-func (s *TripService) GetCompanyTrips(ctx context.Context, originCity, destinationCity, pathType string, startDate *time.Time, companyID uint, page, pageSize uint) ([]trip.Trip, uint, error) {
+func (s *TripService) GetCompanyTrips(ctx context.Context, originCity, destinationCity, pathType string, startDate *time.Time,requesterType string, companyID uint, page, pageSize uint) ([]trip.Trip, uint, error) {
 	tCompany, err := s.companyOps.GetByID(ctx, companyID)
 	if err != nil {
 		return nil, 0, err
@@ -60,7 +60,7 @@ func (s *TripService) GetCompanyTrips(ctx context.Context, originCity, destinati
 		return nil, 0, company.ErrCompanyNotFound
 	}
 
-	return s.tripOps.CompanyTrips(ctx, originCity, destinationCity, pathType, startDate, companyID, page, pageSize)
+	return s.tripOps.CompanyTrips(ctx, originCity, destinationCity, pathType, startDate,requesterType, companyID, page, pageSize)
 }
 
 func (s *TripService) CreateTrip(ctx context.Context, t *trip.Trip, creatorID uint) error {
@@ -114,12 +114,12 @@ func (s *TripService) GetTrips(ctx context.Context, originCity, destinationCity,
 	return s.tripOps.GetTrips(ctx, originCity, destinationCity, pathType, startDate, requesterType, pageSize, page)
 }
 
-func (s *TripService) GetFullTripByID(ctx context.Context, id uint) (*trip.Trip, error) {
-	return s.tripOps.GetFullTripByID(ctx, id)
+func (s *TripService) GetFullTripByID(ctx context.Context, id uint, requester string) (*trip.Trip, error) {
+	return s.tripOps.GetFullTripByID(ctx, id, requester)
 }
 
 func (s *TripService) UpdateTrip(ctx context.Context, id uint, newTrip *trip.Trip) (*trip.Trip, error) {
-	oldTrip, err := s.tripOps.GetFullTripByID(ctx, id)
+	oldTrip, err := s.tripOps.GetFullTripByID(ctx, id, "owner")
 
 	if err != nil {
 		return nil, err
@@ -137,7 +137,7 @@ func (s *TripService) UpdateTrip(ctx context.Context, id uint, newTrip *trip.Tri
 }
 
 func (s *TripService) SetTechTeamToTrip(ctx context.Context, tripID, techteamID uint) (*trip.Trip, error) {
-	t, err := s.tripOps.GetFullTripByID(ctx, tripID)
+	t, err := s.tripOps.GetFullTripByID(ctx, tripID, "owner")
 	if err != nil {
 		return nil, err
 	}
@@ -202,7 +202,7 @@ func (s *TripService) UpdateInvoiceTicket(ctx context.Context, t ticket.Ticket, 
 }
 
 func (s *TripService) CancelTrip(ctx context.Context, tripID uint, requesterID uint, isCanceled bool) (*trip.Trip, error) {
-	t, err := s.tripOps.GetFullTripByID(ctx, tripID)
+	t, err := s.tripOps.GetFullTripByID(ctx, tripID,"owner")
 
 	if err != nil {
 		return nil, err
@@ -260,7 +260,7 @@ func (s *TripService) CancelTrip(ctx context.Context, tripID uint, requesterID u
 }
 
 func (s *TripService) ConfirmTrip(ctx context.Context, tripID uint, requesterID uint, isConfirmed bool) (*trip.Trip, error) {
-	t, err := s.tripOps.GetFullTripByID(ctx, tripID)
+	t, err := s.tripOps.GetFullTripByID(ctx, tripID,"owner")
 
 	if err != nil {
 		return nil, err
@@ -301,7 +301,7 @@ func (s *TripService) ConfirmTrip(ctx context.Context, tripID uint, requesterID 
 }
 
 func (s *TripService) FinishTrip(ctx context.Context, tripID uint, requesterID uint, isFinished bool) (*trip.Trip, error) {
-	t, err := s.tripOps.GetFullTripByID(ctx, tripID)
+	t, err := s.tripOps.GetFullTripByID(ctx, tripID,"owner")
 
 	if err != nil {
 		return nil, err

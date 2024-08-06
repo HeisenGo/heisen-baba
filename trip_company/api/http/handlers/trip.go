@@ -75,7 +75,9 @@ func GetCompanyTrips(tripService *service.TripService) fiber.Handler {
 			return presenter.BadRequest(c, err)
 		}
 		//requester // how to show the result
-		trips, total, err := tripService.GetCompanyTrips(c.UserContext(), originCity, destinationCity, pathType, &startDate, uint(companyID), uint(page), uint(pageSize))
+		requester := "owner" //user // admin // agency // unknown
+		// check isOwner / isAdmin / isTechinician
+		trips, total, err := tripService.GetCompanyTrips(c.UserContext(), originCity, destinationCity, pathType, &startDate,requester, uint(companyID), uint(page), uint(pageSize))
 		if err != nil {
 			if errors.Is(err, trip.ErrRecordsNotFound) {
 				return presenter.BadRequest(c, err)
@@ -83,7 +85,7 @@ func GetCompanyTrips(tripService *service.TripService) fiber.Handler {
 			err := errors.New("Error")
 			return presenter.InternalServerError(c, err)
 		}
-		requester := "owner" //user // admin // agency // unknown
+		
 		var data interface{}
 		if requester == "owner" || requester == "operator" || requester == "technician" || requester == "admin" {
 			data = presenter.NewPagination(
@@ -112,45 +114,7 @@ func GetCompanyTrips(tripService *service.TripService) fiber.Handler {
 	}
 }
 
-func GetFullTripByID(tripService *service.TripService) fiber.Handler {
-	return func(c *fiber.Ctx) error {
-		// userClaims, ok := c.Locals(UserClaimKey).(*jwt.UserClaims)
-		// if !ok {
-		// 	return SendError(c, errWrongClaimType, fiber.StatusBadRequest)
-		// }
-		//query parameter
-		tripID, err := c.ParamsInt("tripID")
-		if err != nil {
-			return presenter.BadRequest(c, errWrongIDType)
-		}
-
-		if tripID < 0 {
-			return presenter.BadRequest(c, errWrongIDType)
-		}
-		// requester!!!!!!!!!!! check what to show
-		requester := "owner" // "user" // "admin" // "operator" // "employee" // "techteam"
-		t, err := tripService.GetFullTripByID(c.UserContext(), uint(tripID))
-		if err != nil {
-			if errors.Is(err, trip.ErrRecordNotFound) {
-				return presenter.BadRequest(c, err)
-			}
-			err := errors.New("Error")
-			return presenter.InternalServerError(c, err)
-		}
-		var data interface{}
-		if requester == "owner" || requester == "operator" || requester == "technician" || requester == "admin" {
-			data = presenter.TripToOwnerAdminTechTeamOperatorTripResponse(*t)
-		} else if requester == "agency" {
-			data = presenter.TripToAgencyTripResponse(*t)
-		} else {
-			data = presenter.TripToUserTripResponse(*t)
-		}
-		// TO DO implement else
-		return presenter.OK(c, "Trip fetched successfully", data)
-	}
-}
-
-func GetTrips(tripService *service.TripService) fiber.Handler {
+func GetCompanyAgencyTrips(tripService *service.TripService) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		// userClaims, ok := c.Locals(UserClaimKey).(*jwt.UserClaims)
 		// if !ok {
@@ -162,9 +126,7 @@ func GetTrips(tripService *service.TripService) fiber.Handler {
 		originCity := c.Query("from")
 		destinationCity := c.Query("to")
 		pathType := c.Query("type")
-		requesterType := c.Query("requester_type") // get from auth!!!!! TODO:
 
-		// Parse dates
 		var startDate time.Time
 		var err error
 
@@ -174,8 +136,15 @@ func GetTrips(tripService *service.TripService) fiber.Handler {
 				return presenter.BadRequest(c, errors.New("invalid start date format"))
 			}
 		}
+		// TO DO check requester!!!
+		companyID, err := c.ParamsInt("companyID")
+		if err != nil {
+			return presenter.BadRequest(c, err)
+		}
+		//requester // how to show the result
+		requester := "agency" //user // admin // agency // unknown
 
-		trips, total, err := tripService.GetTrips(c.UserContext(), originCity, destinationCity, pathType, &startDate, requesterType, uint(page), uint(pageSize))
+		trips, total, err := tripService.GetCompanyTrips(c.UserContext(), originCity, destinationCity, pathType, &startDate,requester, uint(companyID), uint(page), uint(pageSize))
 		if err != nil {
 			if errors.Is(err, trip.ErrRecordsNotFound) {
 				return presenter.BadRequest(c, err)
@@ -183,7 +152,6 @@ func GetTrips(tripService *service.TripService) fiber.Handler {
 			err := errors.New("Error")
 			return presenter.InternalServerError(c, err)
 		}
-		requester := "owner" //user // admin // agency // unknown
 		var data interface{}
 		if requester == "owner" || requester == "operator" || requester == "technician" || requester == "admin" {
 			data = presenter.NewPagination(
@@ -207,6 +175,190 @@ func GetTrips(tripService *service.TripService) fiber.Handler {
 				total,
 			)
 		}
+
+		return presenter.OK(c, "Trips fetched successfully", data)
+	}
+}
+
+
+func GetFullTripByID(tripService *service.TripService) fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		// userClaims, ok := c.Locals(UserClaimKey).(*jwt.UserClaims)
+		// if !ok {
+		// 	return SendError(c, errWrongClaimType, fiber.StatusBadRequest)
+		// }
+		//query parameter
+		tripID, err := c.ParamsInt("tripID")
+		if err != nil {
+			return presenter.BadRequest(c, errWrongIDType)
+		}
+
+		if tripID < 0 {
+			return presenter.BadRequest(c, errWrongIDType)
+		}
+		requester := "user" // "user" // "admin" // "operator" // "employee" // "techteam"
+		//check isAdmin isOwner isTechnician
+		t, err := tripService.GetFullTripByID(c.UserContext(), uint(tripID), requester)
+		if err != nil {
+			if errors.Is(err, trip.ErrRecordNotFound) {
+				return presenter.BadRequest(c, err)
+			}
+			err := errors.New("Error")
+			return presenter.InternalServerError(c, err)
+		}
+		var data interface{}
+		if requester == "owner" || requester == "operator" || requester == "technician" || requester == "admin" {
+			data = presenter.TripToOwnerAdminTechTeamOperatorTripResponse(*t)
+		} else if requester == "agency" {
+			data = presenter.TripToAgencyTripResponse(*t)
+		} else {
+			data = presenter.TripToUserTripResponse(*t)
+		}
+		return presenter.OK(c, "Trip fetched successfully", data)
+	}
+}
+
+func GetFullAgencyTripByID(tripService *service.TripService) fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		// userClaims, ok := c.Locals(UserClaimKey).(*jwt.UserClaims)
+		// if !ok {
+		// 	return SendError(c, errWrongClaimType, fiber.StatusBadRequest)
+		// }
+		//query parameter
+		tripID, err := c.ParamsInt("tripID")
+		if err != nil {
+			return presenter.BadRequest(c, errWrongIDType)
+		}
+
+		if tripID < 0 {
+			return presenter.BadRequest(c, errWrongIDType)
+		}
+
+		requester := "agency" // "user" // "admin" // "operator" // "employee" // "techteam"
+		t, err := tripService.GetFullTripByID(c.UserContext(), uint(tripID), requester)
+		if err != nil {
+			if errors.Is(err, trip.ErrRecordNotFound) {
+				return presenter.BadRequest(c, err)
+			}
+			err := errors.New("Error")
+			return presenter.InternalServerError(c, err)
+		}
+		var data interface{}
+		if requester == "owner" || requester == "operator" || requester == "technician" || requester == "admin" {
+			data = presenter.TripToOwnerAdminTechTeamOperatorTripResponse(*t)
+		} else if requester == "agency" {
+			data = presenter.TripToAgencyTripResponse(*t)
+		} else {
+			data = presenter.TripToUserTripResponse(*t)
+		}
+		return presenter.OK(c, "Trip fetched successfully", data)
+	}
+}
+
+func GetTrips(tripService *service.TripService) fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		// userClaims, ok := c.Locals(UserClaimKey).(*jwt.UserClaims)
+		// if !ok {
+		// 	return SendError(c, errWrongClaimType, fiber.StatusBadRequest)
+		// }
+		//query parameter
+		page, pageSize := PageAndPageSize(c)
+		startDateStr := c.Query("start_date")
+		originCity := c.Query("from")
+		destinationCity := c.Query("to")
+		pathType := c.Query("type")
+
+		// Parse dates
+		var startDate time.Time
+		var err error
+
+		if startDateStr != "" {
+			startDate, err = time.Parse("2006-01-02", startDateStr)
+			if err != nil {
+				return presenter.BadRequest(c, errors.New("invalid start date format"))
+			}
+		}
+		requester := "user" //user // admin // agency // unknown
+		// check isAdmin or isOwner or isTechincian
+		requesterType := c.Query("requester_type") // get from auth!!!!! TODO:
+
+		trips, total, err := tripService.GetTrips(c.UserContext(), originCity, destinationCity, pathType, &startDate, requesterType, uint(page), uint(pageSize))
+		if err != nil {
+			if errors.Is(err, trip.ErrRecordsNotFound) {
+				return presenter.BadRequest(c, err)
+			}
+			err := errors.New("Error")
+			return presenter.InternalServerError(c, err)
+		}
+		
+		var data interface{}
+		if requester == "owner" || requester == "operator" || requester == "technician" || requester == "admin" {
+			data = presenter.NewPagination(
+				presenter.BatchTripToOwnerAdminTechTeamOperatorTripResponse(trips),
+				uint(page),
+				uint(pageSize),
+				total,
+			)
+		} else if requester == "agency" {
+			data = presenter.NewPagination(
+				presenter.BatchTripToAgencyTripResponse(trips),
+				uint(page),
+				uint(pageSize),
+				total,
+			)
+		} else {
+			data = presenter.NewPagination(
+				presenter.BatchTripToUserTripResponse(trips),
+				uint(page),
+				uint(pageSize),
+				total,
+			)
+		}
+
+		return presenter.OK(c, "Trips fetched successfully", data)
+	}
+}
+
+func GetAgencyTrips(tripService *service.TripService) fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		// userClaims, ok := c.Locals(UserClaimKey).(*jwt.UserClaims)
+		// if !ok {
+		// 	return SendError(c, errWrongClaimType, fiber.StatusBadRequest)
+		// }
+		//query parameter
+		page, pageSize := PageAndPageSize(c)
+		startDateStr := c.Query("start_date")
+		originCity := c.Query("from")
+		destinationCity := c.Query("to")
+		pathType := c.Query("type")
+		//requesterType := c.Query("requester_type") // get from auth!!!!! TODO:
+
+		// Parse dates
+		var startDate time.Time
+		var err error
+
+		if startDateStr != "" {
+			startDate, err = time.Parse("2006-01-02", startDateStr)
+			if err != nil {
+				return presenter.BadRequest(c, errors.New("invalid start date format"))
+			}
+		}
+		requester := "agency"
+		trips, total, err := tripService.GetTrips(c.UserContext(), originCity, destinationCity, pathType, &startDate, requester, uint(page), uint(pageSize))
+		if err != nil {
+			if errors.Is(err, trip.ErrRecordsNotFound) {
+				return presenter.BadRequest(c, err)
+			}
+			err := errors.New("Error")
+			return presenter.InternalServerError(c, err)
+		}
+
+		data := presenter.NewPagination(
+			presenter.BatchTripToAgencyTripResponse(trips),
+			uint(page),
+			uint(pageSize),
+			total,
+		)
 
 		return presenter.OK(c, "Trips fetched successfully", data)
 	}
