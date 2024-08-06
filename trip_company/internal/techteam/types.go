@@ -18,6 +18,7 @@ type Repo interface {
 	Insert(ctx context.Context, t *TechTeam) error
 	InsertMember(ctx context.Context, t *TechTeamMember) error
 	GetTechTeamsOfCompany(ctx context.Context, companyId uint, limit, offset uint) ([]TechTeam, uint, error)
+	IsUserTechnicianInCompany(ctx context.Context, companyID uint, userID uint) (bool, error)
 }
 
 type TechTeam struct {

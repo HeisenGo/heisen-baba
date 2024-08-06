@@ -50,3 +50,7 @@ func (o *Ops) GetTechTeamMemberByUserIDAndTechTeamID(ctx context.Context, userID
 	}
 	return m, nil
 }
+
+func (o *Ops)IsUserTechnicianInCompany(ctx context.Context, companyID uint, userID uint) (bool, error) {
+	return o.repo.IsUserTechnicianInCompany(ctx, companyID, userID)
+}

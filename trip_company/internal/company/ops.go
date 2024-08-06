@@ -77,3 +77,6 @@ func(o *Ops)PatchCompanyByOwner(ctx context.Context, updatedCompany, originalCom
 	return o.repo.PatchCompany(ctx, updatedCompany, originalCompany)
 }
 
+func (o *Ops)IsUserOwnerOfCompany(ctx context.Context, companyID uint, userID uint) (bool, error) {
+	return o.repo.IsUserOwnerOfCompany(ctx, companyID, userID)
+}

@@ -75,7 +75,7 @@ func (o *Ops) Create(ctx context.Context, trip *Trip) error {
 	return o.repo.Insert(ctx, trip)
 }
 
-func (o *Ops) GetFullTripByID(ctx context.Context, id uint, requester string) (*Trip, error) {
+func (o *Ops) GetFullTripByID(ctx context.Context, id uint) (*Trip, error) {
 	p, err := o.repo.GetFullTripByID(ctx, id)
 	if err != nil {
 		return nil, err
@@ -83,15 +83,6 @@ func (o *Ops) GetFullTripByID(ctx context.Context, id uint, requester string) (*
 
 	if p == nil {
 		return nil, ErrTripNotFound
-	}
-	if requester == "agency" {
-		if p.TourReleaseDate.After(time.Now()) {
-			return nil, ErrTripUnAvailable
-		}
-	} else if requester == "user" {
-		if p.UserReleaseDate.After(time.Now()) {
-			return nil, ErrTripUnAvailable
-		}
 	}
 	return p, nil
 }

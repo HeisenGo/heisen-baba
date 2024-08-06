@@ -181,3 +181,17 @@ func (r *companyRepo) PatchCompany(ctx context.Context, updatedCompany, original
 	}
 	return nil
 }
+
+func (r *companyRepo) IsUserOwnerOfCompany(ctx context.Context, companyID uint, userID uint) (bool, error) {
+    var count int64
+    err := r.db.WithContext(ctx).
+        Model(&entities.TransportCompany{}).
+        Where("id = ? AND owner_id = ?", companyID, userID).
+        Count(&count).Error
+
+    if err != nil {
+        return false, err
+    }
+
+    return count > 0, nil
+}

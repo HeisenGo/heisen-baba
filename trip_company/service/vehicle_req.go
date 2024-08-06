@@ -25,7 +25,7 @@ func NewVehicleReService(vehicleReqOps *vehiclerequest.Ops, tripOps *trip.Ops) *
 }
 
 func (s *VehicleReService) CreateVehicleReq(ctx context.Context, vR *vehiclerequest.VehicleRequest, creatorID uint) error {
-	t, err := s.tripOps.GetFullTripByID(ctx, vR.TripID,"owner")
+	t, err := s.tripOps.GetFullTripByID(ctx, vR.TripID)
 	if err != nil {
 		return err
 	}

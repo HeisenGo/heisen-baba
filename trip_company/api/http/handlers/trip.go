@@ -75,9 +75,10 @@ func GetCompanyTrips(tripService *service.TripService) fiber.Handler {
 			return presenter.BadRequest(c, err)
 		}
 		//requester // how to show the result
-		requester := "owner" //user // admin // agency // unknown
+		requester := "admin" //user // admin // agency // unknown
+		userID := uint(1)
 		// check isOwner / isAdmin / isTechinician
-		trips, total, err := tripService.GetCompanyTrips(c.UserContext(), originCity, destinationCity, pathType, &startDate,requester, uint(companyID), uint(page), uint(pageSize))
+		trips, total, role, err := tripService.GetCompanyTrips(c.UserContext(), originCity, destinationCity, pathType, &startDate, requester, uint(companyID),userID, uint(page), uint(pageSize))
 		if err != nil {
 			if errors.Is(err, trip.ErrRecordsNotFound) {
 				return presenter.BadRequest(c, err)
@@ -85,16 +86,16 @@ func GetCompanyTrips(tripService *service.TripService) fiber.Handler {
 			err := errors.New("Error")
 			return presenter.InternalServerError(c, err)
 		}
-		
+
 		var data interface{}
-		if requester == "owner" || requester == "operator" || requester == "technician" || requester == "admin" {
+		if role == string(company.OwnerRole) || role == string(company.OperatorRole) || role == string(company.TechRole) || role == "admin" {
 			data = presenter.NewPagination(
 				presenter.BatchTripToOwnerAdminTechTeamOperatorTripResponse(trips),
 				uint(page),
 				uint(pageSize),
 				total,
 			)
-		} else if requester == "agency" {
+		} else if role == "agency" {
 			data = presenter.NewPagination(
 				presenter.BatchTripToAgencyTripResponse(trips),
 				uint(page),
@@ -136,15 +137,15 @@ func GetCompanyAgencyTrips(tripService *service.TripService) fiber.Handler {
 				return presenter.BadRequest(c, errors.New("invalid start date format"))
 			}
 		}
-		// TO DO check requester!!!
 		companyID, err := c.ParamsInt("companyID")
 		if err != nil {
 			return presenter.BadRequest(c, err)
 		}
-		//requester // how to show the result
-		requester := "agency" //user // admin // agency // unknown
+		// only get this 
+		var userID uint
+		requester := "agency" //no other type
 
-		trips, total, err := tripService.GetCompanyTrips(c.UserContext(), originCity, destinationCity, pathType, &startDate,requester, uint(companyID), uint(page), uint(pageSize))
+		trips, total, _, err := tripService.GetCompanyTrips(c.UserContext(), originCity, destinationCity, pathType, &startDate, requester, uint(companyID),userID, uint(page), uint(pageSize))
 		if err != nil {
 			if errors.Is(err, trip.ErrRecordsNotFound) {
 				return presenter.BadRequest(c, err)
@@ -153,7 +154,7 @@ func GetCompanyAgencyTrips(tripService *service.TripService) fiber.Handler {
 			return presenter.InternalServerError(c, err)
 		}
 		var data interface{}
-		if requester == "owner" || requester == "operator" || requester == "technician" || requester == "admin" {
+		if requester == string(company.OwnerRole) || requester == string(company.OperatorRole) || requester == string(company.TechRole) || requester == "admin" {
 			data = presenter.NewPagination(
 				presenter.BatchTripToOwnerAdminTechTeamOperatorTripResponse(trips),
 				uint(page),
@@ -180,7 +181,6 @@ func GetCompanyAgencyTrips(tripService *service.TripService) fiber.Handler {
 	}
 }
 
-
 func GetFullTripByID(tripService *service.TripService) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		// userClaims, ok := c.Locals(UserClaimKey).(*jwt.UserClaims)
@@ -196,9 +196,10 @@ func GetFullTripByID(tripService *service.TripService) fiber.Handler {
 		if tripID < 0 {
 			return presenter.BadRequest(c, errWrongIDType)
 		}
-		requester := "user" // "user" // "admin" // "operator" // "employee" // "techteam"
 		//check isAdmin isOwner isTechnician
-		t, err := tripService.GetFullTripByID(c.UserContext(), uint(tripID), requester)
+		userID := uint(8)
+		requester := "admin"
+		t, requesterRole, err := tripService.GetFullTripByID(c.UserContext(), uint(tripID), userID, requester)
 		if err != nil {
 			if errors.Is(err, trip.ErrRecordNotFound) {
 				return presenter.BadRequest(c, err)
@@ -207,9 +208,9 @@ func GetFullTripByID(tripService *service.TripService) fiber.Handler {
 			return presenter.InternalServerError(c, err)
 		}
 		var data interface{}
-		if requester == "owner" || requester == "operator" || requester == "technician" || requester == "admin" {
+		if requesterRole == string(company.OwnerRole) || requesterRole == string(company.OperatorRole) || requesterRole == string(company.TechRole) || requesterRole == "admin" {
 			data = presenter.TripToOwnerAdminTechTeamOperatorTripResponse(*t)
-		} else if requester == "agency" {
+		} else if requesterRole == "agency" {
 			data = presenter.TripToAgencyTripResponse(*t)
 		} else {
 			data = presenter.TripToUserTripResponse(*t)
@@ -233,9 +234,10 @@ func GetFullAgencyTripByID(tripService *service.TripService) fiber.Handler {
 		if tripID < 0 {
 			return presenter.BadRequest(c, errWrongIDType)
 		}
-
+		//TO do from local context
+		userID := uint(4)
 		requester := "agency" // "user" // "admin" // "operator" // "employee" // "techteam"
-		t, err := tripService.GetFullTripByID(c.UserContext(), uint(tripID), requester)
+		t, _, err := tripService.GetFullTripByID(c.UserContext(), uint(tripID), userID, requester)
 		if err != nil {
 			if errors.Is(err, trip.ErrRecordNotFound) {
 				return presenter.BadRequest(c, err)
@@ -244,7 +246,7 @@ func GetFullAgencyTripByID(tripService *service.TripService) fiber.Handler {
 			return presenter.InternalServerError(c, err)
 		}
 		var data interface{}
-		if requester == "owner" || requester == "operator" || requester == "technician" || requester == "admin" {
+		if requester == string(company.OwnerRole) || requester == string(company.OperatorRole) || requester == string(company.TechRole) || requester == "admin" {
 			data = presenter.TripToOwnerAdminTechTeamOperatorTripResponse(*t)
 		} else if requester == "agency" {
 			data = presenter.TripToAgencyTripResponse(*t)
@@ -278,7 +280,7 @@ func GetTrips(tripService *service.TripService) fiber.Handler {
 				return presenter.BadRequest(c, errors.New("invalid start date format"))
 			}
 		}
-		requester := "user" 
+		requester := "user"
 		// check isAdmin or Not
 		requesterType := c.Query("requester_type") // get from auth!!!!! TODO:
 
@@ -290,9 +292,9 @@ func GetTrips(tripService *service.TripService) fiber.Handler {
 			err := errors.New("Error")
 			return presenter.InternalServerError(c, err)
 		}
-		
+
 		var data interface{}
-		if requester == "owner" || requester == "operator" || requester == "technician" || requester == "admin" {
+		if requester == "admin" {
 			data = presenter.NewPagination(
 				presenter.BatchTripToOwnerAdminTechTeamOperatorTripResponse(trips),
 				uint(page),

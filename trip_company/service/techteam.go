@@ -34,7 +34,7 @@ func (s *TechTeamService) CreateTechTeam(ctx context.Context, t *techteam.TechTe
 
 func (s *TechTeamService) CreateTechTeamMember(ctx context.Context, m *techteam.TechTeamMember, creatorID uint) error {
 
-	m.Role = "Technician"
+	m.Role = "technician"
 	team, err := s.techTeamOps.GetTechTeamByID(ctx, m.TechTeamID)
 
 	if err != nil {

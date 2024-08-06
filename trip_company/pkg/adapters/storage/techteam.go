@@ -99,3 +99,18 @@ func (r *techTeamRepo) GetTechTeamMemberByUserIDAndTechTeamID(ctx context.Contex
 	m := mappers.MemberEntityToMemberDomain(techTeamMember)
 	return &m, nil
 }
+
+func (r *techTeamRepo) IsUserTechnicianInCompany(ctx context.Context, companyID uint, userID uint) (bool, error) {
+    var count int64
+    err := r.db.WithContext(ctx).
+        Model(&entities.TechTeamMember{}).
+        Joins("JOIN tech_teams ON tech_team_members.tech_team_id = tech_teams.id").
+        Where("tech_teams.transport_company_id = ? AND tech_team_members.user_id = ?", companyID, userID).
+        Count(&count).Error
+
+    if err != nil {
+        return false, err
+    }
+
+    return count > 0, nil
+}

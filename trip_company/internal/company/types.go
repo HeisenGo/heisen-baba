@@ -7,6 +7,15 @@ import (
 	"strings"
 )
 
+type CompanyRoleType string
+
+const (
+	UserRole     = CompanyRoleType("user")
+	OwnerRole    = CompanyRoleType("owner")
+	TechRole     = CompanyRoleType("techRole")
+	OperatorRole = CompanyRoleType("operator")
+)
+
 const (
 	MaxNameLength        = 100
 	MaxDescriptionLength = 1500
@@ -21,8 +30,7 @@ var (
 	ErrDeleteCompany   = errors.New("error deleting company")
 	ErrCanNotDelete    = errors.New("company can not be deleted due to unfinished trips")
 	ErrFailedToBlock   = errors.New("failed to block the company")
-	ErrFailedToUpdate   = errors.New("failed to update the company")
-
+	ErrFailedToUpdate  = errors.New("failed to update the company")
 )
 
 type Repo interface {
@@ -33,6 +41,7 @@ type Repo interface {
 	Delete(ctx context.Context, companyID uint) error
 	BlockCompany(ctx context.Context, companyID uint, isBlocked bool) error
 	PatchCompany(ctx context.Context, updatedCompany, originalCompany *TransportCompany) error
+	IsUserOwnerOfCompany(ctx context.Context, companyID uint, userID uint) (bool, error)
 }
 
 type TransportCompany struct {
