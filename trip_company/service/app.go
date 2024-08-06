@@ -32,6 +32,7 @@ type AppContainer struct {
 	techTeamService   *TechTeamService
 
 	authClient      clients.IAuthClient
+	pathClient      clients.IPathClient
 
 }
 
@@ -55,6 +56,7 @@ func NewAppContainer(cfg config.Config) (*AppContainer, error) {
 	app.setVehicleReqService()
 	app.setTechTeamService()
 	app.setAuthClient(cfg.Server.ServiceRegistry.AuthServiceName)
+	app.setPathClient(cfg.Server.ServiceRegistry.PathServiceName)
 
 	//app.setPathService()
 	return app, nil
@@ -147,6 +149,7 @@ func (a *AppContainer) TripServiceFromCtx(ctx context.Context) *TripService {
 		techteam.NewOps(storage.NewTechTeamRepo(gc)),
 		ticket.NewOps(storage.NewTicketRepo(gc)),
 		invoice.NewOps(storage.NewInvoiceRepo(gc)),
+		a.pathClient,
 	)
 }
 
@@ -156,7 +159,8 @@ func (a *AppContainer) setTripService() {
 	}
 	a.tripService = NewTripService(trip.NewOps(storage.NewTripRepo(a.dbConn)),
 		company.NewOps(storage.NewTransportCompanyRepo(a.dbConn)),
-		techteam.NewOps(storage.NewTechTeamRepo(a.dbConn)), ticket.NewOps(storage.NewTicketRepo(a.dbConn)), invoice.NewOps(storage.NewInvoiceRepo(a.dbConn)))
+		techteam.NewOps(storage.NewTechTeamRepo(a.dbConn)), ticket.NewOps(storage.NewTicketRepo(a.dbConn)), 
+		invoice.NewOps(storage.NewInvoiceRepo(a.dbConn)), a.pathClient)
 }
 
 // Ticket Service
@@ -290,4 +294,16 @@ func (a *AppContainer) setAuthClient(authServiceName string) {
 		return
 	}
 	a.authClient = grpc.NewGRPCAuthClient(a.serviceRegistry, authServiceName)
+}
+
+
+func (a *AppContainer) PathClient() clients.IPathClient {
+	return a.pathClient
+}
+
+func (a *AppContainer) setPathClient(pathServiceName string) {
+	if a.pathClient != nil {
+		return
+	}
+	a.pathClient = grpc.NewGRPCPathClient(a.serviceRegistry, pathServiceName)
 }

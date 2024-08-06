@@ -9,6 +9,7 @@ import (
 	"tripcompanyservice/internal/techteam"
 	"tripcompanyservice/internal/ticket"
 	"tripcompanyservice/internal/trip"
+	"tripcompanyservice/pkg/ports/clients/clients"
 
 	"github.com/google/uuid"
 )
@@ -32,15 +33,19 @@ type TripService struct {
 	techTeamOps *techteam.Ops
 	ticketOps   *ticket.Ops
 	invoiceOps  *invoice.Ops
+	pathClient  clients.IPathClient
 }
 
-func NewTripService(tripOps *trip.Ops, companyOps *company.Ops, techTeamOps *techteam.Ops, ticketOps *ticket.Ops, invoiceOps *invoice.Ops) *TripService {
+func NewTripService(tripOps *trip.Ops, companyOps *company.Ops, 
+	techTeamOps *techteam.Ops, ticketOps *ticket.Ops, 
+	invoiceOps *invoice.Ops, pathClient clients.IPathClient) *TripService {
 	return &TripService{
 		tripOps:     tripOps,
 		companyOps:  companyOps,
 		techTeamOps: techTeamOps,
 		ticketOps:   ticketOps,
 		invoiceOps:  invoiceOps,
+		pathClient: pathClient,
 	}
 }
 
@@ -157,6 +162,11 @@ func (s *TripService) CreateTrip(ctx context.Context, t *trip.Trip, creatorID uu
 	t.TripType = trip.TripType(t.Path.Type)
 	t.TripType = "rail"
 	t.Path.DistanceKM = 220
+	pp, err := s.pathClient.GetFullPathByID(uint32(t.PathID))
+	if err != nil {
+		return err
+	}
+	t.Path = pp
 	//v := uint(1)
 	//t.VehicleID = &v
 	//********************************************************
