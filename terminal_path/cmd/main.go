@@ -4,6 +4,8 @@ import (
 	"flag"
 	"log"
 	"os"
+	"sync"
+	grpc_server "terminalpathservice/api/grpc"
 	http_server "terminalpathservice/api/http"
 	"terminalpathservice/config"
 	"terminalpathservice/service"
@@ -19,7 +21,20 @@ func main() {
 		log.Fatal(err)
 	}
 
-	http_server.Run(cfg, app)
+	var wg sync.WaitGroup
+	wg.Add(3)
+
+	go func() {
+		defer wg.Done()
+		http_server.Run(cfg, app)
+	}()
+
+	go func() {
+		defer wg.Done()
+		grpc_server.Run(cfg, app)
+	}()
+
+	wg.Wait()
 }
 
 func readConfig() config.Config {

@@ -7,6 +7,7 @@ server:
   service_host_name: "terminal_path"
   service_http_health_path: "api/v1/health"
   service_http_prefix_path: "/api/v1/terminals"
+  service_grpc_health_path: ""
   service_registry:
     address: "consul:8500"
 db:
