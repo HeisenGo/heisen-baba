@@ -15,7 +15,7 @@ func failOnPublishError(err error, msg string) {
 }
 
 func (r *RabbitMQ) Publish(queueName, msg string) {
-	conn, err := amqp.Dial(fmt.Sprintf("amqp://%s:%s@%s:%v/", r.msgBrokerUsername, r.msgBrokerHostPassword, r.msgBrokerHost, r.msgBrokerPort))
+	conn, err := amqp.Dial(fmt.Sprintf("amqp://%s:%s@%s:%v/", r.msgBrokerUsername, r.msgBrokerPassword, r.msgBrokerHost, r.msgBrokerPort))
 	failOnPublishError(err, "Failed to connect to RabbitMQ")
 	defer conn.Close()
 

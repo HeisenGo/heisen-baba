@@ -13,7 +13,7 @@ func NewConsul(address string) *Consul {
 	return &Consul{Address: address}
 }
 
-func (c *Consul) RegisterService(serviceHostName, servicePrefixPath, serviceHTTPHealthPath string, serviceHTTPPort int) error {
+func (c *Consul) RegisterService(serviceName, serviceHostAddress, servicePrefixPath, serviceHTTPHealthPath string, serviceGRPCPort, serviceHTTPPort int) error {
 	consulConfig := consulAPI.DefaultConfig()
 	consulConfig.Address = c.Address
 	consulClient, err := consulAPI.NewClient(consulConfig)
@@ -21,22 +21,30 @@ func (c *Consul) RegisterService(serviceHostName, servicePrefixPath, serviceHTTP
 		return err
 	}
 
-	HTTPHealthURL := fmt.Sprintf("http://%s:%v/%s", serviceHostName, serviceHTTPPort, serviceHTTPHealthPath)
+	HTTPHealthURL := fmt.Sprintf("http://%s:%v/%s", serviceHostAddress, serviceHTTPPort, serviceHTTPHealthPath)
+	GRPCHealthURL := fmt.Sprintf("%s:%v", serviceHostAddress, serviceGRPCPort)
 	// Register service with Consul
 	registration := &consulAPI.AgentServiceRegistration{
-		ID:      fmt.Sprintf("%s-service-id", serviceHostName),
-		Name:    serviceHostName,
-		Address: serviceHostName,
-		Port:    serviceHTTPPort,
+		ID:      fmt.Sprintf("%s-service-id", serviceName),
+		Name:    serviceName,
+		Address: serviceHostAddress,
+		Port:    serviceGRPCPort,
 		Tags: []string{
-			serviceHostName,
-			fmt.Sprintf("traefik.http.routers.%s_router.rule=PathPrefix(`%s`)", serviceHostName, servicePrefixPath),
-			fmt.Sprintf("traefik.http.services.%s.loadbalancer.server.port=%v", serviceHostName, serviceHTTPPort),
+			serviceName,
+			fmt.Sprintf("traefik.http.routers.%s_router.rule=PathPrefix(`%s`)", serviceName, servicePrefixPath),
+			fmt.Sprintf("traefik.http.services.%s.loadbalancer.server.port=%v", serviceName, serviceHTTPPort),
 		},
-		Check: &consulAPI.AgentServiceCheck{
-			HTTP:     HTTPHealthURL,
-			Interval: "10s",
-			Timeout:  "1s",
+		Checks: []*consulAPI.AgentServiceCheck{
+			{
+				GRPC:     GRPCHealthURL,
+				Interval: "10s",
+				Timeout:  "1s",
+			},
+			{
+				HTTP:     HTTPHealthURL,
+				Interval: "10s",
+				Timeout:  "1s",
+			},
 		},
 	}
 

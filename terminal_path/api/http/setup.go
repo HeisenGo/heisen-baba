@@ -20,7 +20,7 @@ func Run(cfg config.Config, app *service.AppContainer) {
 	registerTerminalRouts(api, app)
 	registerPathRouts(api, app)
 	// run server
-	log.Fatal(fiberApp.Listen(fmt.Sprintf("%s:%d", cfg.Server.Host, cfg.Server.HttpPort)))
+	log.Fatal(fiberApp.Listen(fmt.Sprintf("%s:%d", cfg.Server.Host, cfg.Server.HTTPPort)))
 }
 
 func registerGlobalRoutes(router fiber.Router) {
@@ -41,23 +41,23 @@ func registerTerminalRouts(router fiber.Router, app *service.AppContainer) {
 		handlers.CityTerminals(app.TerminalService()))
 
 	terminalGroup.Patch(":terminalID", middlewares.Auth(app.AuthClient()),
-	handlers.PatchTerminal(app.TerminalService()))
-	
-	terminalGroup.Delete(":terminalID",middlewares.Auth(app.AuthClient()),
-	handlers.DeleteTerminal(app.TerminalService()))
+		handlers.PatchTerminal(app.TerminalService()))
+
+	terminalGroup.Delete(":terminalID", middlewares.Auth(app.AuthClient()),
+		handlers.DeleteTerminal(app.TerminalService()))
 }
 
 func registerPathRouts(router fiber.Router, app *service.AppContainer) {
 	pathGroup := router.Group("terminals/paths") //, middlerwares.Auth(secret), middlerwares.RoleChecker("user", "admin"))
-	pathGroup.Post("",middlewares.Auth(app.AuthClient()),
+	pathGroup.Post("", middlewares.Auth(app.AuthClient()),
 		handlers.CreatePath(app.PathService()),
 	)
 	pathGroup.Get(":pathID", handlers.GetFullPathByID(app.PathService()))
 	pathGroup.Get("",
 		middlewares.SetupCacheMiddleware(2),
 		handlers.GetPathsByOriginDestinationType(app.PathService()))
-	pathGroup.Patch(":pathID",middlewares.Auth(app.AuthClient()),
-	handlers.PatchPath(app.PathService()))
-	pathGroup.Delete(":pathID",middlewares.Auth(app.AuthClient()),
-	handlers.DeletePath(app.PathService()))
+	pathGroup.Patch(":pathID", middlewares.Auth(app.AuthClient()),
+		handlers.PatchPath(app.PathService()))
+	pathGroup.Delete(":pathID", middlewares.Auth(app.AuthClient()),
+		handlers.DeletePath(app.PathService()))
 }
