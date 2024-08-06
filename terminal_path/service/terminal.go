@@ -2,8 +2,13 @@ package service
 
 import (
 	"context"
+	"errors"
 	"terminalpathservice/internal/path"
 	"terminalpathservice/internal/terminal"
+)
+
+var (
+	ErrForbidden = errors.New("you are not allowed to do this action")
 )
 
 type TerminalService struct {
@@ -18,7 +23,10 @@ func NewTerminalService(terminalOps *terminal.Ops, pathOps *path.Ops) *TerminalS
 	}
 }
 
-func (s *TerminalService) CreateTerminal(ctx context.Context, terminal *terminal.Terminal) error {
+func (s *TerminalService) CreateTerminal(ctx context.Context, terminal *terminal.Terminal, isAdmin bool) error {
+	if !isAdmin {
+		return ErrForbidden
+	}
 	return s.terminalOps.Create(ctx, terminal)
 }
 
@@ -26,7 +34,11 @@ func (s *TerminalService) GetTerminals(ctx context.Context, country, city, termi
 	return s.terminalOps.CityTypeTerminals(ctx, country, city, terminalType, page, pageSize)
 }
 
-func (s *TerminalService) PatchTerminal(ctx context.Context, updatedTerminal *terminal.Terminal) (*terminal.Terminal, error) {
+func (s *TerminalService) PatchTerminal(ctx context.Context, updatedTerminal *terminal.Terminal, isAdmin bool) (*terminal.Terminal, error) {
+	
+	if !isAdmin{
+		return nil, ErrForbidden
+	}
 	// exists?
 	originalTerminal, err := s.terminalOps.GetTerminalByID(ctx, updatedTerminal.ID)
 	if err != nil {
@@ -46,7 +58,11 @@ func (s *TerminalService) PatchTerminal(ctx context.Context, updatedTerminal *te
 	return originalTerminal, er
 }
 
-func (s *TerminalService) DeleteTerminal(ctx context.Context, terminalID uint) (*terminal.Terminal, error) {
+func (s *TerminalService) DeleteTerminal(ctx context.Context, terminalID uint, isAdmin bool) (*terminal.Terminal, error) {
+	if !isAdmin{
+		return nil, ErrForbidden
+	}
+
 	// exists?
 	t, err := s.terminalOps.GetTerminalByID(ctx, terminalID)
 	if err != nil {

@@ -23,7 +23,10 @@ func NewPathService(pathOps *path.Ops, terminalOps *terminal.Ops, tripCompanyCli
 	}
 }
 
-func (s *PathService) CreatePath(ctx context.Context, path *path.Path) error {
+func (s *PathService) CreatePath(ctx context.Context, path *path.Path, isAdmin bool) error {
+	if !isAdmin {
+		return ErrForbidden
+	}
 	var err error
 	path.FromTerminal, err = s.terminalOps.GetTerminalByID(ctx, path.FromTerminalID)
 	if err != nil {
@@ -50,8 +53,11 @@ func (s *PathService) GetFullPathByID(ctx context.Context, id uint) (*path.Path,
 	return s.pathOps.GetFullPathByID(ctx, id)
 }
 
-func (s *PathService) PatchPath(ctx context.Context, updatedPath *path.Path) (*path.Path, error) {
+func (s *PathService) PatchPath(ctx context.Context, updatedPath *path.Path, isAdmin bool) (*path.Path, error) {
 	var hasUnfinishedTrips bool
+	if !isAdmin {
+		return nil, ErrForbidden
+	}
 	count, err := s.tripCompanyClient.GetCountPathUnfinishedTrips(updatedPath.ID)
 	if err != nil {
 		return nil, err
@@ -83,8 +89,10 @@ func (s *PathService) PatchPath(ctx context.Context, updatedPath *path.Path) (*p
 	return originalPath, nil
 }
 
-func (s *PathService) DeletePath(ctx context.Context, pathID uint) (*path.Path, error) {
-
+func (s *PathService) DeletePath(ctx context.Context, pathID uint, isAdmin bool) (*path.Path, error) {
+	if !isAdmin {
+		return nil, ErrForbidden
+	}
 	count, err := s.tripCompanyClient.GetCountPathUnfinishedTrips(pathID)
 	if err != nil {
 		return nil, err

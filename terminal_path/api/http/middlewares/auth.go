@@ -3,7 +3,7 @@ package middlewares
 import (
 	"errors"
 	"strings"
-	"terminalpathservice/api/http/handlers"
+	"terminalpathservice/api/http/handlers/presenter"
 	"terminalpathservice/pkg/jwt"
 	"terminalpathservice/pkg/ports/clients/clients"
 
@@ -15,20 +15,20 @@ func Auth(GRPCAuthClient clients.IAuthClient) fiber.Handler {
 		authorization := c.Get("Authorization")
 
 		if authorization == "" {
-			return handlers.SendError(c, errors.New("authorization header missing"), fiber.StatusUnauthorized)
+			return presenter.Unauthorized(c, errors.New("authorization header missing"))
 		}
 
 		// Split the Authorization header value
 		parts := strings.Split(authorization, " ")
 		if len(parts) != 2 || parts[0] != "Bearer" {
-			return handlers.SendError(c, errors.New("invalid authorization token format"), fiber.StatusUnauthorized)
+			return presenter.Unauthorized(c, errors.New("invalid authorization token format"))
 		}
 
 		//pureToken := parts[1]
 		pureToken := parts[1]
 		user, err := GRPCAuthClient.GetUserByToken(pureToken)
 		if err != nil {
-			return handlers.SendError(c, err, fiber.StatusUnauthorized)
+			return presenter.Unauthorized(c, err)
 		}
 
 		c.Locals(jwt.UserClaimKey, user)

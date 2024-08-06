@@ -1,6 +1,7 @@
 package rabbitmq
 
 import (
+	"fmt"
 	"log"
 
 	amqp "github.com/rabbitmq/amqp091-go"
@@ -13,7 +14,7 @@ func failOnConsumeError(err error, msg string) {
 }
 
 func (r *RabbitMQ) Consume(queueName string, execute func(msg string)) {
-	conn, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
+	conn, err := amqp.Dial(fmt.Sprintf("amqp://%s:%s@%s:%v/", r.msgBrokerUsername, r.msgBrokerPassword, r.msgBrokerHost, r.msgBrokerPort))
 	failOnConsumeError(err, "Failed to connect to RabbitMQ")
 	defer conn.Close()
 
