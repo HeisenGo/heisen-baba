@@ -7,9 +7,9 @@ type Config struct {
 }
 
 type Server struct {
-	HttpPort int    `mapstructure:"http_port"`
+	HTTPPort              int             `mapstructure:"http_port"`
 	GRPCPort              int             `mapstructure:"grpc_port"`
-	Host     string `mapstructure:"host"`
+	Host                  string          `mapstructure:"host"`
 	ServiceRegistry       ServiceRegistry `mapstructure:"service_registry"`
 	ServiceHostAddress    string          `mapstructure:"service_host_address"`
 	ServiceHostName       string          `mapstructure:"service_host_name"`
@@ -21,15 +21,15 @@ type ServiceRegistry struct {
 	Address                string `mapstructure:"address"`
 	AuthServiceName        string `mapstructure:"auth_service_name"`
 	TripCompanyServiceName string `mapstructure:"trip_company_service_name"`
-	ServiceName     string `mapstructure:"service_name"`
+	ServiceName            string `mapstructure:"service_name"`
 }
 
 type DB struct {
-	User   string `mapstructure:"user"`
-	Pass   string `mapstructure:"pass"`
-	Host   string `mapstructure:"host"`
-	Port   int    `mapstructure:"port"`
-	DBName string `mapstructure:"db_name"`
+	User          string `mapstructure:"user"`
+	Pass          string `mapstructure:"pass"`
+	Host          string `mapstructure:"host"`
+	Port          int    `mapstructure:"port"`
+	DBName        string `mapstructure:"db_name"`
 	AppCommission uint   `mapstructure:"app_commission"`
 }
 

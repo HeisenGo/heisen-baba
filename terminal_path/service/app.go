@@ -156,7 +156,7 @@ func (a *AppContainer) setPathService() {
 
 func (a *AppContainer) mustRegisterService(srvCfg config.Server) {
 	registry := consul.NewConsul(srvCfg.ServiceRegistry.Address)
-	err := registry.RegisterService(srvCfg.ServiceHostName, srvCfg.ServiceHTTPPrefixPath, srvCfg.ServiceHTTPHealthPath, srvCfg.HttpPort)
+	err := registry.RegisterService(srvCfg.ServiceRegistry.ServiceName, srvCfg.ServiceHostAddress, srvCfg.ServiceHTTPPrefixPath, srvCfg.ServiceHTTPHealthPath, srvCfg.GRPCPort, srvCfg.HTTPPort)
 	if err != nil {
 		log.Fatalf("Failed to register service with Consul: %v", err)
 	}
