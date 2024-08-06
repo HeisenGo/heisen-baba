@@ -142,6 +142,9 @@ func (s *TripService) GetFullTripByID(ctx context.Context, id uint, requesterID 
 		if t.TourReleaseDate.After(time.Now()) {
 			return nil, requester, trip.ErrTripUnAvailable
 		}
+		if t.TransportCompany.IsBlocked{
+			return nil, requester, trip.ErrTripUnAvailable
+		}
 		return t, requester, nil
 
 	}
@@ -149,6 +152,10 @@ func (s *TripService) GetFullTripByID(ctx context.Context, id uint, requesterID 
 
 	if role == company.UserRole {
 		if t.UserReleaseDate.After(time.Now()) {
+			return nil, string(role), trip.ErrTripUnAvailable
+		}
+
+		if t.TransportCompany.IsBlocked{
 			return nil, string(role), trip.ErrTripUnAvailable
 		}
 		return t, string(role), nil
