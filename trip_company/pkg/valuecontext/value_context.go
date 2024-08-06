@@ -14,6 +14,8 @@ const (
 	IsTxError   ValueKeyType = "IS-TX-ERROR"
 )
 
+const UserClaimKey = "User-Claims"
+
 type Committer interface {
 	Begin() Committer
 	Commit() error

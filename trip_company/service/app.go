@@ -10,9 +10,11 @@ import (
 	"tripcompanyservice/internal/ticket"
 	"tripcompanyservice/internal/trip"
 	vehiclerequest "tripcompanyservice/internal/vehicle_request"
+	"tripcompanyservice/pkg/adapters/clients/grpc"
 	"tripcompanyservice/pkg/adapters/consul"
 	"tripcompanyservice/pkg/adapters/storage"
 	"tripcompanyservice/pkg/ports"
+	"tripcompanyservice/pkg/ports/clients/clients"
 	"tripcompanyservice/pkg/valuecontext"
 
 	"gorm.io/gorm"
@@ -25,9 +27,12 @@ type AppContainer struct {
 	tripService       *TripService
 	ticketService     *TicketService
 	invoiceService    *InvoiceService
-	serviceRegistry   *ports.IServiceRegistry
+	serviceRegistry   ports.IServiceRegistry
 	vehicleReqService *VehicleReService
 	techTeamService   *TechTeamService
+
+	authClient      clients.IAuthClient
+
 }
 
 func NewAppContainer(cfg config.Config) (*AppContainer, error) {
@@ -49,6 +54,8 @@ func NewAppContainer(cfg config.Config) (*AppContainer, error) {
 	app.setInvoiceService()
 	app.setVehicleReqService()
 	app.setTechTeamService()
+	app.setAuthClient(cfg.Server.ServiceRegistry.AuthServiceName)
+
 	//app.setPathService()
 	return app, nil
 }
@@ -272,4 +279,15 @@ func (a *AppContainer) setTechTeamService() {
 		return
 	}
 	a.techTeamService = NewTechTeamService(techteam.NewOps(storage.NewTechTeamRepo(a.dbConn)), trip.NewOps(storage.NewTripRepo(a.dbConn)), company.NewOps(storage.NewTransportCompanyRepo(a.dbConn)))
+}
+
+func (a *AppContainer) AuthClient() clients.IAuthClient {
+	return a.authClient
+}
+
+func (a *AppContainer) setAuthClient(authServiceName string) {
+	if a.authClient != nil {
+		return
+	}
+	a.authClient = grpc.NewGRPCAuthClient(a.serviceRegistry, authServiceName)
 }

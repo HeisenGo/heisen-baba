@@ -1,8 +1,8 @@
 package mappers
 
 import (
-	"bankservice/internal/user"
-	"bankservice/protobufs"
+	"tripcompanyservice/internal/user"
+	"tripcompanyservice/protobufs"
 
 	"github.com/google/uuid"
 )

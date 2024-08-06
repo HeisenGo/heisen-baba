@@ -19,6 +19,7 @@ type Server struct {
 
 type ServiceRegistry struct {
 	Address string `mapstructure:"address"`
+	AuthServiceName string `mapstructure:"auth_service_name"`
 }
 
 type DB struct {

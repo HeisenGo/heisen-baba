@@ -17,11 +17,13 @@ import (
 
 func Run(cfg config.Server, app *service.AppContainer) {
 	fiberApp := fiber.New()
-	api := fiberApp.Group("/api/v1") //, middlerwares.SetUserContext())
+	api := fiberApp.Group("/api/v1",middlerwares.SetUserContext()) //, middlerwares.SetUserContext())
 
 	createGroupLogger := loggerSetup(fiberApp)
 
 	registerGlobalRoutes(api)
+	api.Use(middlerwares.Auth(app.AuthClient()))
+
 	registerTransportCompanyRoutes(api, app, createGroupLogger("companies"))
 
 	log.Fatal(fiberApp.Listen(fmt.Sprintf("%s:%d", cfg.Host, cfg.HttpPort)))
