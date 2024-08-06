@@ -278,8 +278,8 @@ func GetTrips(tripService *service.TripService) fiber.Handler {
 				return presenter.BadRequest(c, errors.New("invalid start date format"))
 			}
 		}
-		requester := "user" //user // admin // agency // unknown
-		// check isAdmin or isOwner or isTechincian
+		requester := "user" 
+		// check isAdmin or Not
 		requesterType := c.Query("requester_type") // get from auth!!!!! TODO:
 
 		trips, total, err := tripService.GetTrips(c.UserContext(), originCity, destinationCity, pathType, &startDate, requesterType, uint(page), uint(pageSize))
