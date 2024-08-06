@@ -47,9 +47,50 @@ func NewTripService(tripOps *trip.Ops, companyOps *company.Ops, techTeamOps *tec
 func (s *TripService) GetCountPathUnfinishedTrips(ctx context.Context, pathID uint) (uint, error) {
 	return s.tripOps.GetCountPathUnfinishedTrips(ctx, pathID)
 }
-func (s *TripService) GetUpcomingUnconfirmedTripIDsToCancel(ctx context.Context) ([]uint, error) {
+func (s *TripService) GetUpcomingUnconfirmedTripIDsToCancel(ctx context.Context) error {
 	// TODO : get them one by one and cancel them move money from libaba to the buyers wallet
-	return s.tripOps.GetUpcomingUnconfirmedTripIDsToCancel(ctx)
+	tripIDs, _ := s.tripOps.GetUpcomingUnconfirmedTripIDsToCancel(ctx)
+	if len(tripIDs) > 0 {
+		updates := make(map[string]interface{})
+		for i := range len(tripIDs) {
+			updates["is_canceled"] = true
+			updates["status"] = "Canceled"
+
+			err := s.tripOps.UpdateTripTechTimID(ctx, tripIDs[i], updates)
+			if err != nil {
+				return err
+			}
+			ticks, err := s.ticketOps.GetTicketsWithInvoicesByTripID(ctx, tripIDs[i])
+			if err != nil {
+				return err
+			}
+
+			var state string
+			var refund, penalty float64
+			//var receiverID uint
+			var userRecieverID uuid.UUID
+			state = "Canceled"
+			penalty = 0
+			for i := range len(ticks) {
+				if ticks[i].AgencyID == nil {
+					userRecieverID = *ticks[i].UserID
+				} else {
+					//receiverID = *ticks[i].AgencyID
+					// get owner of agency id !!! TO Do
+					userRecieverID = uuid.Nil
+				}
+				if ticks[i].Penalty != 0 { // cause already canceled by user
+					refund = ticks[i].Penalty
+				} else {
+					refund = ticks[i].TotalPrice
+				}
+				s.UpdateInvoiceTicket(ctx, ticks[i], state, penalty, refund, userRecieverID)
+
+			}
+		}
+
+	}
+	return nil
 }
 
 func (s *TripService) GetCompanyTrips(ctx context.Context, originCity, destinationCity, pathType string, startDate *time.Time, requesterType string, companyID uint, userID uuid.UUID, page, pageSize uint) ([]trip.Trip, uint, string, error) {
@@ -96,7 +137,7 @@ func (s *TripService) CreateTrip(ctx context.Context, t *trip.Trip, creatorID uu
 	if tCompany == nil {
 		return company.ErrCompanyNotFound
 	}
-	if tCompany.OwnerID != creatorID{
+	if tCompany.OwnerID != creatorID {
 		return ErrForbidden
 	}
 	// GET PATH TODO: //****************************
@@ -177,7 +218,7 @@ func (s *TripService) UpdateTrip(ctx context.Context, id uint, newTrip *trip.Tri
 	// TO DO check permissions and roles ex: tech team can only update is_confirmed
 	// admin can update is_finished
 	// owner/operator can update everything according to the conditions of trip
-	if oldTrip.TransportCompany.OwnerID!=requesterID{
+	if oldTrip.TransportCompany.OwnerID != requesterID {
 		return nil, ErrForbidden
 	}
 	err = s.tripOps.UpdateTrip(ctx, id, newTrip, oldTrip)
@@ -193,7 +234,7 @@ func (s *TripService) SetTechTeamToTrip(ctx context.Context, tripID, techteamID 
 		return nil, err
 	}
 
-	if requesterID!=t.TransportCompany.OwnerID{
+	if requesterID != t.TransportCompany.OwnerID {
 		return nil, ErrForbidden
 	}
 
