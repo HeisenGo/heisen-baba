@@ -19,10 +19,14 @@ func TripEntityToDomain(tripEntity entities.Trip) trip.Trip {
 		FromTerminal: &trip.Terminal{
 			City: tripEntity.Origin,
 			Name: tripEntity.FromTerminalName,
+			Country: tripEntity.FromCountry,
+			Type: tripEntity.TripType,
 		},
 		ToTerminal: &trip.Terminal{
 			City: tripEntity.Destination,
 			Name: tripEntity.ToTerminalName,
+			Type: tripEntity.TripType,
+			Country: tripEntity.ToCountry,
 		},
 	}
 	var penalty tripcancellingpenalty.TripCancelingPenalty
@@ -82,10 +86,14 @@ func TripFullEntityToDomain(tripEntity entities.Trip) trip.Trip {
 		FromTerminal: &trip.Terminal{
 			City: tripEntity.Origin,
 			Name: tripEntity.FromTerminalName,
+			Country: tripEntity.FromCountry,
+			Type: tripEntity.TripType,
 		},
 		ToTerminal: &trip.Terminal{
 			City: tripEntity.Destination,
 			Name: tripEntity.ToTerminalName,
+			Country: tripEntity.ToCountry,
+			Type: tripEntity.TripType,
 		},
 	}
 	penalty := PenaltyEntityToDomain(*tripEntity.TripCancelingPenalty)
@@ -165,6 +173,8 @@ func TripDomainToEntity(t *trip.Trip) *entities.Trip {
 		SoldTickets:          t.SoldTickets,
 		IsConfirmed:          t.IsConfirmed,
 		Profit:               t.Profit,
+		FromCountry: t.Path.FromTerminal.Country,
+		ToCountry: t.Path.ToTerminal.Country,
 	}
 }
 
@@ -178,11 +188,13 @@ func SimpleTripEntityToDomain(tripEntity entities.Trip) trip.Trip {
 			City: tripEntity.Origin,
 			Name: tripEntity.FromTerminalName,
 			Type: tripEntity.TripType,
+			Country: tripEntity.FromCountry,
 		},
 		ToTerminal: &trip.Terminal{
 			City: tripEntity.Destination,
 			Name: tripEntity.ToTerminalName,
 			Type: tripEntity.TripType,
+			Country: tripEntity.ToCountry,
 		},
 	}
 	return trip.Trip{
@@ -224,11 +236,13 @@ func SimpleTripEntityToDomainWithPenalty(tripEntity entities.Trip) trip.Trip {
 			City: tripEntity.Origin,
 			Name: tripEntity.FromTerminalName,
 			Type: tripEntity.TripType,
+			Country: tripEntity.FromCountry,
 		},
 		ToTerminal: &trip.Terminal{
 			City: tripEntity.Destination,
 			Name: tripEntity.ToTerminalName,
 			Type: tripEntity.TripType,
+			Country: tripEntity.ToCountry,
 		},
 	}
 	penalty := PenaltyEntityToDomain(*tripEntity.TripCancelingPenalty)

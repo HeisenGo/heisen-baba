@@ -16,6 +16,8 @@ type Trip struct {
 	UserPrice               float64
 	AgencyPrice             float64
 	PathID                  uint   `gorm:"not null"`//;uniqueIndex:idx_trip_unique"`
+	FromCountry      string
+	ToCountry string
 	Origin                  string `gorm:"type:varchar(100);not null"`
 	FromTerminalName        string
 	ToTerminalName          string

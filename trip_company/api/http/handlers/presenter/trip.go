@@ -49,6 +49,8 @@ type CreateTripRes struct {
 	TripCancellingPenalty *CreateTripCancelingPenaltyReq `json:"penalty" `
 	EndDate               Timestamp                      `json:"end_date"`
 	IsConfirmed           bool                           `json:"is_confirmed"`
+	FromCountry           string                         `json:"from_country"`
+	ToCountry             string                         `json:"to_country"`
 }
 
 func CreateTripReqToTrip(req *CreateTripReq) *trip.Trip {
@@ -109,6 +111,8 @@ func TripToCreateTripRes(t *trip.Trip) *CreateTripRes {
 		Destination:           t.Path.ToTerminal.City,
 		FromTerminalName:      t.Path.FromTerminal.Name,
 		ToTerminalName:        t.Path.ToTerminal.Name,
+		FromCountry:           t.Path.FromTerminal.Country,
+		ToCountry:             t.Path.ToTerminal.Country,
 		PathName:              t.Path.Name,
 		Type:                  t.Path.Type,
 		IsConfirmed:           t.IsConfirmed,
@@ -147,6 +151,8 @@ type OwnerAdminTechTeamOperatorTripResponse struct {
 	VehicleRequest         *CreateVehicleRes              `json:"vehicle_req"`
 	TechTeam               *TechTeamRe                    `json:"tech_team"`
 	Profit                 float64                        `json:"profit"`
+	FromCountry            string                         `json:"from_country"`
+	ToCountry              string                         `json:"to_country"`
 }
 
 func TripToOwnerAdminTechTeamOperatorTripResponse(t trip.Trip) OwnerAdminTechTeamOperatorTripResponse {
@@ -200,6 +206,8 @@ func TripToOwnerAdminTechTeamOperatorTripResponse(t trip.Trip) OwnerAdminTechTea
 		IsConfirmed:            t.IsConfirmed,
 		TechTeam:               &team,
 		Profit:                 t.Profit,
+		FromCountry:            t.Path.FromTerminal.Country,
+		ToCountry:              t.Path.ToTerminal.Country,
 	}
 }
 
@@ -220,6 +228,9 @@ type UserTripResponse struct {
 	TripCancellingPenalty *CreateTripCancelingPenaltyRes `json:"penalty"`
 	StartDate             Timestamp                      `json:"start_date"`
 	EndDate               Timestamp                      `json:"end_date"`
+
+	FromCountry string `json:"from_country"`
+	ToCountry   string `json:"to_country"`
 }
 
 func TripToUserTripResponse(t trip.Trip) UserTripResponse {
@@ -245,6 +256,8 @@ func TripToUserTripResponse(t trip.Trip) UserTripResponse {
 		ToTerminalName:        t.Path.ToTerminal.Name,
 		PathName:              t.Path.Name,
 		TripType:              t.Path.Type,
+		FromCountry:           t.Path.FromTerminal.Country,
+		ToCountry:             t.Path.ToTerminal.Country,
 	}
 }
 
@@ -264,6 +277,9 @@ type AgencyTripResponse struct {
 	TripCancellingPenalty *CreateTripCancelingPenaltyRes `json:"penalty"`
 	StartDate             Timestamp                      `json:"start_date"`
 	EndDate               Timestamp                      `json:"end_date"`
+
+	FromCountry string `json:"from_country"`
+	ToCountry   string `json:"to_country"`
 }
 
 func TripToAgencyTripResponse(t trip.Trip) AgencyTripResponse {
@@ -289,6 +305,8 @@ func TripToAgencyTripResponse(t trip.Trip) AgencyTripResponse {
 		ToTerminalName:        t.Path.ToTerminal.Name,
 		PathName:              t.Path.Name,
 		TripType:              t.Path.Type,
+		FromCountry:           t.Path.FromTerminal.Country,
+		ToCountry:             t.Path.ToTerminal.Country,
 	}
 }
 
