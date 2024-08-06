@@ -4,10 +4,10 @@ import "gorm.io/gorm"
 
 type TechTeam struct {
 	gorm.Model
-	Name               string `gorm:"type:varchar(100);not null"`
-	Description        string `gorm:"type:text"`
-	TripType           string `gorm:"type:varchar(20);not null"`
-	TransportCompanyID uint
+	Name               string           `gorm:"type:varchar(100);not null;uniqueIndex:idx_name_co_unique"`
+	Description        string           `gorm:"type:text"`
+	TripType           string           `gorm:"type:varchar(20);not null"`
+	TransportCompanyID uint             `gorm:"not null; uniqueIndex:idx_name_co_unique"`
 	TransportCompany   TransportCompany `gorm:"foreignKey:TransportCompanyID;constraint:OnDelete:CASCADE;"`
 	Members            []TechTeamMember `gorm:"foreignKey:TechTeamID;constraint:OnDelete:CASCADE;"`
 }

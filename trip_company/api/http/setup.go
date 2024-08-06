@@ -128,7 +128,7 @@ func registerTransportCompanyRoutes(router fiber.Router, app *service.AppContain
 	router.Delete("/vehicle-req:vRID", handlers.DeleteVR(app.VehicleReqServiceFromCtx))
 
 	router.Post("/tech-teams", handlers.CreateTechTeam(app.TechTeamService()))
-	router.Delete("/tech-teams/:teamID", handlers.CreateTechTeam(app.TechTeamService()))
+	router.Delete("/tech-teams/:teamID", handlers.DeleteTeam(app.TechTeamService()))
 
 	router.Post("/tech-members", handlers.CreateTechMember(app.TechTeamService()))
 	router.Get("/tech-teams/:companyID", handlers.GetTechTeamsOfCompany(app.TechTeamService()))
