@@ -198,6 +198,8 @@ func (s *TripService) UpdateInvoiceTicket(ctx context.Context, t ticket.Ticket, 
 		return err
 	}
 	// send to band : TODO from alibaba to user/aganecyId
+	// cancel vehicle
+	//notification
 	return nil
 }
 
@@ -266,9 +268,6 @@ func (s *TripService) ConfirmTrip(ctx context.Context, tripID uint, requesterID 
 		return nil, err
 	}
 
-	// if t.TransportCompany.OwnerID != requesterID{
-	// 	return nil, ErrForbidden
-	// }
 	_, err = s.techTeamOps.GetTechTeamMemberByUserIDAndTechTeamID(ctx, requesterID, *t.TechTeamID)
 	if err != nil {
 		return nil, ErrForbidden
@@ -343,6 +342,6 @@ func (s *TripService) FinishTrip(ctx context.Context, tripID uint, requesterID u
 	t.Profit = profit
 	//TODO : bank
 	// calculate profit tell alibaba to move money from alibaba to owner id wallet: profit = totalprice (status canceled nis) + penalty (status cancel and )
-
+	//notification
 	return t, nil
 }
