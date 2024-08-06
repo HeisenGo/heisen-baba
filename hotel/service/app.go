@@ -7,7 +7,11 @@ import (
 	"hotel/internal/invoice"
 	"hotel/internal/reservation"
 	"hotel/internal/room"
+	"hotel/pkg/adapters/clients/grpc"
+	"hotel/pkg/adapters/consul"
 	"hotel/pkg/adapters/storage"
+	"hotel/pkg/ports"
+	"hotel/pkg/ports/clients/clients"
 	"hotel/pkg/valuecontext"
 	"log"
 
@@ -16,6 +20,8 @@ import (
 
 type AppContainer struct {
 	cfg                config.Config
+	serviceRegistry    ports.IServiceRegistry
+	authClient         clients.IAuthClient
 	dbConn             *gorm.DB
 	hotelService       *HotelService
 	roomService        *RoomService
@@ -29,6 +35,8 @@ func NewAppContainer(cfg config.Config) (*AppContainer, error) {
 	}
 
 	app.mustInitDB()
+	app.mustRegisterService(cfg.Server)
+	app.setAuthClient(cfg.Server.ServiceRegistry.AuthServiceName)
 	app.setHotelService()
 	app.setRoomService()
 	app.setReservationService()
@@ -56,6 +64,16 @@ func (a *AppContainer) mustInitDB() {
 	if err != nil {
 		log.Fatal("Migration failed: ", err)
 	}
+}
+func (a *AppContainer) AuthClient() clients.IAuthClient {
+	return a.authClient
+}
+
+func (a *AppContainer) setAuthClient(authServiceName string) {
+	if a.authClient != nil {
+		return
+	}
+	a.authClient = grpc.NewGRPCAuthClient(a.serviceRegistry, authServiceName)
 }
 
 func (a *AppContainer) HotelService() *HotelService {
@@ -107,7 +125,7 @@ func (a *AppContainer) RoomServiceFromCtx(ctx context.Context) *RoomService {
 
 	return NewRoomService(
 		room.NewOps(storage.NewRoomRepo(gc)),
-		reservation.NewOps(storage.NewReservationRepo(gc)),hotel.NewOps(storage.NewHotelRepo(gc)))
+		reservation.NewOps(storage.NewReservationRepo(gc)), hotel.NewOps(storage.NewHotelRepo(gc)))
 }
 
 func (a *AppContainer) setRoomService() {
@@ -116,7 +134,7 @@ func (a *AppContainer) setRoomService() {
 	}
 	a.roomService = NewRoomService(
 		room.NewOps(storage.NewRoomRepo(a.dbConn)),
-		reservation.NewOps(storage.NewReservationRepo(a.dbConn)),hotel.NewOps(storage.NewHotelRepo(a.dbConn)))
+		reservation.NewOps(storage.NewReservationRepo(a.dbConn)), hotel.NewOps(storage.NewHotelRepo(a.dbConn)))
 }
 
 func (a *AppContainer) ReservationService() *ReservationService {
@@ -177,4 +195,13 @@ func (a *AppContainer) setInvoiceService() {
 	a.invoiceService = NewInvoiceService(
 		invoice.NewOps(storage.NewInvoiceRepo(a.dbConn)),
 	)
+}
+
+func (a *AppContainer) mustRegisterService(srvCfg config.Server) {
+	registry := consul.NewConsul(srvCfg.ServiceRegistry.Address)
+	err := registry.RegisterService(srvCfg.ServiceRegistry.ServiceName, srvCfg.ServiceHostAddress, srvCfg.ServiceHTTPPrefixPath, srvCfg.ServiceHTTPHealthPath, srvCfg.HTTPPort)
+	if err != nil {
+		log.Fatalf("Failed to register service with Consul: %v", err)
+	}
+	a.serviceRegistry = registry
 }

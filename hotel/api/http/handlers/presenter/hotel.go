@@ -9,11 +9,10 @@ import (
 )
 
 type CreateHotelReq struct {
-	OwnerID uuid.UUID `json:"owner_id" validate:"required" example:"aba3b3ed-e3d8-4403-9751-1f04287c9d65"`
-	Name    string    `json:"name" validate:"required" example:"myhotel"`
-	City    string    `json:"city" validate:"required" example:"Los Angles"`
-	Country string    `json:"country" validate:"required" example:"United States America"`
-	Details string    `json:"details" validate:"required" example:"5 Star Beach Palm Hotel"`
+	Name    string `json:"name" validate:"required" example:"myhotel"`
+	City    string `json:"city" validate:"required" example:"Los Angles"`
+	Country string `json:"country" validate:"required" example:"United States America"`
+	Details string `json:"details" validate:"required" example:"5 Star Beach Palm Hotel"`
 }
 
 type HotelResp struct {
@@ -59,13 +58,12 @@ type CreateHotelResponse struct {
 	Rooms   []HotelRoomResp `json:"rooms"`
 }
 
-func CreateHotelRequest(samplehotel *CreateHotelReq) *hotel.Hotel {
+func CreateHotelRequest(sampleHotel *CreateHotelReq) *hotel.Hotel {
 	h := &hotel.Hotel{
-		OwnerID: samplehotel.OwnerID,
-		Name:    samplehotel.Name,
-		City:    samplehotel.City,
-		Country: samplehotel.Country,
-		Details: samplehotel.Details,
+		Name:    sampleHotel.Name,
+		City:    sampleHotel.City,
+		Country: sampleHotel.Country,
+		Details: sampleHotel.Details,
 	}
 	return h
 }

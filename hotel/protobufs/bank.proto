@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+option go_package = "bank/internal/protobufs";
+package bank;
+
+service BankService {
+  rpc CreateWallet (CreateWalletRequest) returns (CreateWalletRequestResponse) {}
+  rpc Transfer (TransferRequest) returns (TransferResponse) {}
+}
+
+message CreateWalletRequest {
+  string UserID = 1;
+}
+message CreateWalletRequestResponse {
+  string message = 1;
+}
+
+message TransferRequest {
+  string senderOwnerID = 1;
+  string receiverOwnerID = 2;
+  bool isPaidToSystem = 3;
+  uint64 amount = 4;
+}
+
+message TransferResponse {
+  string senderOwnerID = 1;
+  string receiverOwnerID = 2;
+  bool isPaidToSystem = 3;
+  uint64 amount = 4;
+  string status = 5;
+}

@@ -1,9 +1,16 @@
 server:
-  http_port: 8080
+  http_port: 8087
   host: "0.0.0.0"
+  service_host_address: "172.20.10.3"
+  service_http_health_path: "api/v1/health"
+  service_http_prefix_path: "/api/v1/hotels"
+  service_registry:
+    service_name: "hotel"
+    address: "0.0.0.0:8500"
+    auth_service_name: "auth"
 db:
-  user: "root"
-  pass: "123456"
-  host : "localhost"
+  user: "postgres"
+  pass: "postgres"
+  host: "0.0.0.0"
   port: 5432
-  db_name: "hotel_domain"
+  db_name: "hotel"

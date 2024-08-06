@@ -9,6 +9,10 @@ import (
 	"strings"
 )
 
+var (
+	errWrongClaimType = errors.New("wrong claim type")
+)
+
 type ServiceFactory[T any] func(context.Context) T
 
 func SendError(c *fiber.Ctx, err error, status int) error {
