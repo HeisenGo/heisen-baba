@@ -42,7 +42,32 @@ func CreateTour(tourService *service.TourService) fiber.Handler {
 		return presenter.Created(c, "Tour created successfully", res)
 	}
 }
-
+// CreateTourReservation creates a new Tour reservation
+// @Summary Create a new Tour reservation
+// @Description Create a new Tour reservation
+// @Tags reservations
+// @Accept json
+// @Produce json
+// @Param reservation body presenter.ReservationCreateReq true "Reservation to create"
+// @Success 201 {object} presenter.ReservationResp
+// @Failure 400 {object} presenter.Response "error: bad request"
+// @Failure 500 {object} presenter.Response "error: internal server error"
+// @Router /reservations [post]
+func CreateTourReservation(reservationService *service.TourService) fiber.Handler {
+    return func(c *fiber.Ctx) error {
+        var req presenter.ReservationCreateReq
+        if err := c.BodyParser(&req); err != nil {
+            return presenter.BadRequest(c, err)
+        }
+        res := presenter.ReservationReqToReservationDomain(&req)
+        err := reservationService.CreateTourReservation(c.UserContext(), res)
+        if err != nil {
+            return presenter.InternalServerError(c, err)
+        }
+        response := presenter.ReservationToFullReservationResponse(res)
+        return presenter.Created(c, "Reservation created successfully", response)
+    }
+}
 // GetTours retrieves a paginated list of tours
 // @Summary Get tours
 // @Description Get a paginated list of tours

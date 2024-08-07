@@ -135,8 +135,8 @@ func (a *AppContainer) RoomServiceFromCtx(ctx context.Context) *RoomService {
 	}
 
 	return NewRoomService(
-		room.NewOps(storage.NewRoomRepo(gc)),
-		reservation.NewOps(storage.NewReservationRepo(gc)), hotel.NewOps(storage.NewHotelRepo(gc)))
+			room.NewOps(storage.NewRoomRepo(gc)),
+			reservation.NewOps(storage.NewReservationRepo(gc)), hotel.NewOps(storage.NewHotelRepo(gc)),invoice.NewOps(storage.NewInvoiceRepo(gc)),a.BankClient())
 }
 
 func (a *AppContainer) setRoomService() {
@@ -145,7 +145,7 @@ func (a *AppContainer) setRoomService() {
 	}
 	a.roomService = NewRoomService(
 		room.NewOps(storage.NewRoomRepo(a.dbConn)),
-		reservation.NewOps(storage.NewReservationRepo(a.dbConn)), hotel.NewOps(storage.NewHotelRepo(a.dbConn)))
+		reservation.NewOps(storage.NewReservationRepo(a.dbConn)), hotel.NewOps(storage.NewHotelRepo(a.dbConn)),invoice.NewOps(storage.NewInvoiceRepo(a.dbConn)),a.BankClient())
 }
 
 func (a *AppContainer) ReservationService() *ReservationService {
@@ -164,7 +164,6 @@ func (a *AppContainer) ReservationServiceFromCtx(ctx context.Context) *Reservati
 	}
 
 	return NewReservationService(
-		a.BankClient(),
 		reservation.NewOps(storage.NewReservationRepo(gc)),
 		invoice.NewOps(storage.NewInvoiceRepo(gc)),
 	)
@@ -175,7 +174,6 @@ func (a *AppContainer) setReservationService() {
 		return
 	}
 	a.reservationService = NewReservationService(
-		a.BankClient(),
 		reservation.NewOps(storage.NewReservationRepo(a.dbConn)),
 		invoice.NewOps(storage.NewInvoiceRepo(a.dbConn)),
 	)

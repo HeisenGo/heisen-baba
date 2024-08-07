@@ -17,12 +17,21 @@ import (
 func Run(cfg config.Config, app *service.AppContainer) {
 	fiberApp := fiber.New()
 	api := fiberApp.Group("/api/v1", middlewares.SetUserContext())
+	registerGlobalRoutes(api)
+	api.Use(middlewares.Auth(app.AuthClient()))
 	registerAgencyRoutes(api, app)
 	registerTourRoutes(api, app)
 	// Add any additional routes here
 	fiberApp.Get("/swagger/*", fiberSwagger.WrapHandler)
 
-	log.Fatal(fiberApp.Listen(fmt.Sprintf("%s:%d", cfg.Server.Host, cfg.Server.HttpPort)))
+	log.Fatal(fiberApp.Listen(fmt.Sprintf("%s:%d", cfg.Server.Host, cfg.Server.HTTPPort)))
+}
+
+func registerGlobalRoutes(router fiber.Router) {
+	// Setup a simple health check route
+	router.Get("/health", func(c *fiber.Ctx) error {
+		return c.SendString("Service is up and running")
+	})
 }
 
 func registerAgencyRoutes(router fiber.Router, app *service.AppContainer) {

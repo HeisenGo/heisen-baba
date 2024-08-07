@@ -19,6 +19,7 @@ func TourEntityToDomain(tourEntity entities.Tour) tour.Tour {
 		Capacity:     tourEntity.Capacity,
 		ReleaseDate:  tourEntity.ReleaseDate,
 		IsActive:     tourEntity.IsActive,
+		UserPrice:    tourEntity.UserPrice,
 		IsApproved:   tourEntity.IsApproved,
 	}
 }
@@ -40,5 +41,6 @@ func TourDomainToEntity(t *tour.Tour) *entities.Tour {
 		ReleaseDate:  t.ReleaseDate,
 		IsActive:     t.IsActive,
 		IsApproved:   t.IsApproved,
+		UserPrice:    t.UserPrice,
 	}
 }

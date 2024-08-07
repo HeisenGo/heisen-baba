@@ -25,6 +25,7 @@ type Tour struct {
 	HotelID      uint // Changed from 'HotelID' to 'AgencyID'
 	Capacity     uint
 	ReleaseDate  time.Time
+	UserPrice    uint64
 	IsApproved   bool
 	IsActive     bool
 }

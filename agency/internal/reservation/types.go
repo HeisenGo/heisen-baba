@@ -19,7 +19,7 @@ type Repo interface {
 type Reservation struct {
 	ID         uint
 	OwnerID    uuid.UUID
-	RoomID     uint
+	TourID     uint
 	UserID     uuid.UUID
 	CheckIn    time.Time
 	CheckOut   time.Time
@@ -40,7 +40,6 @@ func ValidateReservationStatus(status string) error {
 		"checked_in":  true,
 		"checked_out": true,
 		"canceled":    true,
-		"pending" : true,
 	}
 	_, ok := validStatuses[status]
 	if !ok {
