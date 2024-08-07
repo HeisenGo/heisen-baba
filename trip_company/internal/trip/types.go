@@ -20,7 +20,8 @@ const (
 )
 
 var (
-	ErrInvalidPercentage = errors.New("invlaid percent")
+	ErrTripUnAvailable = errors.New("trip is unavailable")
+	ErrInvalidPercentage = errors.New("invalid percent")
 	ErrCanNotUpdate    = errors.New("can not update")
 	ErrNotUpdated      = errors.New("could not update trip")
 	ErrRecordsNotFound = errors.New("no records found")
@@ -40,18 +41,20 @@ var (
 )
 
 type Repo interface {
-	GetCompanyTrips(ctx context.Context, companyID uint, limit, offset uint) ([]Trip, uint, error)
+	GetCompanyTrips(ctx context.Context, originCity, destinationCity, pathType string, startDate *time.Time,requesterType string ,companyID uint, limit, offset uint) ([]Trip, uint, error)
 	Insert(ctx context.Context, t *Trip) error
 
 	GetFullTripByID(ctx context.Context, id uint) (*Trip, error)
-	GetTrips(ctx context.Context, originCity, destinationCity, pathType string, startDate *time.Time, requesterType string, limit, offset uint) ([]Trip, uint, error)
+	GetTrips(ctx context.Context, originCity, destinationCity, pathType string, startDate *time.Time, requesterType string,limit, offset uint) ([]Trip, uint, error)
 	UpdateTrip(ctx context.Context, id uint, updates map[string]interface{}) error
 
 	GetCountPathUnfinishedTrips(ctx context.Context, pathID uint) (uint, error)
 	GetUpcomingUnconfirmedTripIDsToCancel(ctx context.Context) ([]uint, error)
 
+	GetCountCompanyUnfinishedUncanceledTrips(ctx context.Context, companyID uint) (uint, error)
+	CheckAvailabilityTechTeam(ctx context.Context, tripID uint, techTeamID uint, startDate time.Time, endDate time.Time) (bool, error)
+
 	// TODO: remove if no tickets are sold
-	// TODO: separate is_cancled, is_finished_is_confirmed from update
 }
 
 type Trip struct {

@@ -12,6 +12,8 @@ import (
 
 var (
 	errWrongIDType    = errors.New("wrong type for id")
+	errWrongClaimType = errors.New("wrong claim type")
+
 )
 
 type ServiceFactory[T any] func(context.Context) T
@@ -28,13 +30,6 @@ func SendError(c *fiber.Ctx, err error, status int) error {
 	})
 }
 
-// func SendUserToken(c *fiber.Ctx, authToken *service.UserToken) error {
-
-// 	return presenter.OK(c, "User successfully logged in", fiber.Map{
-// 		"auth_token":    authToken.AuthorizationToken,
-// 		"refresh_token": authToken.RefreshToken,
-// 	})
-// }
 
 func PageAndPageSize(c *fiber.Ctx) (int, int) {
 	page, pageSize := c.QueryInt("page"), c.QueryInt("page_size")

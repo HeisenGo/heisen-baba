@@ -11,6 +11,7 @@ func VehicleDomainToVehicleEntity(r *vehiclerequest.VehicleRequest) *entities.Ve
 		TripID:            r.TripID,
 		MinCapacity:       r.MinCapacity,
 		ProductionYearMin: r.ProductionYearMin,
+		VehicleType:       r.VehicleType,
 	}
 }
 
@@ -25,6 +26,7 @@ func VehicleReqEntityToVehicleReqDomain(v entities.VehicleRequest) vehiclereques
 		MatchedVehicleID:      v.MatchedVehicleID,
 		MinCapacity:           v.MinCapacity,
 		ProductionYearMin:     v.ProductionYearMin,
-		MatchVehicleSpeed: v.MatchVehicleSpeed,
+		MatchVehicleSpeed:     v.MatchVehicleSpeed,
+		Status:                v.Status,
 	}
 }

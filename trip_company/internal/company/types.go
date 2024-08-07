@@ -5,6 +5,17 @@ import (
 	"errors"
 	"regexp"
 	"strings"
+
+	"github.com/google/uuid"
+)
+
+type CompanyRoleType string
+
+const (
+	UserRole     = CompanyRoleType("user")
+	OwnerRole    = CompanyRoleType("owner")
+	TechRole     = CompanyRoleType("techRole")
+	OperatorRole = CompanyRoleType("operator")
 )
 
 const (
@@ -21,25 +32,25 @@ var (
 	ErrDeleteCompany   = errors.New("error deleting company")
 	ErrCanNotDelete    = errors.New("company can not be deleted due to unfinished trips")
 	ErrFailedToBlock   = errors.New("failed to block the company")
-	ErrFailedToUpdate   = errors.New("failed to update the company")
-
+	ErrFailedToUpdate  = errors.New("failed to update the company")
 )
 
 type Repo interface {
 	GetByID(ctx context.Context, id uint) (*TransportCompany, error)
 	GetTransportCompanies(ctx context.Context, limit, offset uint) ([]TransportCompany, uint, error)
 	Insert(ctx context.Context, company *TransportCompany) error
-	GetUserTransportCompanies(ctx context.Context, ownerID uint, limit, offset uint) ([]TransportCompany, uint, error)
+	GetUserTransportCompanies(ctx context.Context, ownerID uuid.UUID, limit, offset uint) ([]TransportCompany, uint, error)
 	Delete(ctx context.Context, companyID uint) error
 	BlockCompany(ctx context.Context, companyID uint, isBlocked bool) error
 	PatchCompany(ctx context.Context, updatedCompany, originalCompany *TransportCompany) error
+	IsUserOwnerOfCompany(ctx context.Context, companyID uint, userID uuid.UUID) (bool, error)
 }
 
 type TransportCompany struct {
 	ID          uint
 	Name        string
 	Description string
-	OwnerID     uint
+	OwnerID     uuid.UUID
 	Address     string
 	IsBlocked   bool
 	//PhoneNumber string

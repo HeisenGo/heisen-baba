@@ -1,3 +1,5 @@
+
+CREATE DATABASE trip_company;
 CREATE
 DATABASE auth;
 CREATE

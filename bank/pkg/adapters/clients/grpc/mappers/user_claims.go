@@ -3,6 +3,7 @@ package mappers
 import (
 	"bankservice/internal/user"
 	"bankservice/protobufs"
+
 	"github.com/google/uuid"
 )
 

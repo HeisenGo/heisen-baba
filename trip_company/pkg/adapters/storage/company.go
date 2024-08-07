@@ -9,6 +9,7 @@ import (
 	"tripcompanyservice/pkg/adapters/storage/entities"
 	"tripcompanyservice/pkg/adapters/storage/mappers"
 
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -101,7 +102,7 @@ func (r *companyRepo) Insert(ctx context.Context, c *company.TransportCompany) e
 
 }
 
-func (r *companyRepo) GetUserTransportCompanies(ctx context.Context, ownerID uint, limit, offset uint) ([]company.TransportCompany, uint, error) {
+func (r *companyRepo) GetUserTransportCompanies(ctx context.Context, ownerID uuid.UUID, limit, offset uint) ([]company.TransportCompany, uint, error) {
 	query := r.db.WithContext(ctx).Model(&entities.TransportCompany{}).Where("owner_id = ?", ownerID)
 
 	var total int64
@@ -168,7 +169,8 @@ func (r *companyRepo) PatchCompany(ctx context.Context, updatedCompany, original
 		updates["address"] = updatedCompany.Address
 		originalCompany.Address = updatedCompany.Address
 	}
-	if updatedCompany.OwnerID != 0 {
+	// be careful
+	if updatedCompany.OwnerID != uuid.Nil {
 		updates["owner_id"] = updatedCompany.OwnerID
 		originalCompany.OwnerID = updatedCompany.OwnerID
 	}
@@ -180,4 +182,18 @@ func (r *companyRepo) PatchCompany(ctx context.Context, updatedCompany, original
 		return fmt.Errorf("%w %w",company.ErrFailedToUpdate, err)
 	}
 	return nil
+}
+
+func (r *companyRepo) IsUserOwnerOfCompany(ctx context.Context, companyID uint, userID uuid.UUID) (bool, error) {
+    var count int64
+    err := r.db.WithContext(ctx).
+        Model(&entities.TransportCompany{}).
+        Where("id = ? AND owner_id = ?", companyID, userID).
+        Count(&count).Error
+
+    if err != nil {
+        return false, err
+    }
+
+    return count > 0, nil
 }

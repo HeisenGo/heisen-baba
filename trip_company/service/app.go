@@ -10,9 +10,11 @@ import (
 	"tripcompanyservice/internal/ticket"
 	"tripcompanyservice/internal/trip"
 	vehiclerequest "tripcompanyservice/internal/vehicle_request"
+	"tripcompanyservice/pkg/adapters/clients/grpc"
 	"tripcompanyservice/pkg/adapters/consul"
 	"tripcompanyservice/pkg/adapters/storage"
 	"tripcompanyservice/pkg/ports"
+	"tripcompanyservice/pkg/ports/clients/clients"
 	"tripcompanyservice/pkg/valuecontext"
 
 	"gorm.io/gorm"
@@ -25,9 +27,13 @@ type AppContainer struct {
 	tripService       *TripService
 	ticketService     *TicketService
 	invoiceService    *InvoiceService
-	serviceRegistry   *ports.IServiceRegistry
+	serviceRegistry   ports.IServiceRegistry
 	vehicleReqService *VehicleReService
 	techTeamService   *TechTeamService
+
+	authClient      clients.IAuthClient
+	pathClient      clients.IPathClient
+
 }
 
 func NewAppContainer(cfg config.Config) (*AppContainer, error) {
@@ -49,6 +55,9 @@ func NewAppContainer(cfg config.Config) (*AppContainer, error) {
 	app.setInvoiceService()
 	app.setVehicleReqService()
 	app.setTechTeamService()
+	app.setAuthClient(cfg.Server.ServiceRegistry.AuthServiceName)
+	app.setPathClient(cfg.Server.ServiceRegistry.PathServiceName)
+
 	//app.setPathService()
 	return app, nil
 }
@@ -83,7 +92,7 @@ func (a *AppContainer) mustInitDB() {
 
 func (a *AppContainer) mustRegisterService(srvCfg config.Server) {
 	registry := consul.NewConsul(srvCfg.ServiceRegistry.Address)
-	err := registry.RegisterService(srvCfg.ServiceHostName, srvCfg.ServiceHTTPPrefixPath, srvCfg.ServiceHTTPHealthPath, srvCfg.HttpPort)
+	err := registry.RegisterService(srvCfg.ServiceRegistry.ServiceName, srvCfg.ServiceHostAddress, srvCfg.ServiceHTTPPrefixPath, srvCfg.ServiceHTTPHealthPath, srvCfg.HTTPPort)
 	if err != nil {
 		log.Fatalf("Failed to register service with Consul: %v", err)
 	}
@@ -106,6 +115,7 @@ func (a *AppContainer) CompanyServiceFromCtx(ctx context.Context) *TransportComp
 
 	return NewTransportCompanyService(
 		company.NewOps(storage.NewTransportCompanyRepo(gc)),
+		trip.NewOps(storage.NewTripRepo(gc)),
 	)
 }
 
@@ -113,7 +123,7 @@ func (a *AppContainer) setCompanyService() {
 	if a.companyService != nil {
 		return
 	}
-	a.companyService = NewTransportCompanyService(company.NewOps(storage.NewTransportCompanyRepo(a.dbConn)))
+	a.companyService = NewTransportCompanyService(company.NewOps(storage.NewTransportCompanyRepo(a.dbConn)), trip.NewOps(storage.NewTripRepo(a.dbConn)))
 }
 
 // Trip service
@@ -139,6 +149,7 @@ func (a *AppContainer) TripServiceFromCtx(ctx context.Context) *TripService {
 		techteam.NewOps(storage.NewTechTeamRepo(gc)),
 		ticket.NewOps(storage.NewTicketRepo(gc)),
 		invoice.NewOps(storage.NewInvoiceRepo(gc)),
+		a.pathClient,
 	)
 }
 
@@ -148,7 +159,8 @@ func (a *AppContainer) setTripService() {
 	}
 	a.tripService = NewTripService(trip.NewOps(storage.NewTripRepo(a.dbConn)),
 		company.NewOps(storage.NewTransportCompanyRepo(a.dbConn)),
-		techteam.NewOps(storage.NewTechTeamRepo(a.dbConn)), ticket.NewOps(storage.NewTicketRepo(a.dbConn)), invoice.NewOps(storage.NewInvoiceRepo(a.dbConn)))
+		techteam.NewOps(storage.NewTechTeamRepo(a.dbConn)), ticket.NewOps(storage.NewTicketRepo(a.dbConn)), 
+		invoice.NewOps(storage.NewInvoiceRepo(a.dbConn)), a.pathClient)
 }
 
 // Ticket Service
@@ -267,8 +279,31 @@ func (a *AppContainer) TechTeamServiceFromCtx(ctx context.Context) *TechTeamServ
 }
 
 func (a *AppContainer) setTechTeamService() {
-	if a.tripService != nil {
+	if a.techTeamService != nil {
 		return
 	}
 	a.techTeamService = NewTechTeamService(techteam.NewOps(storage.NewTechTeamRepo(a.dbConn)), trip.NewOps(storage.NewTripRepo(a.dbConn)), company.NewOps(storage.NewTransportCompanyRepo(a.dbConn)))
+}
+
+func (a *AppContainer) AuthClient() clients.IAuthClient {
+	return a.authClient
+}
+
+func (a *AppContainer) setAuthClient(authServiceName string) {
+	if a.authClient != nil {
+		return
+	}
+	a.authClient = grpc.NewGRPCAuthClient(a.serviceRegistry, authServiceName)
+}
+
+
+func (a *AppContainer) PathClient() clients.IPathClient {
+	return a.pathClient
+}
+
+func (a *AppContainer) setPathClient(pathServiceName string) {
+	if a.pathClient != nil {
+		return
+	}
+	a.pathClient = grpc.NewGRPCPathClient(a.serviceRegistry, pathServiceName)
 }

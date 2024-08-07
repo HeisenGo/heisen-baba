@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 var(
@@ -14,7 +16,7 @@ var(
 )
 
 type Repo interface {
-	GetInvoicesByUserOrAgency(ctx context.Context, userID *uint, agencyID *uint, limit, offset uint) ([]Invoice,uint, error)
+	GetInvoicesByUserOrAgency(ctx context.Context, userID *uuid.UUID, agencyID *uint, limit, offset uint) ([]Invoice,uint, error)
 	GetInvoiceByTicketID(ctx context.Context, ticketID uint) (*Invoice, error)
 	Insert(ctx context.Context, i *Invoice) error
 	UpdateInvoiceStatus(ctx context.Context, invoiceID uint, status string) error

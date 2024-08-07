@@ -6,7 +6,7 @@ type Config struct {
 }
 
 type Server struct {
-	HttpPort int    `mapstructure:"http_port"`
+	HTTPPort int    `mapstructure:"http_port"`
 	Host     string `mapstructure:"host"`
 	//TokenExpMinutes        uint   `mapstructure:"token_exp_minutes"`
 	//RefreshTokenExpMinutes uint   `mapstructure:"refresh_token_exp_minute"`
@@ -15,10 +15,15 @@ type Server struct {
 	ServiceHostName       string          `mapstructure:"service_host_name"`
 	ServiceHTTPHealthPath string          `mapstructure:"service_http_health_path"`
 	ServiceHTTPPrefixPath string          `mapstructure:"service_http_prefix_path"`
+	ServiceHostAddress    string          `mapstructure:"service_host_address"`
+
 }
 
 type ServiceRegistry struct {
-	Address string `mapstructure:"address"`
+	Address         string `mapstructure:"address"`
+	ServiceName     string `mapstructure:"service_name"`
+	AuthServiceName string `mapstructure:"auth_service_name"`
+	PathServiceName string `mapstructure:"path_service_name"`
 }
 
 type DB struct {

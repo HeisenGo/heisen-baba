@@ -8,6 +8,7 @@ import (
 	"tripcompanyservice/pkg/adapters/storage/entities"
 	"tripcompanyservice/pkg/adapters/storage/mappers"
 
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -22,7 +23,7 @@ func NewTechTeamRepo(db *gorm.DB) techteam.Repo {
 func (r *techTeamRepo) GetTechTeamByID(ctx context.Context, id uint) (*techteam.TechTeam, error) {
 	var t entities.TechTeam
 	if err := r.db.WithContext(ctx).
-		Preload("TechTeamMember").
+		Preload("Members").
 		First(&t, id).Error; err != nil {
 		if strings.Contains(err.Error(), "record not found") {
 			return nil, nil
@@ -55,12 +56,14 @@ func (r *techTeamRepo) InsertMember(ctx context.Context, t *techteam.TechTeamMem
 }
 
 func (r *techTeamRepo) GetTechTeamsOfCompany(ctx context.Context, companyId uint, limit, offset uint) ([]techteam.TechTeam, uint, error) {
-	query := r.db.WithContext(ctx).Model(&entities.TechTeam{}).Where("transport_company_id = ?", companyId)
+	query := r.db.WithContext(ctx).
+		Preload("Members").
+		Model(&entities.TechTeam{}).
+		Where("transport_company_id = ?", companyId)
 
 	var total int64
-
 	if err := query.Count(&total).Error; err != nil {
-		return nil, 0, err
+		return nil, 0, fmt.Errorf("failed to count tech teams: %w", err)
 	}
 
 	if offset > 0 {
@@ -72,18 +75,17 @@ func (r *techTeamRepo) GetTechTeamsOfCompany(ctx context.Context, companyId uint
 	}
 
 	var teams []entities.TechTeam
-
 	if err := query.Find(&teams).Error; err != nil {
 		if strings.Contains(err.Error(), "record not found") {
-			return nil, 0, nil
+			return nil, 0, techteam.ErrFailedToFetchRecords
 		}
-		return nil, 0, err
+		return nil, 0, fmt.Errorf("failed to fetch tech teams: %w", err)
 	}
 
 	return mappers.BatchTecTeamEnToDo(teams), uint(total), nil
 }
 
-func (r *techTeamRepo) GetTechTeamMemberByUserIDAndTechTeamID(ctx context.Context, userID uint, techTeamID uint) (*techteam.TechTeamMember, error) {
+func (r *techTeamRepo) GetTechTeamMemberByUserIDAndTechTeamID(ctx context.Context, userID uuid.UUID, techTeamID uint) (*techteam.TechTeamMember, error) {
 	var techTeamMember entities.TechTeamMember
 
 	if err := r.db.WithContext(ctx).
@@ -97,4 +99,43 @@ func (r *techTeamRepo) GetTechTeamMemberByUserIDAndTechTeamID(ctx context.Contex
 
 	m := mappers.MemberEntityToMemberDomain(techTeamMember)
 	return &m, nil
+}
+
+func (r *techTeamRepo) IsUserTechnicianInCompany(ctx context.Context, companyID uint, userID uuid.UUID) (bool, error) {
+	var count int64
+	err := r.db.WithContext(ctx).
+		Model(&entities.TechTeamMember{}).
+		Joins("JOIN tech_teams ON tech_team_members.tech_team_id = tech_teams.id").
+		Where("tech_teams.transport_company_id = ? AND tech_team_members.user_id = ?", companyID, userID).
+		Count(&count).Error
+
+	if err != nil {
+		return false, err
+	}
+
+	return count > 0, nil
+}
+
+func (r *techTeamRepo) Delete(ctx context.Context, tID uint) error {
+	if err := r.db.WithContext(ctx).Delete(&entities.TechTeam{}, tID).Error; err != nil {
+		return fmt.Errorf("%w %w", techteam.ErrDeleteTeam, err)
+	} else {
+		return nil
+	}
+
+}
+
+func (r *techTeamRepo) GetFullTechTeamByID(ctx context.Context, id uint) (*techteam.TechTeam, error) {
+	var t entities.TechTeam
+	if err := r.db.WithContext(ctx).
+		Preload("TransportCompany").
+		Preload("Members").
+		First(&t, id).Error; err != nil {
+		if strings.Contains(err.Error(), "record not found") {
+			return nil, nil
+		}
+		return nil, fmt.Errorf("%w", err)
+	}
+	teamD := mappers.FullTechTeamEntityToDomain(t)
+	return &teamD, nil
 }

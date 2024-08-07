@@ -1,4 +1,4 @@
-package adapters
+package adapter
 
 import (
 	"tripcompanyservice/pkg/valuecontext"
@@ -6,33 +6,33 @@ import (
 	"gorm.io/gorm"
 )
 
-type GormCommitter struct {
+type GormCommiter struct {
 	db *gorm.DB
 	tx *gorm.DB
 }
 
-func NewGormCommitter(db *gorm.DB) valuecontext.Committer {
-	return &GormCommitter{db: db}
+func NewGormCommiter(db *gorm.DB) valuecontext.Committer {
+	return &GormCommiter{db: db}
 }
 
-func (c *GormCommitter) Tx() any {
+func (c *GormCommiter) Tx() any {
 	return c.tx
 }
 
-func (c *GormCommitter) Begin() valuecontext.Committer {
+func (c *GormCommiter) Begin() valuecontext.Committer {
 	tx := c.db.Begin()
 	c.tx = tx
 	return c
 }
 
-func (c *GormCommitter) Commit() error {
+func (c *GormCommiter) Commit() error {
 	if c.tx == nil {
 		return nil
 	}
 	return c.tx.Commit().Error
 }
 
-func (c *GormCommitter) Rollback() error {
+func (c *GormCommiter) Rollback() error {
 	if c.tx == nil {
 		return nil
 	}

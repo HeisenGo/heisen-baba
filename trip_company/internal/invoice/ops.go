@@ -1,6 +1,10 @@
 package invoice
 
-import "context"
+import (
+	"context"
+
+	"github.com/google/uuid"
+)
 
 type Ops struct {
 	repo Repo
@@ -18,7 +22,7 @@ func (o *Ops) UpdateInvoiceStatus(ctx context.Context, invoiceID uint, status st
 	return o.repo.UpdateInvoiceStatus(ctx, invoiceID, status)
 }
 
-func (o *Ops) GetInvoicesByUserOrAgency(ctx context.Context, userID *uint, agencyID *uint, page, pageSize uint) ([]Invoice, uint, error) {
+func (o *Ops) GetInvoicesByUserOrAgency(ctx context.Context, userID *uuid.UUID, agencyID *uint, page, pageSize uint) ([]Invoice, uint, error) {
 	limit := pageSize
 	offset := (page - 1) * pageSize
 

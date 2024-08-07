@@ -8,6 +8,7 @@ import (
 	"tripcompanyservice/pkg/adapters/storage/entities"
 	"tripcompanyservice/pkg/adapters/storage/mappers"
 
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -25,15 +26,15 @@ func (r *ticketRepo) GetFullTicketByID(ctx context.Context, id uint) (*ticket.Ti
 	if err := r.db.WithContext(ctx).
 		Preload("Trip").                  // Preload related Trip
 		Preload("Trip.TransportCompany").
-		Preload("Trip.TripCancellingPenalty"). // Preload TransportCompany within Trip
-		Preload("Ticket").                // Preload related Invoice
+		Preload("Trip.TripCancelingPenalty"). // Preload TransportCompany within Trip
+		Preload("Invoice").                // Preload related Invoice
 		First(&eT, id).Error; err != nil {
 		if strings.Contains(err.Error(), "record not found") {
 			return nil, nil
 		}
 		return nil, fmt.Errorf("%w %w %d", ticket.ErrFailedToGetTicket, err, id)
 	}
-	dT := mappers.TicketEntityToDomainWithTripWithCompanyWithPenalty(eT)
+	dT := mappers.TicketEntityToDomainWithTripWithCompanyWithPenaltyWithInvoice(eT)
 
 	return &dT, nil
 }
@@ -55,9 +56,9 @@ func (r *ticketRepo) UpdateTicketStatus(ctx context.Context, ticketID uint, stat
 	return r.db.WithContext(ctx).Model(&entities.Ticket{}).Where("id = ?", ticketID).Update("status", status).Error
 }
 
-func (r *ticketRepo) GetTicketsByUserOrAgency(ctx context.Context, userID *uint, agencyID *uint, limit, offset uint) ([]ticket.Ticket, uint, error) {
+func (r *ticketRepo) GetTicketsByUserOrAgency(ctx context.Context, userID *uuid.UUID, agencyID *uint, limit, offset uint) ([]ticket.Ticket, uint, error) {
 	query := r.db.WithContext(ctx).Model(&entities.Ticket{}).
-		Preload("Trip").Preload("Invoice")
+		Preload("Trip").Preload("Trip.TripCancelingPenalty").Preload("Invoice")
 
 	if userID != nil {
 		query = query.Where("user_id = ?", userID)
@@ -92,7 +93,7 @@ func (r *ticketRepo) GetTicketsByUserOrAgency(ctx context.Context, userID *uint,
 func (r *ticketRepo) UpdateTicket(ctx context.Context, id uint, updates map[string]interface{}) error {
 	var t entities.Ticket
 
-	if err := r.db.WithContext(ctx).Model(&t).Updates(updates).Error; err != nil {
+	if err := r.db.WithContext(ctx).Model(&t).Where("id = ?", id).Updates(updates).Error; err != nil {
 		return fmt.Errorf("%w %w", ticket.ErrFailedToUpdate, err)
 	}
 

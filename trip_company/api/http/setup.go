@@ -6,7 +6,9 @@ import (
 	"os"
 	"path/filepath"
 	"tripcompanyservice/api/http/handlers"
+	middlerwares "tripcompanyservice/api/http/middlewares"
 	"tripcompanyservice/config"
+	adapter "tripcompanyservice/pkg/adapters"
 	"tripcompanyservice/service"
 
 	"github.com/gofiber/fiber/v2"
@@ -15,17 +17,14 @@ import (
 
 func Run(cfg config.Server, app *service.AppContainer) {
 	fiberApp := fiber.New()
-	api := fiberApp.Group("/api/v1") //, middlerwares.SetUserContext())
+	api := fiberApp.Group("/api/v1",middlerwares.SetUserContext()) //, middlerwares.SetUserContext())
 
 	createGroupLogger := loggerSetup(fiberApp)
 
-	secret := []byte(cfg.Secret)
-	fmt.Println(api, secret)
 	registerGlobalRoutes(api)
 	registerTransportCompanyRoutes(api, app, createGroupLogger("companies"))
-	//registerPathRouts(api, app, secret)
-	// run server
-	log.Fatal(fiberApp.Listen(fmt.Sprintf("%s:%d", cfg.Host, cfg.HttpPort)))
+
+	log.Fatal(fiberApp.Listen(fmt.Sprintf("%s:%d", cfg.Host, cfg.HTTPPort)))
 }
 
 func loggerSetup(app *fiber.App) func(groupName string) fiber.Handler {
@@ -75,81 +74,70 @@ func registerTransportCompanyRoutes(router fiber.Router, app *service.AppContain
 
 	router.Post("",
 		//middlewares.SetTransaction(adapters.NewGormCommitter(app.RawDBConnection())),
-		//middlewares.Auth(),
+		middlerwares.Auth(app.AuthClient()),
 		handlers.CreateTransportCompany(app.CompanyService()),
 	)
 	router.Get("/my-companies/:ownerID",
-		//middlewares.Auth(),
+	middlerwares.Auth(app.AuthClient()),
 		handlers.GetUserCompanies(app.CompanyService()),
 	)
 	router.Get("",
-		//middlewares.Auth(),
-		handlers.GetCompanies(app.CompanyService()),
+	middlerwares.Auth(app.AuthClient()),
+			handlers.GetCompanies(app.CompanyService()),
 	)
 
 	// only owner can do this
 	router.Delete("/my-companies/:companyID",
+	middlerwares.Auth(app.AuthClient()),
 		handlers.DeleteCompany(app.CompanyService()),
 	)
 	router.Patch("/my-companies/:companyID",
+	middlerwares.Auth(app.AuthClient()),
 		handlers.PatchCompany(app.CompanyService()),
 	)
 
 	// only admin can do this
 	router.Patch("/block/:companyID", //, middlewares.SetTransaction(adapters.NewGormCommitter(app.RawDBConnection())),
-		//middlewares.Auth(),
+	middlerwares.Auth(app.AuthClient()),
 		handlers.BlockCompany(app.CompanyService()))
 
 	router.Post("/trips",
-		//middlewares.SetTransaction(adapters.NewGormCommitter(app.RawDBConnection())),
 		//middlewares.Auth(),
-		//handlers.CreateTrip(app.TripServiceFromCtx)),
-		handlers.CreateTrip(app.TripService()))
+		middlerwares.SetTransaction(adapter.NewGormCommiter(app.RawDBConnection())),
+		middlerwares.Auth(app.AuthClient()),
+				handlers.CreateTrip(app.TripServiceFromCtx))
 
-	router.Get("/trips", handlers.GetTrips(app.TripService()))
-	router.Get("/one-trip/:tripID", handlers.GetFullTripByID(app.TripService()))
-	router.Patch("/trips/:tripID",
-		handlers.PatchTrip(app.TripService()),
+	router.Get("/trips", middlerwares.Auth(app.AuthClient()),handlers.GetTrips(app.TripService()))
+	router.Get("/agency-trips", middlerwares.Auth(app.AuthClient()),handlers.GetAgencyTrips(app.TripService()))
+
+	router.Get("/one-trip/:tripID", middlerwares.Auth(app.AuthClient()),handlers.GetFullTripByID(app.TripService()))
+	router.Get("/one-agency-trip/:tripID",middlerwares.Auth(app.AuthClient()), handlers.GetFullAgencyTripByID(app.TripService()))
+
+	router.Patch("/trips/:tripID",middlerwares.Auth(app.AuthClient()),
+		handlers.PatchTrip(app.TripServiceFromCtx),
 	)
-	router.Get("/company-trips/:companyID", handlers.GetCompanyTrips(app.TripService()))
-	router.Post("/buy", handlers.BuyTicket(app.TicketService())) // TODO : should be transactional
+	router.Get("/company-trips/:companyID", middlerwares.Auth(app.AuthClient()),handlers.GetCompanyTrips(app.TripService()))
+	router.Get("/company-agency-trips/:companyID",middlerwares.Auth(app.AuthClient()), handlers.GetCompanyAgencyTrips(app.TripService()))
 
-	router.Patch("/cancel-ticket/:ticketID", handlers.CancelTicketByID(app.TicketService()))
-	router.Get("/tickets", handlers.GetTickets(app.TicketService())) // configure a way o separate agnecy and user TODO:
 
-	router.Post("/vehicle-req", handlers.CreateVehicleRequest(app.VehicleReqService()))
+	router.Post("/buy", handlers.BuyTicket(app.TicketServiceFromCtx))
+	router.Patch("/cancel-ticket/:ticketID",middlerwares.Auth(app.AuthClient()), handlers.CancelTicketByID(app.TicketServiceFromCtx))
 
-	router.Post("/tech-teams", handlers.CreateTechTeam(app.TechTeamService()))
-	router.Post("/tech-members", handlers.CreateTechMember(app.TechTeamService()))
-	router.Get("/tech-teams/:companyID", handlers.GetTechTeamsOfCompany(app.TechTeamService()))
-	router.Patch("/cancel-trip/:tripID", handlers.CancelTrip(app.TripService()))
-	router.Patch("/finish-trip/:tripID", handlers.FinishTrip(app.TripService()))
-	router.Patch("/confirm-trip/:tripID", handlers.ConfirmTrip(app.TripService()))
+	router.Get("/user-tickets", middlerwares.Auth(app.AuthClient()),handlers.GetUserTickets(app.TicketService()))
+	router.Get("/agency-tickets/:agencyID", middlerwares.Auth(app.AuthClient()),handlers.GetAgencyTickets(app.TicketService())) 
+
+	router.Post("/vehicle-req", middlerwares.Auth(app.AuthClient()),handlers.CreateVehicleRequest(app.VehicleReqServiceFromCtx))
+	router.Delete("/vehicle-req:vRID",middlerwares.Auth(app.AuthClient()), handlers.DeleteVR(app.VehicleReqServiceFromCtx))
+
+	router.Post("/tech-teams", middlerwares.Auth(app.AuthClient()),handlers.CreateTechTeam(app.TechTeamService()))
+	router.Delete("/tech-teams/:teamID",middlerwares.Auth(app.AuthClient()), handlers.DeleteTeam(app.TechTeamService()))
+
+	router.Post("/tech-members", middlerwares.Auth(app.AuthClient()),handlers.CreateTechMember(app.TechTeamService()))
+	router.Get("/tech-teams/:companyID", middlerwares.Auth(app.AuthClient()),handlers.GetTechTeamsOfCompany(app.TechTeamService()))
+	router.Patch("/set-team/:tripID", middlerwares.Auth(app.AuthClient()),handlers.SetTechTeamToTrip(app.TripServiceFromCtx))
+	router.Patch("/cancel-trip/:tripID",middlerwares.Auth(app.AuthClient()), handlers.CancelTrip(app.TripServiceFromCtx))
+	router.Patch("/finish-trip/:tripID",middlerwares.Auth(app.AuthClient()), handlers.FinishTrip(app.TripServiceFromCtx))
+	router.Patch("/confirm-trip/:tripID",middlerwares.Auth(app.AuthClient()), handlers.ConfirmTrip(app.TripServiceFromCtx))
 
 	router.Get("/path-trips/:pathID", handlers.GetCountPathUnfinishedTrips(app.TripService()))
 }
-
-// func registerTerminalRouts(router fiber.Router, app *service.AppContainer, secret []byte) {
-// 	terminalGroup := router.Group("/terminals") //, middlerwares.Auth(secret), middlerwares.RoleChecker("user", "admin"))
-// 	fmt.Print(secret)
-// 	terminalGroup.Post("",
-// 		handlers.CreateTerminal(app.TerminalService()),
-// 	)
-
-// 	terminalGroup.Get("", handlers.CityTerminals(app.TerminalService()))
-
-// 	terminalGroup.Patch(":terminalID", handlers.PatchTerminal(app.TerminalService()))
-// 	terminalGroup.Delete(":terminalID", handlers.DeleteTerminal(app.TerminalService()))
-// }
-
-// func registerPathRouts(router fiber.Router, app *service.AppContainer, secret []byte) {
-// 	pathGroup := router.Group("/paths") //, middlerwares.Auth(secret), middlerwares.RoleChecker("user", "admin"))
-// 	fmt.Print(secret)
-// 	pathGroup.Post("",
-// 		handlers.CreatePath(app.PathService()),
-// 	)
-// 	pathGroup.Get(":pathID", handlers.GetFullPathByID(app.PathService()))
-// 	pathGroup.Get("", handlers.GetPathsByOriginDestinationType(app.PathService()))
-// 	pathGroup.Patch(":pathID", handlers.PatchPath(app.PathService()))
-// 	pathGroup.Delete(":pathID", handlers.DeletePath(app.PathService()))
-// }

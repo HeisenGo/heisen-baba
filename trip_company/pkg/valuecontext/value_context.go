@@ -14,6 +14,8 @@ const (
 	IsTxError   ValueKeyType = "IS-TX-ERROR"
 )
 
+const UserClaimKey = "User-Claims"
+
 type Committer interface {
 	Begin() Committer
 	Commit() error
@@ -72,10 +74,10 @@ func TryGetTxFromContext(ctx context.Context) (Committer, bool) {
 	return ctxVal.Tx, true
 }
 
-func GetLogger(ctx context.Context) *slog.Logger {
-	val, _ := tryGetValueFromContext(ctx)
-	return val.Logger
-}
+// func GetLogger(ctx context.Context) *slog.Logger {
+// 	val, _ := tryGetValueFromContext(ctx)
+// 	return val.Logger
+// }
 
 func SetTx(ctx context.Context, tx Committer) {
 	val, ok := tryGetValueFromContext(ctx)

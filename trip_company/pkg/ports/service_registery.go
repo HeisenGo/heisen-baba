@@ -1,5 +1,6 @@
 package ports
 
 type IServiceRegistry interface {
-	RegisterServiceRegisterService(serviceHostName, servicePrefixPath, serviceHTTPHealthPath string, serviceHTTPPort int) error
+	RegisterService(serviceName, serviceHostName, servicePrefixPath, serviceHTTPHealthPath string, serviceHTTPPort int) error //
+	DiscoverService(serviceName string) (port int, ip string, err error)
 }

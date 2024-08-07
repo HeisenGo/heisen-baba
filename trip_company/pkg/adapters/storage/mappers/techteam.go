@@ -1,6 +1,7 @@
 package mappers
 
 import (
+	"tripcompanyservice/internal/company"
 	"tripcompanyservice/internal/techteam"
 	"tripcompanyservice/pkg/adapters/storage/entities"
 	"tripcompanyservice/pkg/fp"
@@ -55,4 +56,24 @@ func TechTeamEntityToDomain(teamEntity entities.TechTeam) techteam.TechTeam {
 
 func BatchTecTeamEnToDo(t []entities.TechTeam) []techteam.TechTeam {
 	return fp.Map(t, TechTeamEntityToDomain)
+}
+
+func FullTechTeamEntityToDomain(teamEntity entities.TechTeam) techteam.TechTeam {
+	m := make([]techteam.TechTeamMember, len(teamEntity.Members))
+	if len(teamEntity.Members) > 0 {
+		m = BatchMembersEntitiesToMembersDomain(teamEntity.Members)
+	}
+	var co company.TransportCompany
+	if teamEntity.TransportCompany.Name != "" {
+		co = CompanyEntityToDomain(teamEntity.TransportCompany)
+	}
+	return techteam.TechTeam{
+		ID:                 teamEntity.ID,
+		TransportCompanyID: teamEntity.TransportCompanyID,
+		Name:               teamEntity.Name,
+		Description:        teamEntity.Description,
+		TripType:           teamEntity.TripType,
+		Members:            m,
+		TransportCompany:   &co,
+	}
 }

@@ -1,8 +1,10 @@
 package mappers
 
 import (
+	"tripcompanyservice/internal/company"
 	"tripcompanyservice/internal/techteam"
 	"tripcompanyservice/internal/trip"
+	tripcancellingpenalty "tripcompanyservice/internal/trip_cancelling_penalty"
 	vehiclerequest "tripcompanyservice/internal/vehicle_request"
 	"tripcompanyservice/pkg/adapters/storage/entities"
 	"tripcompanyservice/pkg/fp"
@@ -17,14 +19,24 @@ func TripEntityToDomain(tripEntity entities.Trip) trip.Trip {
 		FromTerminal: &trip.Terminal{
 			City: tripEntity.Origin,
 			Name: tripEntity.FromTerminalName,
+			Country: tripEntity.FromCountry,
+			Type: tripEntity.TripType,
 		},
 		ToTerminal: &trip.Terminal{
 			City: tripEntity.Destination,
 			Name: tripEntity.ToTerminalName,
+			Type: tripEntity.TripType,
+			Country: tripEntity.ToCountry,
 		},
 	}
-	penalty := PenaltyEntityToDomain(*tripEntity.TripCancelingPenalty)
-	company := CompanyEntityToDomain(*tripEntity.TransportCompany)
+	var penalty tripcancellingpenalty.TripCancelingPenalty
+	if tripEntity.TripCancelingPenalty != nil {
+		penalty = PenaltyEntityToDomain(*tripEntity.TripCancelingPenalty)
+	}
+	var company company.TransportCompany
+	if tripEntity.TransportCompany != nil {
+		company = CompanyEntityToDomain(*tripEntity.TransportCompany)
+	}
 	var vR vehiclerequest.VehicleRequest
 	if tripEntity.VehicleRequest != nil {
 		vR = VehicleReqEntityToVehicleReqDomain(*tripEntity.VehicleRequest)
@@ -74,10 +86,14 @@ func TripFullEntityToDomain(tripEntity entities.Trip) trip.Trip {
 		FromTerminal: &trip.Terminal{
 			City: tripEntity.Origin,
 			Name: tripEntity.FromTerminalName,
+			Country: tripEntity.FromCountry,
+			Type: tripEntity.TripType,
 		},
 		ToTerminal: &trip.Terminal{
 			City: tripEntity.Destination,
 			Name: tripEntity.ToTerminalName,
+			Country: tripEntity.ToCountry,
+			Type: tripEntity.TripType,
 		},
 	}
 	penalty := PenaltyEntityToDomain(*tripEntity.TripCancelingPenalty)
@@ -157,6 +173,8 @@ func TripDomainToEntity(t *trip.Trip) *entities.Trip {
 		SoldTickets:          t.SoldTickets,
 		IsConfirmed:          t.IsConfirmed,
 		Profit:               t.Profit,
+		FromCountry: t.Path.FromTerminal.Country,
+		ToCountry: t.Path.ToTerminal.Country,
 	}
 }
 
@@ -170,14 +188,66 @@ func SimpleTripEntityToDomain(tripEntity entities.Trip) trip.Trip {
 			City: tripEntity.Origin,
 			Name: tripEntity.FromTerminalName,
 			Type: tripEntity.TripType,
+			Country: tripEntity.FromCountry,
 		},
 		ToTerminal: &trip.Terminal{
 			City: tripEntity.Destination,
 			Name: tripEntity.ToTerminalName,
 			Type: tripEntity.TripType,
+			Country: tripEntity.ToCountry,
 		},
 	}
 	return trip.Trip{
+		ID:                     tripEntity.ID,
+		TransportCompanyID:     tripEntity.TransportCompanyID,
+		TripType:               trip.TripType(tripEntity.TripType),
+		UserReleaseDate:        tripEntity.UserReleaseDate,
+		TourReleaseDate:        tripEntity.TourReleaseDate,
+		UserPrice:              tripEntity.UserPrice,
+		AgencyPrice:            tripEntity.AgencyPrice,
+		PathID:                 tripEntity.PathID,
+		Origin:                 tripEntity.Origin,
+		Destination:            tripEntity.Destination,
+		Path:                   path,
+		Status:                 tripEntity.Status,
+		MinPassengers:          tripEntity.MinPassengers,
+		TechTeamID:             tripEntity.TechTeamID,
+		VehicleRequestID:       tripEntity.VehicleRequestID,
+		TripCancelingPenaltyID: tripEntity.TripCancellingPenaltyID,
+		MaxTickets:             tripEntity.MaxTickets,
+		VehicleID:              tripEntity.VehicleID,
+		IsCanceled:             tripEntity.IsCanceled,
+		IsFinished:             tripEntity.IsFinished,
+		StartDate:              tripEntity.StartDate,
+		EndDate:                tripEntity.EndDate,
+		SoldTickets:            tripEntity.SoldTickets,
+		IsConfirmed:            tripEntity.IsConfirmed,
+		Profit:                 tripEntity.Profit,
+	}
+}
+
+func SimpleTripEntityToDomainWithPenalty(tripEntity entities.Trip) trip.Trip {
+	path := &trip.Path{
+		ID:         tripEntity.PathID,
+		Name:       tripEntity.PathName,
+		Type:       tripEntity.TripType,
+		DistanceKM: tripEntity.PathDistanceKM,
+		FromTerminal: &trip.Terminal{
+			City: tripEntity.Origin,
+			Name: tripEntity.FromTerminalName,
+			Type: tripEntity.TripType,
+			Country: tripEntity.FromCountry,
+		},
+		ToTerminal: &trip.Terminal{
+			City: tripEntity.Destination,
+			Name: tripEntity.ToTerminalName,
+			Type: tripEntity.TripType,
+			Country: tripEntity.ToCountry,
+		},
+	}
+	penalty := PenaltyEntityToDomain(*tripEntity.TripCancelingPenalty)
+	return trip.Trip{
+		TripCancellingPenalty:  &penalty,
 		ID:                     tripEntity.ID,
 		TransportCompanyID:     tripEntity.TransportCompanyID,
 		TripType:               trip.TripType(tripEntity.TripType),
