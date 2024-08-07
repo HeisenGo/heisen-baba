@@ -6,6 +6,7 @@ import (
 	"time"
 	"tripcompanyservice/internal/trip"
 	vehiclerequest "tripcompanyservice/internal/vehicle_request"
+	"tripcompanyservice/pkg/ports/clients/clients"
 
 	"github.com/google/uuid"
 )
@@ -18,12 +19,14 @@ var (
 type VehicleReService struct {
 	vehicleReqOps *vehiclerequest.Ops
 	tripOps       *trip.Ops
+	vClient       clients.IVehicleClient
 }
 
-func NewVehicleReService(vehicleReqOps *vehiclerequest.Ops, tripOps *trip.Ops) *VehicleReService {
+func NewVehicleReService(vehicleReqOps *vehiclerequest.Ops, tripOps *trip.Ops, vclient clients.IVehicleClient) *VehicleReService {
 	return &VehicleReService{
 		vehicleReqOps: vehicleReqOps,
 		tripOps:       tripOps,
+		vClient:       vclient,
 	}
 }
 
@@ -50,21 +53,40 @@ func (s *VehicleReService) CreateVehicleReq(ctx context.Context, vR *vehiclerequ
 		return err
 	}
 	// send vr to rabbit MQ TODO: with distance and date
-	vR.MatchedVehicleID = uint(2)
-	vR.VehicleName = "new bmb"
-	vR.VehicleProductionYear = 2021
-	vR.MatchVehicleSpeed = 220
+	matchedOne, err := s.vClient.SelectVehicles(vR)
+	if err!=nil{
+		return err
+	}
+	vR.MatchedVehicleID = matchedOne.ID
+	vR.VehicleName = matchedOne.Name
+	vR.VehicleProductionYear = int(matchedOne.ProductionYear)
+	vR.MatchVehicleSpeed = matchedOne.Speed
 	vR.Status = "matched"
 	travelTimeHours := t.Path.DistanceKM / vR.MatchVehicleSpeed
 	travelDuration := time.Duration(travelTimeHours * float64(time.Hour))
 	endDate := t.StartDate.Add(travelDuration)
 	t.EndDate = &endDate
-	vR.VehicleReservationFee = 23000 * travelTimeHours
+	vR.VehicleReservationFee = matchedOne.PricePerHour * travelTimeHours
 	updates := make(map[string]interface{})
 	updates["end_date"] = endDate
 	updates["vehicle_id"] = vR.MatchedVehicleID
 	updates["vehicle_name"] = vR.VehicleName
 	updates["vehicle_request_id"] = vR.ID
+	// vR.MatchedVehicleID = uint(2)
+	// vR.VehicleName = "new bmb"
+	// vR.VehicleProductionYear = 2021
+	// vR.MatchVehicleSpeed = 220
+	// vR.Status = "matched"
+	// travelTimeHours := t.Path.DistanceKM / vR.MatchVehicleSpeed
+	// travelDuration := time.Duration(travelTimeHours * float64(time.Hour))
+	// endDate := t.StartDate.Add(travelDuration)
+	// t.EndDate = &endDate
+	// vR.VehicleReservationFee = 23000 * travelTimeHours
+	// updates := make(map[string]interface{})
+	// updates["end_date"] = endDate
+	// updates["vehicle_id"] = vR.MatchedVehicleID
+	// updates["vehicle_name"] = vR.VehicleName
+	// updates["vehicle_request_id"] = vR.ID
 	err = s.tripOps.UpdateEndDateTrip(ctx, t.ID, updates)
 	if err != nil {
 		return err

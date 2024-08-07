@@ -11,6 +11,7 @@ import (
 	"tripcompanyservice/internal/trip"
 	vehiclerequest "tripcompanyservice/internal/vehicle_request"
 	"tripcompanyservice/pkg/adapters/clients/grpc"
+	"tripcompanyservice/pkg/adapters/clients/rest"
 	"tripcompanyservice/pkg/adapters/consul"
 	"tripcompanyservice/pkg/adapters/storage"
 	"tripcompanyservice/pkg/ports"
@@ -31,9 +32,10 @@ type AppContainer struct {
 	vehicleReqService *VehicleReService
 	techTeamService   *TechTeamService
 
-	authClient      clients.IAuthClient
-	pathClient      clients.IPathClient
-
+	authClient clients.IAuthClient
+	pathClient clients.IPathClient
+	bankClient clients.IBankClient
+	vClient    clients.IVehicleClient
 }
 
 func NewAppContainer(cfg config.Config) (*AppContainer, error) {
@@ -57,6 +59,8 @@ func NewAppContainer(cfg config.Config) (*AppContainer, error) {
 	app.setTechTeamService()
 	app.setAuthClient(cfg.Server.ServiceRegistry.AuthServiceName)
 	app.setPathClient(cfg.Server.ServiceRegistry.PathServiceName)
+	app.setBankClient(cfg.Server.ServiceRegistry.BankServiceName)
+	app.setVClient(cfg.Server.ServiceRegistry.VehicleServiceName)
 
 	//app.setPathService()
 	return app, nil
@@ -96,6 +100,7 @@ func (a *AppContainer) mustRegisterService(srvCfg config.Server) {
 	if err != nil {
 		log.Fatalf("Failed to register service with Consul: %v", err)
 	}
+	a.serviceRegistry = registry
 }
 
 func (a *AppContainer) CompanyService() *TransportCompanyService {
@@ -150,6 +155,7 @@ func (a *AppContainer) TripServiceFromCtx(ctx context.Context) *TripService {
 		ticket.NewOps(storage.NewTicketRepo(gc)),
 		invoice.NewOps(storage.NewInvoiceRepo(gc)),
 		a.pathClient,
+		a.bankClient,
 	)
 }
 
@@ -159,8 +165,8 @@ func (a *AppContainer) setTripService() {
 	}
 	a.tripService = NewTripService(trip.NewOps(storage.NewTripRepo(a.dbConn)),
 		company.NewOps(storage.NewTransportCompanyRepo(a.dbConn)),
-		techteam.NewOps(storage.NewTechTeamRepo(a.dbConn)), ticket.NewOps(storage.NewTicketRepo(a.dbConn)), 
-		invoice.NewOps(storage.NewInvoiceRepo(a.dbConn)), a.pathClient)
+		techteam.NewOps(storage.NewTechTeamRepo(a.dbConn)), ticket.NewOps(storage.NewTicketRepo(a.dbConn)),
+		invoice.NewOps(storage.NewInvoiceRepo(a.dbConn)), a.pathClient, a.bankClient)
 }
 
 // Ticket Service
@@ -184,6 +190,7 @@ func (a *AppContainer) TicketServiceFromCtx(ctx context.Context) *TicketService 
 		ticket.NewOps(storage.NewTicketRepo(gc)),
 		trip.NewOps(storage.NewTripRepo(gc)),
 		invoice.NewOps(storage.NewInvoiceRepo(gc)),
+		a.bankClient,
 	)
 }
 
@@ -191,7 +198,9 @@ func (a *AppContainer) setTicketService() {
 	if a.ticketService != nil {
 		return
 	}
-	a.ticketService = NewTicketService(ticket.NewOps(storage.NewTicketRepo(a.dbConn)), trip.NewOps(storage.NewTripRepo(a.dbConn)), invoice.NewOps(storage.NewInvoiceRepo(a.dbConn)))
+	a.ticketService = NewTicketService(ticket.NewOps(storage.NewTicketRepo(a.dbConn)),
+		trip.NewOps(storage.NewTripRepo(a.dbConn)),
+		invoice.NewOps(storage.NewInvoiceRepo(a.dbConn)), a.bankClient)
 }
 
 // Invoice Service
@@ -244,6 +253,7 @@ func (a *AppContainer) VehicleReqServiceFromCtx(ctx context.Context) *VehicleReS
 	return NewVehicleReService(
 		vehiclerequest.NewOps(storage.NewVehicleReqRepo(gc)),
 		trip.NewOps(storage.NewTripRepo(gc)),
+		a.vClient,
 	)
 }
 
@@ -251,7 +261,8 @@ func (a *AppContainer) setVehicleReqService() {
 	if a.vehicleReqService != nil {
 		return
 	}
-	a.vehicleReqService = NewVehicleReService(vehiclerequest.NewOps(storage.NewVehicleReqRepo(a.dbConn)), trip.NewOps(storage.NewTripRepo(a.dbConn)))
+	a.vehicleReqService = NewVehicleReService(vehiclerequest.NewOps(storage.NewVehicleReqRepo(a.dbConn)),
+		trip.NewOps(storage.NewTripRepo(a.dbConn)), a.vClient)
 }
 
 // Tech team service
@@ -296,7 +307,6 @@ func (a *AppContainer) setAuthClient(authServiceName string) {
 	a.authClient = grpc.NewGRPCAuthClient(a.serviceRegistry, authServiceName)
 }
 
-
 func (a *AppContainer) PathClient() clients.IPathClient {
 	return a.pathClient
 }
@@ -306,4 +316,26 @@ func (a *AppContainer) setPathClient(pathServiceName string) {
 		return
 	}
 	a.pathClient = grpc.NewGRPCPathClient(a.serviceRegistry, pathServiceName)
+}
+
+func (a *AppContainer) BankClient() clients.IBankClient {
+	return a.bankClient
+}
+
+func (a *AppContainer) setBankClient(bankServiceName string) {
+	if a.bankClient != nil {
+		return
+	}
+	a.bankClient = grpc.NewGRPCBankClient(a.serviceRegistry, bankServiceName)
+}
+
+func (a *AppContainer) setVClient(vServiceName string) {
+	if a.vClient != nil {
+		return
+	}
+	a.vClient = rest.NewRestVehicleClient(a.serviceRegistry, vServiceName)
+}
+
+func (a *AppContainer) VClient() clients.IBankClient {
+	return a.bankClient
 }

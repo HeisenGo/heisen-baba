@@ -1,6 +1,5 @@
 package clients
 
-
 type IBankClient interface {
-	Transfer(senderOwnerID, receiverOwnerID, isPaidToSystem string, amount uint64) (bool,error)
+	Transfer(senderOwnerID, receiverOwnerID string, isPaidToSystem bool, amount uint64) (bool, error)
 }

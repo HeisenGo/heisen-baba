@@ -31,4 +31,5 @@ type VehicleRequest struct {
 	VehicleProductionYear int
 	VehicleName           string
 	MatchVehicleSpeed float64
+	MinCost            float64
 }

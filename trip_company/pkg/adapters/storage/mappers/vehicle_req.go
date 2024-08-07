@@ -12,6 +12,7 @@ func VehicleDomainToVehicleEntity(r *vehiclerequest.VehicleRequest) *entities.Ve
 		MinCapacity:       r.MinCapacity,
 		ProductionYearMin: r.ProductionYearMin,
 		VehicleType:       r.VehicleType,
+		MinCost: r.MinCost,
 	}
 }
 
@@ -28,5 +29,6 @@ func VehicleReqEntityToVehicleReqDomain(v entities.VehicleRequest) vehiclereques
 		ProductionYearMin:     v.ProductionYearMin,
 		MatchVehicleSpeed:     v.MatchVehicleSpeed,
 		Status:                v.Status,
+		MinCost: v.MinCost,
 	}
 }

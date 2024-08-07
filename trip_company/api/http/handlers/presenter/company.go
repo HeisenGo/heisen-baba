@@ -36,7 +36,7 @@ func UpdateCompanyToCompany(req *UpdateCompanyReq, id uint) *company.TransportCo
 type CompanyReq struct {
 	Name        string `json:"name" validate:"required"`
 	Description string `json:"desc"`
-	OwnerID     uuid.UUID   `json:"owner_id" validate:"required"`
+	//OwnerID     uuid.UUID   `json:"owner_id" validate:"required"`
 	Address     string `json:"address"`
 	//PhoneNumber string `json:"phone"`
 	//Email       string `json:"email"`
@@ -66,7 +66,7 @@ func CompanyReqToCompanyDomain(req *CompanyReq) *company.TransportCompany {
 	return &company.TransportCompany{
 		Name:        req.Name,
 		Description: req.Description,
-		OwnerID:     req.OwnerID,
+		//OwnerID:     req.OwnerID,
 		Address:     req.Address,
 
 		//PhoneNumber: req.PhoneNumber,

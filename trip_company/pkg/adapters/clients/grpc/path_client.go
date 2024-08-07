@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"tripcompanyservice/internal/trip"
-	"tripcompanyservice/pkg/adapters/clients/grpc/mappers.go"
+	"tripcompanyservice/pkg/adapters/clients/grpc/mappers"
 	"tripcompanyservice/pkg/ports"
 	"tripcompanyservice/protobufs"
 
@@ -20,7 +20,7 @@ func NewGRPCPathClient(serviceRegistry ports.IServiceRegistry, pathServiceName s
 	return &GRPCPathClient{ServiceRegistry: serviceRegistry, PathServiceName: pathServiceName}
 }
 
-func (g *GRPCPathClient)GetFullPathByID(pathID uint32) (*trip.Path, error) {
+func (g *GRPCPathClient) GetFullPathByID(pathID uint32) (*trip.Path, error) {
 
 	port, ip, err := g.ServiceRegistry.DiscoverService(g.PathServiceName)
 	if err != nil {

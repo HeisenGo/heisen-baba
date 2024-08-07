@@ -8,3 +8,5 @@ CREATE
 DATABASE bank;
 CREATE
 DATABASE hotel;
+CREATE
+DATABASE trip_company;
