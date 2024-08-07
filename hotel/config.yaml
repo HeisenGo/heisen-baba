@@ -1,7 +1,7 @@
 server:
   http_port: 8087
   host: "0.0.0.0"
-  service_host_address: "192.168.1.40"
+  service_host_address: "192.168.1.10"
   service_http_health_path: "api/v1/health"
   service_http_prefix_path: "/api/v1/hotels"
   service_registry:
