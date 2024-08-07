@@ -47,7 +47,7 @@ func NewAppContainer(cfg config.Config) (*AppContainer, error) {
 		log.Fatal("Migration failed: ", err)
 	}
 	// service registry
-	//app.mustRegisterService(cfg.Server)
+	app.mustRegisterService(cfg.Server)
 
 	app.setCompanyService()
 	app.setTripService()
