@@ -285,6 +285,274 @@
                 }
             }
         },
+        "/reservations": {
+            "post": {
+                "description": "Create a new Tour reservation",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "reservations"
+                ],
+                "summary": "Create a new Tour reservation",
+                "parameters": [
+                    {
+                        "description": "Reservation to create",
+                        "name": "reservation",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/presenter.ReservationCreateReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/presenter.ReservationResp"
+                        }
+                    },
+                    "400": {
+                        "description": "error: bad request",
+                        "schema": {
+                            "$ref": "#/definitions/presenter.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "error: internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/presenter.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/reservations/agency": {
+            "get": {
+                "description": "Get reservations by agency owner ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "reservations"
+                ],
+                "summary": "Get reservations by agency owner ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Owner ID",
+                        "name": "owner_id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page number",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page size",
+                        "name": "page_size",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/presenter.FullReservationResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "error: bad request",
+                        "schema": {
+                            "$ref": "#/definitions/presenter.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "error: internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/presenter.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/reservations/user": {
+            "get": {
+                "description": "Get reservations by user ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "reservations"
+                ],
+                "summary": "Get reservations by user ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User ID",
+                        "name": "user_id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/presenter.ReservationResp"
+                        }
+                    },
+                    "400": {
+                        "description": "error: bad request",
+                        "schema": {
+                            "$ref": "#/definitions/presenter.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "error: internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/presenter.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/reservations/{id}": {
+            "get": {
+                "description": "Get a reservation by ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "reservations"
+                ],
+                "summary": "Get a reservation by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Reservation ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/presenter.ReservationResp"
+                        }
+                    },
+                    "400": {
+                        "description": "error: bad request",
+                        "schema": {
+                            "$ref": "#/definitions/presenter.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "error: internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/presenter.Response"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Update a reservation by ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "reservations"
+                ],
+                "summary": "Update a reservation by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Reservation ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Reservation to update",
+                        "name": "reservation",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/presenter.ReservationCreateReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/presenter.ReservationResp"
+                        }
+                    },
+                    "400": {
+                        "description": "error: bad request",
+                        "schema": {
+                            "$ref": "#/definitions/presenter.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "error: internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/presenter.Response"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete a reservation by ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "reservations"
+                ],
+                "summary": "Delete a reservation by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Reservation ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "error: bad request",
+                        "schema": {
+                            "$ref": "#/definitions/presenter.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "error: internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/presenter.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/tours": {
             "get": {
                 "description": "Get a paginated list of tours",
@@ -700,6 +968,46 @@
                 }
             }
         },
+        "presenter.FullReservationResponse": {
+            "type": "object",
+            "required": [
+                "hotel_id"
+            ],
+            "properties": {
+                "check_in": {
+                    "type": "string",
+                    "example": "2024-08-01T00:00:00Z"
+                },
+                "check_out": {
+                    "type": "string",
+                    "example": "2024-08-05T00:00:00Z"
+                },
+                "hotel_id": {
+                    "type": "integer",
+                    "example": 3
+                },
+                "reservation_id": {
+                    "type": "integer",
+                    "example": 12
+                },
+                "room_id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "status": {
+                    "type": "string",
+                    "example": "booked"
+                },
+                "total_price": {
+                    "type": "integer",
+                    "example": 50000
+                },
+                "user_id": {
+                    "type": "string",
+                    "example": "aba3b3ed-e3d8-4403-9751-1f04287c9d65"
+                }
+            }
+        },
         "presenter.FullTourResponse": {
             "type": "object",
             "properties": {
@@ -738,6 +1046,67 @@
                 "tour_id": {
                     "type": "integer",
                     "example": 12
+                }
+            }
+        },
+        "presenter.ReservationCreateReq": {
+            "type": "object",
+            "required": [
+                "check_in",
+                "check_out",
+                "hotel_id",
+                "room_id",
+                "user_id"
+            ],
+            "properties": {
+                "check_in": {
+                    "type": "string",
+                    "example": "2024-08-01T00:00:00Z"
+                },
+                "check_out": {
+                    "type": "string",
+                    "example": "2024-08-05T00:00:00Z"
+                },
+                "hotel_id": {
+                    "type": "integer",
+                    "example": 3
+                },
+                "room_id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "user_id": {
+                    "type": "string",
+                    "example": "aba3b3ed-e3d8-4403-9751-1f04287c9d65"
+                }
+            }
+        },
+        "presenter.ReservationResp": {
+            "type": "object",
+            "properties": {
+                "check_in": {
+                    "type": "string"
+                },
+                "check_out": {
+                    "type": "string"
+                },
+                "hotel_id": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "room_id": {
+                    "type": "integer"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "total_price": {
+                    "type": "integer"
+                },
+                "user_id": {
+                    "type": "string"
                 }
             }
         },

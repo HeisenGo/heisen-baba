@@ -70,6 +70,35 @@ definitions:
         example: aba3b3ed-e3d8-4403-9751-1f04287c9d65
         type: string
     type: object
+  presenter.FullReservationResponse:
+    properties:
+      check_in:
+        example: "2024-08-01T00:00:00Z"
+        type: string
+      check_out:
+        example: "2024-08-05T00:00:00Z"
+        type: string
+      hotel_id:
+        example: 3
+        type: integer
+      reservation_id:
+        example: 12
+        type: integer
+      room_id:
+        example: 1
+        type: integer
+      status:
+        example: booked
+        type: string
+      total_price:
+        example: 50000
+        type: integer
+      user_id:
+        example: aba3b3ed-e3d8-4403-9751-1f04287c9d65
+        type: string
+    required:
+    - hotel_id
+    type: object
   presenter.FullTourResponse:
     properties:
       agency_id:
@@ -99,6 +128,49 @@ definitions:
       tour_id:
         example: 12
         type: integer
+    type: object
+  presenter.ReservationCreateReq:
+    properties:
+      check_in:
+        example: "2024-08-01T00:00:00Z"
+        type: string
+      check_out:
+        example: "2024-08-05T00:00:00Z"
+        type: string
+      hotel_id:
+        example: 3
+        type: integer
+      room_id:
+        example: 1
+        type: integer
+      user_id:
+        example: aba3b3ed-e3d8-4403-9751-1f04287c9d65
+        type: string
+    required:
+    - check_in
+    - check_out
+    - hotel_id
+    - room_id
+    - user_id
+    type: object
+  presenter.ReservationResp:
+    properties:
+      check_in:
+        type: string
+      check_out:
+        type: string
+      hotel_id:
+        type: integer
+      id:
+        type: integer
+      room_id:
+        type: integer
+      status:
+        type: string
+      total_price:
+        type: integer
+      user_id:
+        type: string
     type: object
   presenter.Response:
     properties:
@@ -326,6 +398,183 @@ paths:
       summary: Get agencies by owner ID
       tags:
       - agencies
+  /reservations:
+    post:
+      consumes:
+      - application/json
+      description: Create a new Tour reservation
+      parameters:
+      - description: Reservation to create
+        in: body
+        name: reservation
+        required: true
+        schema:
+          $ref: '#/definitions/presenter.ReservationCreateReq'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/presenter.ReservationResp'
+        "400":
+          description: 'error: bad request'
+          schema:
+            $ref: '#/definitions/presenter.Response'
+        "500":
+          description: 'error: internal server error'
+          schema:
+            $ref: '#/definitions/presenter.Response'
+      summary: Create a new Tour reservation
+      tags:
+      - reservations
+  /reservations/{id}:
+    delete:
+      description: Delete a reservation by ID
+      parameters:
+      - description: Reservation ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: 'error: bad request'
+          schema:
+            $ref: '#/definitions/presenter.Response'
+        "500":
+          description: 'error: internal server error'
+          schema:
+            $ref: '#/definitions/presenter.Response'
+      summary: Delete a reservation by ID
+      tags:
+      - reservations
+    get:
+      description: Get a reservation by ID
+      parameters:
+      - description: Reservation ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presenter.ReservationResp'
+        "400":
+          description: 'error: bad request'
+          schema:
+            $ref: '#/definitions/presenter.Response'
+        "500":
+          description: 'error: internal server error'
+          schema:
+            $ref: '#/definitions/presenter.Response'
+      summary: Get a reservation by ID
+      tags:
+      - reservations
+    put:
+      consumes:
+      - application/json
+      description: Update a reservation by ID
+      parameters:
+      - description: Reservation ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Reservation to update
+        in: body
+        name: reservation
+        required: true
+        schema:
+          $ref: '#/definitions/presenter.ReservationCreateReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presenter.ReservationResp'
+        "400":
+          description: 'error: bad request'
+          schema:
+            $ref: '#/definitions/presenter.Response'
+        "500":
+          description: 'error: internal server error'
+          schema:
+            $ref: '#/definitions/presenter.Response'
+      summary: Update a reservation by ID
+      tags:
+      - reservations
+  /reservations/agency:
+    get:
+      description: Get reservations by agency owner ID
+      parameters:
+      - description: Owner ID
+        in: query
+        name: owner_id
+        required: true
+        type: string
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Page size
+        in: query
+        name: page_size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presenter.FullReservationResponse'
+        "400":
+          description: 'error: bad request'
+          schema:
+            $ref: '#/definitions/presenter.Response'
+        "500":
+          description: 'error: internal server error'
+          schema:
+            $ref: '#/definitions/presenter.Response'
+      summary: Get reservations by agency owner ID
+      tags:
+      - reservations
+  /reservations/user:
+    get:
+      description: Get reservations by user ID
+      parameters:
+      - description: User ID
+        in: query
+        name: user_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presenter.ReservationResp'
+        "400":
+          description: 'error: bad request'
+          schema:
+            $ref: '#/definitions/presenter.Response'
+        "500":
+          description: 'error: internal server error'
+          schema:
+            $ref: '#/definitions/presenter.Response'
+      summary: Get reservations by user ID
+      tags:
+      - reservations
   /tours:
     get:
       description: Get a paginated list of tours
