@@ -54,6 +54,9 @@ func (s *VehicleReService) CreateVehicleReq(ctx context.Context, vR *vehiclerequ
 	}
 	// send vr to rabbit MQ TODO: with distance and date
 	matchedOne, err := s.vClient.SelectVehicles(vR)
+	if err!=nil{
+		return err
+	}
 	vR.MatchedVehicleID = matchedOne.ID
 	vR.VehicleName = matchedOne.Name
 	vR.VehicleProductionYear = int(matchedOne.ProductionYear)
