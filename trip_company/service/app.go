@@ -62,7 +62,6 @@ func NewAppContainer(cfg config.Config) (*AppContainer, error) {
 	app.setBankClient(cfg.Server.ServiceRegistry.BankServiceName)
 	app.setVClient(cfg.Server.ServiceRegistry.VehicleServiceName)
 
-
 	//app.setPathService()
 	return app, nil
 }
@@ -101,6 +100,7 @@ func (a *AppContainer) mustRegisterService(srvCfg config.Server) {
 	if err != nil {
 		log.Fatalf("Failed to register service with Consul: %v", err)
 	}
+	a.serviceRegistry = registry
 }
 
 func (a *AppContainer) CompanyService() *TransportCompanyService {
