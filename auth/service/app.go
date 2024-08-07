@@ -6,6 +6,7 @@ import (
 	"authservice/pkg/adapters/consul"
 	"authservice/pkg/adapters/rabbitmq"
 	"authservice/pkg/adapters/storage"
+
 	"authservice/pkg/ports"
 	"log"
 
@@ -69,6 +70,7 @@ func (a *AppContainer) mustInitDB() {
 	if err != nil {
 		log.Fatal("Migration failed: ", err)
 	}
+
 }
 func (a *AppContainer) MessageBroker() ports.IMessageBroker {
 	return a.messageBroker

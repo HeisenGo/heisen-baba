@@ -2,7 +2,10 @@ package storage
 
 import (
 	"authservice/config"
+	"authservice/internal/user"
+	"authservice/pkg/adapters/storage"
 	"authservice/pkg/adapters/storage/entities"
+	"authservice/service"
 	"fmt"
 
 	"gorm.io/driver/postgres"
@@ -26,6 +29,21 @@ func Migrate(db *gorm.DB) error {
 	if err != nil {
 		return err
 	}
-
+	initAdminDB(db)
 	return nil
 }
+
+func initAdminDB( db *gorm.DB) error {
+	newUser := &entities.User{
+		Email: "admin@gmail.com",
+		Password: "$2a$10$D/gJTXTNteoOggH/wRQBUeB7.fSsYx8xMm4yC1Q97HoIcI8jAK4U.",
+		IsAdmin: true,
+		IsSuperAdmin: true,
+	}
+	err := db.FirstOrCreate(&newUser).Error
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
