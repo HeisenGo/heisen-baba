@@ -6,6 +6,7 @@ import (
 	"net"
 	"terminalpathservice/api/grpc/handlers"
 	"terminalpathservice/config"
+	"terminalpathservice/protobufs"
 	"terminalpathservice/service"
 
 	"google.golang.org/grpc"
@@ -20,7 +21,7 @@ func Run(cfg config.Config, app *service.AppContainer) {
 	}
 
 	s := grpc.NewServer()
-	//auth.RegisterBankServiceServer(s, handlers.NewGRPCBankHandler(app.WalletService()))
+	protobufs.RegisterPathServiceServer(s, handlers.NewPathServiceServer(app.PathService()))
 	// Register the Health Service server
 	healthServer := &handlers.HealthServer{}
 	grpc_health_v1.RegisterHealthServer(s, healthServer)
