@@ -23,7 +23,7 @@ type TicketService struct {
 	ticketOps  *ticket.Ops
 	tripOps    *trip.Ops
 	invoiceOps *invoice.Ops
-	bankClient   clients.IBankClient
+	bankClient clients.IBankClient
 }
 
 func NewTicketService(ticketOps *ticket.Ops, tripOps *trip.Ops, invoiceOps *invoice.Ops, bclient clients.IBankClient) *TicketService {
@@ -64,7 +64,14 @@ func (s *TicketService) ProcessAgencyTicket(ctx context.Context, t *ticket.Ticke
 	if err != nil {
 		return err
 	}
-
+	//*********************************
+	y, err := s.bankClient.Transfer(trp.TransportCompany.OwnerID.String(), "", true, uint64(t.TotalPrice))
+	if err != nil {
+		return err
+	}
+	if !y {
+		return errors.New("unsuccessful pay")
+	}
 	//if invoice was successfull // TODO
 	//****************************************
 	trp.SoldTickets = trp.SoldTickets + uint(t.Quantity)
