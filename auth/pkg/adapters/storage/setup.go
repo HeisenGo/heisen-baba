@@ -1,12 +1,9 @@
 package storage
 
 import (
-	"authservice/config"
-	"authservice/internal/user"
-	"authservice/pkg/adapters/storage"
-	"authservice/pkg/adapters/storage/entities"
-	"authservice/service"
 	"fmt"
+	"authservice/config"
+	"authservice/pkg/adapters/storage/entities"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
