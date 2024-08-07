@@ -1,4 +1,4 @@
-package main
+package rest
 
 import (
 	"encoding/json"
@@ -7,21 +7,21 @@ import (
 	"net/http"
 	"tripcompanyservice/internal/vehicle"
 	vehiclerequest "tripcompanyservice/internal/vehicle_request"
+	"tripcompanyservice/pkg/ports"
 )
 
-// RestVehicleClient defines the client used to interact with the vehicle service.
 type RestVehicleClient struct {
-	baseURL string
+	ServiceRegistry        ports.IServiceRegistry
+	VServiceName string
 }
 
-// NewRestVehicleClient initializes a new RestVehicleClient with the base URL of the service.
-func NewRestVehicleClient(baseURL string) *RestVehicleClient {
-	return &RestVehicleClient{baseURL: baseURL}
+func NewRestVehicleClient(serviceRegistry ports.IServiceRegistry, vServiceName string) *RestVehicleClient {
+	return &RestVehicleClient{ServiceRegistry: serviceRegistry, VServiceName: vServiceName}
 }
 
-// SelectVehicles sends a GET request to fetch vehicles based on the VehicleRequest.
 func (r *RestVehicleClient) SelectVehicles(vr vehiclerequest.VehicleRequest) (*vehicle.FullVehicleResponse, error) {
-	url := fmt.Sprintf("%s/api/v1/companies/vehicles/select?id=%d", r.baseURL, vr.ID)
+
+	url := fmt.Sprintf("http://%s/api/v1/companies/vehicles/select?num_passengers=%v?cost=%v?production_year=%d", r.VServiceName, vr.MinCapacity, vr.VehicleReservationFee, vr.ProductionYearMin)
 
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {

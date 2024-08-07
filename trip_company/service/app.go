@@ -11,6 +11,7 @@ import (
 	"tripcompanyservice/internal/trip"
 	vehiclerequest "tripcompanyservice/internal/vehicle_request"
 	"tripcompanyservice/pkg/adapters/clients/grpc"
+	"tripcompanyservice/pkg/adapters/clients/rest"
 	"tripcompanyservice/pkg/adapters/consul"
 	"tripcompanyservice/pkg/adapters/storage"
 	"tripcompanyservice/pkg/ports"
@@ -34,6 +35,7 @@ type AppContainer struct {
 	authClient clients.IAuthClient
 	pathClient clients.IPathClient
 	bankClient clients.IBankClient
+	vClient    clients.IVehicleClient
 }
 
 func NewAppContainer(cfg config.Config) (*AppContainer, error) {
@@ -58,6 +60,8 @@ func NewAppContainer(cfg config.Config) (*AppContainer, error) {
 	app.setAuthClient(cfg.Server.ServiceRegistry.AuthServiceName)
 	app.setPathClient(cfg.Server.ServiceRegistry.PathServiceName)
 	app.setBankClient(cfg.Server.ServiceRegistry.BankServiceName)
+	app.setVClient(cfg.Server.ServiceRegistry.VehicleServiceName)
+
 
 	//app.setPathService()
 	return app, nil
@@ -318,4 +322,15 @@ func (a *AppContainer) setBankClient(bankServiceName string) {
 		return
 	}
 	a.bankClient = grpc.NewGRPCBankClient(a.serviceRegistry, bankServiceName)
+}
+
+func (a *AppContainer) setVClient(vServiceName string) {
+	if a.vClient != nil {
+		return
+	}
+	a.vClient = rest.NewRestVehicleClient(a.serviceRegistry, vServiceName)
+}
+
+func (a *AppContainer) VClient() clients.IBankClient {
+	return a.bankClient
 }

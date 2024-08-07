@@ -6,5 +6,5 @@ import (
 )
 
 type IVehicleClient interface {
-	SelectVehicles(vr vehiclerequest.VehicleRequest) (vehicle.FullVehicleResponse, error)
+	SelectVehicles(vr vehiclerequest.VehicleRequest) (*vehicle.FullVehicleResponse, error)
 }
