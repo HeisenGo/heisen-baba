@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"tripcompanyservice/internal/user"
-	"tripcompanyservice/pkg/adapters/clients/grpc/mappers.go"
+	"tripcompanyservice/pkg/adapters/clients/grpc/mappers"
 	"tripcompanyservice/pkg/ports"
 	"tripcompanyservice/protobufs"
 

@@ -1,52 +1,53 @@
-package rest
+package main
 
 import (
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
-	"terminalpathservice/pkg/ports"
 	"tripcompanyservice/internal/vehicle"
 	vehiclerequest "tripcompanyservice/internal/vehicle_request"
 )
 
+// RestVehicleClient defines the client used to interact with the vehicle service.
 type RestVehicleClient struct {
-	ServiceRegistry        ports.IServiceRegistry
-	VehicleServiceName string
+	baseURL string
 }
 
-func NewVehicleClient(serviceRegistry ports.IServiceRegistry, vServiceName string) *RestVehicleClient {
-	return &RestVehicleClient{ServiceRegistry: serviceRegistry, VehicleServiceName: vServiceName}
+// NewRestVehicleClient initializes a new RestVehicleClient with the base URL of the service.
+func NewRestVehicleClient(baseURL string) *RestVehicleClient {
+	return &RestVehicleClient{baseURL: baseURL}
 }
 
-func (r *RestVehicleClient) SelectVehicles(vr vehiclerequest.VehicleRequest) (vehicle.FullVehicleResponse, error) {
-
-	url := fmt.Sprintf("http://%s/api/v1/companies/vehicles/select%v", )
+// SelectVehicles sends a GET request to fetch vehicles based on the VehicleRequest.
+func (r *RestVehicleClient) SelectVehicles(vr vehiclerequest.VehicleRequest) (*vehicle.FullVehicleResponse, error) {
+	url := fmt.Sprintf("%s/api/v1/companies/vehicles/select?id=%d", r.baseURL, vr.ID)
 
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
-		return 0, fmt.Errorf("Error creating request: %v", err)
+		return nil, fmt.Errorf("error creating request: %v", err)
 	}
 
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		return 0, fmt.Errorf("Error sending request: %v", err)
+		return nil, fmt.Errorf("error sending request: %v", err)
 	}
 	defer resp.Body.Close()
 
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("received non-OK response status: %s", resp.Status)
+	}
+
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return 0, fmt.Errorf("Error reading response: %v", err)
+		return nil, fmt.Errorf("error reading response: %v", err)
 	}
 
-	var responseData struct {
-		Count int `json:"count"`
+	var response vehicle.FullVehicleResponse
+	if err := json.Unmarshal(body, &response); err != nil {
+		return nil, fmt.Errorf("error unmarshalling JSON: %v", err)
 	}
 
-	if err := json.Unmarshal(body, &responseData); err != nil {
-		return 0, fmt.Errorf("Error unmarshalling JSON: %v", err)
-	}
-
-	return uint(responseData.Count), nil
+	return &response, nil
 }
