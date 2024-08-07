@@ -25,6 +25,7 @@ type ServiceRegistry struct {
 	AuthServiceName string `mapstructure:"auth_service_name"`
 	PathServiceName string `mapstructure:"path_service_name"`
 	BankServiceName string `mapstructure:"bank_service_name"`
+	VehicleServiceName string `mapstructure:"vehicle_service_name"`
 }
 
 type DB struct {

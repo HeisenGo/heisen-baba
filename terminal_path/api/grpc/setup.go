@@ -28,8 +28,8 @@ func Run(cfg config.Config, app *service.AppContainer) {
 	// Register reflection service on gRPC server
 	reflection.Register(s)
 
-	log.Println("Server listening at %v", lis.Addr())
+	log.Printf("Server listening at %v", lis.Addr())
 	if err := s.Serve(lis); err != nil {
-		fmt.Println("Failed to serve: %v", err)
+		fmt.Printf("Failed to serve: %v", err)
 	}
 }
