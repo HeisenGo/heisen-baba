@@ -6,6 +6,7 @@ import (
 	"time"
 	"tripcompanyservice/internal/trip"
 	vehiclerequest "tripcompanyservice/internal/vehicle_request"
+	"tripcompanyservice/pkg/ports/clients/clients"
 
 	"github.com/google/uuid"
 )
@@ -18,6 +19,8 @@ var (
 type VehicleReService struct {
 	vehicleReqOps *vehiclerequest.Ops
 	tripOps       *trip.Ops
+	vClient  clients.IVehicleClient
+
 }
 
 func NewVehicleReService(vehicleReqOps *vehiclerequest.Ops, tripOps *trip.Ops) *VehicleReService {
