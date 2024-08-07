@@ -1,0 +1,9 @@
+server:
+  http_port: 8080
+  host: "0.0.0.0"
+db:
+  user: "root"
+  pass: "123456"
+  host : "localhost"
+  port: 5432
+  db_name: "hotel_domain"
