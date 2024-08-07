@@ -2,6 +2,8 @@ package handlers
 
 import (
 	"hotel/api/http/handlers/presenter"
+	"hotel/internal/user"
+	"hotel/pkg/valuecontext"
 	"hotel/service"
 	"strconv"
 
@@ -29,7 +31,12 @@ func CreateHotel(hotelService *service.HotelService) fiber.Handler {
 		if err := BodyValidator(&req); err != nil {
 			return presenter.BadRequest(c, err)
 		}
+		userReq, ok := c.Locals(valuecontext.UserClaimKey).(*user.User)
+		if !ok {
+			return SendError(c, errWrongClaimType, fiber.StatusBadRequest)
+		}
 		h := presenter.CreateHotelRequest(&req)
+		h.OwnerID = userReq.ID
 		if err := hotelService.CreateHotel(c.UserContext(), h); err != nil {
 			return presenter.InternalServerError(c, err)
 		}
@@ -165,6 +172,7 @@ func DeleteHotel(hotelService *service.HotelService) fiber.Handler {
 		return presenter.NoContent(c)
 	}
 }
+
 // BlockHotel blocks a hotel by its ID
 // @Summary Block a hotel by ID
 // @Description Block a hotel by its ID
@@ -176,16 +184,16 @@ func DeleteHotel(hotelService *service.HotelService) fiber.Handler {
 // @Failure 500 {object} presenter.Response "Internal server error"
 // @Router /hotels/{id}/block [patch]
 func BlockHotel(hotelService *service.HotelService) fiber.Handler {
-    return func(c *fiber.Ctx) error {
-        hotelID, err := strconv.Atoi(c.Params("id"))
-        if err != nil {
-            return presenter.BadRequest(c, err)
-        }
+	return func(c *fiber.Ctx) error {
+		hotelID, err := strconv.Atoi(c.Params("id"))
+		if err != nil {
+			return presenter.BadRequest(c, err)
+		}
 
-        if err := hotelService.BlockHotel(c.UserContext(), uint(hotelID)); err != nil {
-            return presenter.InternalServerError(c, err)
-        }
+		if err := hotelService.BlockHotel(c.UserContext(), uint(hotelID)); err != nil {
+			return presenter.InternalServerError(c, err)
+		}
 
-        return presenter.OK(c, "Hotel blocked successfully", nil)
-    }
+		return presenter.OK(c, "Hotel blocked successfully", nil)
+	}
 }

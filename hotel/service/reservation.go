@@ -4,18 +4,21 @@ import (
 	"context"
 	"hotel/internal/invoice"
 	"hotel/internal/reservation"
+	"hotel/pkg/ports/clients/clients"
 	"time"
 
 	"github.com/google/uuid"
 )
 
 type ReservationService struct {
+	bankClient     clients.IBankClient
 	reservationOps *reservation.Ops
 	invoiceOps     *invoice.Ops
 }
 
-func NewReservationService(reservationOps *reservation.Ops, invoiceOps *invoice.Ops) *ReservationService {
+func NewReservationService(bankClient clients.IBankClient, reservationOps *reservation.Ops, invoiceOps *invoice.Ops) *ReservationService {
 	return &ReservationService{
+		bankClient:     bankClient,
 		reservationOps: reservationOps,
 		invoiceOps:     invoiceOps,
 	}
@@ -42,7 +45,13 @@ func (s *ReservationService) CreateReservation(ctx context.Context, res *reserva
 	if err != nil {
 		return err
 	}
-	// TO DO : Check the Paid status of invoice
+	isSuccess, err := s.bankClient.Transfer(inv.UserID.String(), inv.OwnerID.String(), false, inv.Amount)
+	if err != nil {
+		return err
+	}
+	if isSuccess {
+		inv.Paid = true
+	}
 	return nil
 }
 
