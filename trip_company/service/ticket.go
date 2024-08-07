@@ -8,6 +8,7 @@ import (
 	"tripcompanyservice/internal/invoice"
 	"tripcompanyservice/internal/ticket"
 	"tripcompanyservice/internal/trip"
+	"tripcompanyservice/pkg/ports/clients/clients"
 
 	"github.com/google/uuid"
 )
@@ -22,13 +23,15 @@ type TicketService struct {
 	ticketOps  *ticket.Ops
 	tripOps    *trip.Ops
 	invoiceOps *invoice.Ops
+	bankClient   clients.IBankClient
 }
 
-func NewTicketService(ticketOps *ticket.Ops, tripOps *trip.Ops, invoiceOps *invoice.Ops) *TicketService {
+func NewTicketService(ticketOps *ticket.Ops, tripOps *trip.Ops, invoiceOps *invoice.Ops, bclient clients.IBankClient) *TicketService {
 	return &TicketService{
 		ticketOps:  ticketOps,
 		tripOps:    tripOps,
 		invoiceOps: invoiceOps,
+		bankClient: bclient,
 	}
 }
 
