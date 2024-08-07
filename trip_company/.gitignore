@@ -1,2 +1,5 @@
 logs
 .vscode
+*.yaml
+*.logs
+init.sql

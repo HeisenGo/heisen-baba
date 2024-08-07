@@ -26,7 +26,7 @@ func Run(cfg config.Server, app *service.AppContainer) {
 
 	registerTransportCompanyRoutes(api, app, createGroupLogger("companies"))
 
-	log.Fatal(fiberApp.Listen(fmt.Sprintf("%s:%d", cfg.Host, cfg.HttpPort)))
+	log.Fatal(fiberApp.Listen(fmt.Sprintf("%s:%d", cfg.Host, cfg.HTTPPort)))
 }
 
 func loggerSetup(app *fiber.App) func(groupName string) fiber.Handler {
