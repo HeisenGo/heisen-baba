@@ -10,17 +10,7 @@ import (
 	"strconv"
 )
 
-// CreateReservation creates a new reservation
-// @Summary Create a new reservation
-// @Description Create a new reservation
-// @Tags reservations
-// @Accept json
-// @Produce json
-// @Param reservation body presenter.ReservationCreateReq true "Reservation to create"
-// @Success 201 {object} presenter.ReservationResp
-// @Failure 400 {object} presenter.Response "error: bad request"
-// @Failure 500 {object} presenter.Response "error: internal server error"
-// @Router /reservations [post]
+
 func CreateReservation(reservationService *service.ReservationService) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		var req presenter.ReservationCreateReq

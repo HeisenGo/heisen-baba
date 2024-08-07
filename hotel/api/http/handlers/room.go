@@ -97,7 +97,7 @@ func GetRooms(roomService *service.RoomService) fiber.Handler {
 // @Tags rooms
 // @Produce json
 // @Param id path int true "room ID"
-// @Success 200 {object} presenter.roomResp
+// @Success 200 {object} presenter.RoomResp
 // @Failure 400 {object} presenter.Response "error: bad request"
 // @Failure 500 {object} presenter.Response "error: internal server error"
 // @Router /rooms/{id} [get]

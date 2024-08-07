@@ -14,15 +14,11 @@ definitions:
       name:
         example: myhotel
         type: string
-      owner_id:
-        example: aba3b3ed-e3d8-4403-9751-1f04287c9d65
-        type: string
     required:
     - city
     - country
     - details
     - name
-    - owner_id
     type: object
   presenter.CreateHotelResponse:
     properties:
@@ -104,6 +100,9 @@ definitions:
       check_out:
         example: "2024-08-05T00:00:00Z"
         type: string
+      hotel_id:
+        example: 3
+        type: integer
       reservation_id:
         example: 12
         type: integer
@@ -119,6 +118,8 @@ definitions:
       user_id:
         example: aba3b3ed-e3d8-4403-9751-1f04287c9d65
         type: string
+    required:
+    - hotel_id
     type: object
   presenter.HotelRoomResp:
     properties:
@@ -145,14 +146,11 @@ definitions:
       check_out:
         example: "2024-08-05T00:00:00Z"
         type: string
+      hotel_id:
+        example: 3
+        type: integer
       room_id:
         example: 1
-        type: integer
-      status:
-        example: booked
-        type: string
-      total_price:
-        example: 50000
         type: integer
       user_id:
         example: aba3b3ed-e3d8-4403-9751-1f04287c9d65
@@ -160,9 +158,8 @@ definitions:
     required:
     - check_in
     - check_out
+    - hotel_id
     - room_id
-    - status
-    - total_price
     - user_id
     type: object
   presenter.ReservationResp:
@@ -171,6 +168,8 @@ definitions:
         type: string
       check_out:
         type: string
+      hotel_id:
+        type: integer
       id:
         type: integer
       room_id:
@@ -427,7 +426,7 @@ paths:
     post:
       consumes:
       - application/json
-      description: Create a new reservation
+      description: Create a new room reservation
       parameters:
       - description: Reservation to create
         in: body
@@ -450,7 +449,7 @@ paths:
           description: 'error: internal server error'
           schema:
             $ref: '#/definitions/presenter.Response'
-      summary: Create a new reservation
+      summary: Create a new room reservation
       tags:
       - reservations
   /reservations/{id}:
@@ -678,6 +677,32 @@ paths:
           schema:
             $ref: '#/definitions/presenter.Response'
       summary: Delete a room by ID
+      tags:
+      - rooms
+    get:
+      description: Get a room by ID
+      parameters:
+      - description: room ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presenter.RoomResp'
+        "400":
+          description: 'error: bad request'
+          schema:
+            $ref: '#/definitions/presenter.Response'
+        "500":
+          description: 'error: internal server error'
+          schema:
+            $ref: '#/definitions/presenter.Response'
+      summary: Get a room by ID
       tags:
       - rooms
     put:

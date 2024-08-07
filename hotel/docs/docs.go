@@ -299,7 +299,7 @@ const docTemplate = `{
         },
         "/reservations": {
             "post": {
-                "description": "Create a new reservation",
+                "description": "Create a new room reservation",
                 "consumes": [
                     "application/json"
                 ],
@@ -309,7 +309,7 @@ const docTemplate = `{
                 "tags": [
                     "reservations"
                 ],
-                "summary": "Create a new reservation",
+                "summary": "Create a new room reservation",
                 "parameters": [
                     {
                         "description": "Reservation to create",
@@ -650,6 +650,45 @@ const docTemplate = `{
             }
         },
         "/rooms/{id}": {
+            "get": {
+                "description": "Get a room by ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "rooms"
+                ],
+                "summary": "Get a room by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "room ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/presenter.RoomResp"
+                        }
+                    },
+                    "400": {
+                        "description": "error: bad request",
+                        "schema": {
+                            "$ref": "#/definitions/presenter.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "error: internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/presenter.Response"
+                        }
+                    }
+                }
+            },
             "put": {
                 "description": "Update a room by ID",
                 "consumes": [
@@ -752,8 +791,7 @@ const docTemplate = `{
                 "city",
                 "country",
                 "details",
-                "name",
-                "owner_id"
+                "name"
             ],
             "properties": {
                 "city": {
@@ -771,10 +809,6 @@ const docTemplate = `{
                 "name": {
                     "type": "string",
                     "example": "myhotel"
-                },
-                "owner_id": {
-                    "type": "string",
-                    "example": "aba3b3ed-e3d8-4403-9751-1f04287c9d65"
                 }
             }
         },
@@ -883,6 +917,9 @@ const docTemplate = `{
         },
         "presenter.FullReservationResponse": {
             "type": "object",
+            "required": [
+                "hotel_id"
+            ],
             "properties": {
                 "check_in": {
                     "type": "string",
@@ -891,6 +928,10 @@ const docTemplate = `{
                 "check_out": {
                     "type": "string",
                     "example": "2024-08-05T00:00:00Z"
+                },
+                "hotel_id": {
+                    "type": "integer",
+                    "example": 3
                 },
                 "reservation_id": {
                     "type": "integer",
@@ -945,9 +986,8 @@ const docTemplate = `{
             "required": [
                 "check_in",
                 "check_out",
+                "hotel_id",
                 "room_id",
-                "status",
-                "total_price",
                 "user_id"
             ],
             "properties": {
@@ -959,17 +999,13 @@ const docTemplate = `{
                     "type": "string",
                     "example": "2024-08-05T00:00:00Z"
                 },
+                "hotel_id": {
+                    "type": "integer",
+                    "example": 3
+                },
                 "room_id": {
                     "type": "integer",
                     "example": 1
-                },
-                "status": {
-                    "type": "string",
-                    "example": "booked"
-                },
-                "total_price": {
-                    "type": "integer",
-                    "example": 50000
                 },
                 "user_id": {
                     "type": "string",
@@ -985,6 +1021,9 @@ const docTemplate = `{
                 },
                 "check_out": {
                     "type": "string"
+                },
+                "hotel_id": {
+                    "type": "integer"
                 },
                 "id": {
                     "type": "integer"
