@@ -1,20 +1,88 @@
 package service
 
 import (
-	"context"
+	"agency/internal/agency"
+	"agency/internal/invoice"
+	"agency/internal/reservation"
 	"agency/internal/tour"
+	"agency/pkg/ports/clients/clients"
+	"context"
+	"errors"
+	"time"
+)
+
+
+var (
+	ErrTourNotFound          = errors.New("tour not found")
+	ErrReservationNotCreated = errors.New("reservation not created")
+	ErrInvoiceNotCreated     = errors.New("invoice not created")
 )
 
 type TourService struct {
-	tourOps *tour.Ops
+	tourOps        *tour.Ops
+	reservationOps *reservation.Ops
+	agencyOps       *agency.Ops
+	invoiceOps     *invoice.Ops
+	bankClient     clients.IBankClient
 }
 
-func NewTourService(tourOps *tour.Ops) *TourService {
+func NewTourService(tourOps *tour.Ops, reservationOps *reservation.Ops, agencyOps *agency.Ops, invoiceOps *invoice.Ops, bankClient clients.IBankClient) *TourService {
 	return &TourService{
-		tourOps: tourOps,
+		tourOps:        tourOps,
+		reservationOps: reservationOps,
+		agencyOps:       agencyOps,
+		invoiceOps:     invoiceOps,
+		bankClient:     bankClient,
 	}
 }
+func (s *TourService) CreateTourReservation(ctx context.Context, res *reservation.Reservation) error {
+	// Ensure Tour exists before creating a reservation
+	existingTour, err := s.tourOps.GetTourByID(ctx, res.TourID)
+	if err != nil {
+		return ErrTourNotFound
+	}
+	if existingTour == nil {
+		return ErrTourNotFound
+	}
+	res.TotalPrice = existingTour.UserPrice
+	agency, err := s.agencyOps.GetAgencyByID(ctx, existingTour.AgencyID)
+	if err != nil {
+		return err
+	}
 
+	res.OwnerID = agency.OwnerID
+	// Validate and create the reservation
+	err = s.reservationOps.Create(ctx, res)
+	if err != nil {
+		return err
+	}
+	inv := &invoice.Invoice{
+		ReservationID: res.ID,
+		IssueDate:     time.Now(),
+		Amount:        res.TotalPrice,
+		UserID:        res.UserID,
+		OwnerID:       res.OwnerID,
+		Paid:          false,
+	}
+
+	err = s.invoiceOps.Create(ctx, inv)
+	if err != nil {
+		return err
+	}
+	isSuccess, err := s.bankClient.Transfer(inv.UserID.String(), inv.OwnerID.String(), false, inv.Amount)
+	if err != nil {
+		return err
+	}
+	if isSuccess {
+		inv.Paid = true
+	}
+	if err := s.reservationOps.Create(ctx, res); err != nil {
+		return ErrReservationNotCreated
+
+	}
+
+	return nil
+}
 func (s *TourService) CreateTour(ctx context.Context, t *tour.Tour) error {
 	return s.tourOps.CreateTour(ctx, t)
 }

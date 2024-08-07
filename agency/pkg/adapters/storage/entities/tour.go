@@ -14,6 +14,7 @@ type Tour struct {
 	BackTicketID uint
 	HotelID      uint
 	Capacity     uint
+	UserPrice    uint64
 	ReleaseDate  time.Time
 	IsApproved   bool
 	IsActive     bool

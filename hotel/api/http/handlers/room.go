@@ -36,7 +36,32 @@ func CreateRoom(roomService *service.RoomService) fiber.Handler {
 		return presenter.Created(c, "Room created successfully", res)
 	}
 }
-
+// CreateRoomReservation creates a new room reservation
+// @Summary Create a new room reservation
+// @Description Create a new room reservation
+// @Tags reservations
+// @Accept json
+// @Produce json
+// @Param reservation body presenter.ReservationCreateReq true "Reservation to create"
+// @Success 201 {object} presenter.ReservationResp
+// @Failure 400 {object} presenter.Response "error: bad request"
+// @Failure 500 {object} presenter.Response "error: internal server error"
+// @Router /reservations [post]
+func CreateRoomReservation(reservationService *service.RoomService) fiber.Handler {
+    return func(c *fiber.Ctx) error {
+        var req presenter.ReservationCreateReq
+        if err := c.BodyParser(&req); err != nil {
+            return presenter.BadRequest(c, err)
+        }
+        res := presenter.ReservationReqToReservationDomain(&req)
+        err := reservationService.CreateRoomReservation(c.UserContext(), res)
+        if err != nil {
+            return presenter.InternalServerError(c, err)
+        }
+        response := presenter.ReservationToFullReservationResponse(res)
+        return presenter.Created(c, "Reservation created successfully", response)
+    }
+}
 // GetRooms gets a paginated list of rooms
 // @Summary Get rooms
 // @Description Get paginated list of rooms
