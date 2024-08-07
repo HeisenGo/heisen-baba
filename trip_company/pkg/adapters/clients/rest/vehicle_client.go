@@ -21,7 +21,7 @@ func NewRestVehicleClient(serviceRegistry ports.IServiceRegistry, vServiceName s
 
 func (r *RestVehicleClient) SelectVehicles(vr *vehiclerequest.VehicleRequest) (*vehicle.FullVehicleResponse, error) {
 
-	url := fmt.Sprintf("http://%s/api/v1/companies/vehicles/select?num_passengers=%v?cost=%v?production_year=%d", r.VServiceName, vr.MinCapacity, vr.ProductionYearMin)
+	url := fmt.Sprintf("http://%s/api/v1/companies/vehicles/select?num_passengers=%v?cost=%v?production_year=%d", r.VServiceName, vr.MinCapacity, vr.MinCost, vr.ProductionYearMin)
 
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
