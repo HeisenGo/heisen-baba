@@ -23,10 +23,11 @@ type VehicleReService struct {
 
 }
 
-func NewVehicleReService(vehicleReqOps *vehiclerequest.Ops, tripOps *trip.Ops) *VehicleReService {
+func NewVehicleReService(vehicleReqOps *vehiclerequest.Ops, tripOps *trip.Ops, vclient clients.IVehicleClient) *VehicleReService {
 	return &VehicleReService{
 		vehicleReqOps: vehicleReqOps,
 		tripOps:       tripOps,
+		vClient: vclient,
 	}
 }
 

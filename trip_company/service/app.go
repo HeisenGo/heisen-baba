@@ -250,6 +250,7 @@ func (a *AppContainer) VehicleReqServiceFromCtx(ctx context.Context) *VehicleReS
 	return NewVehicleReService(
 		vehiclerequest.NewOps(storage.NewVehicleReqRepo(gc)),
 		trip.NewOps(storage.NewTripRepo(gc)),
+		a.vClient,
 	)
 }
 
@@ -257,7 +258,8 @@ func (a *AppContainer) setVehicleReqService() {
 	if a.vehicleReqService != nil {
 		return
 	}
-	a.vehicleReqService = NewVehicleReService(vehiclerequest.NewOps(storage.NewVehicleReqRepo(a.dbConn)), trip.NewOps(storage.NewTripRepo(a.dbConn)))
+	a.vehicleReqService = NewVehicleReService(vehiclerequest.NewOps(storage.NewVehicleReqRepo(a.dbConn)), 
+	trip.NewOps(storage.NewTripRepo(a.dbConn)), a.vClient)
 }
 
 // Tech team service
