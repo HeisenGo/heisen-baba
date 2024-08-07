@@ -190,6 +190,7 @@ func (a *AppContainer) TicketServiceFromCtx(ctx context.Context) *TicketService 
 		ticket.NewOps(storage.NewTicketRepo(gc)),
 		trip.NewOps(storage.NewTripRepo(gc)),
 		invoice.NewOps(storage.NewInvoiceRepo(gc)),
+		a.bankClient,
 	)
 }
 
@@ -197,7 +198,9 @@ func (a *AppContainer) setTicketService() {
 	if a.ticketService != nil {
 		return
 	}
-	a.ticketService = NewTicketService(ticket.NewOps(storage.NewTicketRepo(a.dbConn)), trip.NewOps(storage.NewTripRepo(a.dbConn)), invoice.NewOps(storage.NewInvoiceRepo(a.dbConn)))
+	a.ticketService = NewTicketService(ticket.NewOps(storage.NewTicketRepo(a.dbConn)),
+		trip.NewOps(storage.NewTripRepo(a.dbConn)),
+		invoice.NewOps(storage.NewInvoiceRepo(a.dbConn)), a.bankClient)
 }
 
 // Invoice Service
@@ -250,6 +253,7 @@ func (a *AppContainer) VehicleReqServiceFromCtx(ctx context.Context) *VehicleReS
 	return NewVehicleReService(
 		vehiclerequest.NewOps(storage.NewVehicleReqRepo(gc)),
 		trip.NewOps(storage.NewTripRepo(gc)),
+		a.vClient,
 	)
 }
 
@@ -257,7 +261,8 @@ func (a *AppContainer) setVehicleReqService() {
 	if a.vehicleReqService != nil {
 		return
 	}
-	a.vehicleReqService = NewVehicleReService(vehiclerequest.NewOps(storage.NewVehicleReqRepo(a.dbConn)), trip.NewOps(storage.NewTripRepo(a.dbConn)))
+	a.vehicleReqService = NewVehicleReService(vehiclerequest.NewOps(storage.NewVehicleReqRepo(a.dbConn)),
+		trip.NewOps(storage.NewTripRepo(a.dbConn)), a.vClient)
 }
 
 // Tech team service

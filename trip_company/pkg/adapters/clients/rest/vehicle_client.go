@@ -19,7 +19,7 @@ func NewRestVehicleClient(serviceRegistry ports.IServiceRegistry, vServiceName s
 	return &RestVehicleClient{ServiceRegistry: serviceRegistry, VServiceName: vServiceName}
 }
 
-func (r *RestVehicleClient) SelectVehicles(vr vehiclerequest.VehicleRequest) (*vehicle.FullVehicleResponse, error) {
+func (r *RestVehicleClient) SelectVehicles(vr *vehiclerequest.VehicleRequest) (*vehicle.FullVehicleResponse, error) {
 
 	url := fmt.Sprintf("http://%s/api/v1/companies/vehicles/select?num_passengers=%v?cost=%v?production_year=%d", r.VServiceName, vr.MinCapacity, vr.VehicleReservationFee, vr.ProductionYearMin)
 
