@@ -34,11 +34,12 @@ type TripService struct {
 	ticketOps   *ticket.Ops
 	invoiceOps  *invoice.Ops
 	pathClient  clients.IPathClient
+	bankClient  clients.IBankClient
 }
 
 func NewTripService(tripOps *trip.Ops, companyOps *company.Ops, 
 	techTeamOps *techteam.Ops, ticketOps *ticket.Ops, 
-	invoiceOps *invoice.Ops, pathClient clients.IPathClient) *TripService {
+	invoiceOps *invoice.Ops, pathClient clients.IPathClient, bClient clients.IBankClient) *TripService {
 	return &TripService{
 		tripOps:     tripOps,
 		companyOps:  companyOps,
@@ -46,6 +47,7 @@ func NewTripService(tripOps *trip.Ops, companyOps *company.Ops,
 		ticketOps:   ticketOps,
 		invoiceOps:  invoiceOps,
 		pathClient: pathClient,
+		bankClient: bClient,
 	}
 }
 
@@ -151,17 +153,17 @@ func (s *TripService) CreateTrip(ctx context.Context, t *trip.Trip, creatorID uu
 		ToTerminal:   &trip.Terminal{},
 	}
 	//******************************************
-	t.Path.Name = "jjdjdjlk"
-	t.Path.FromTerminal.Name = "kjdkdkdkk"
-	t.Origin = "Tehran"
-	t.Destination = "Mashhad"
-	t.Path.ToTerminalID = 2
-	t.Path.FromTerminalID = 1
-	t.Path.ToTerminal.Name = "central"
-	t.Path.Type = "rail"
-	t.TripType = trip.TripType(t.Path.Type)
-	t.TripType = "rail"
-	t.Path.DistanceKM = 220
+	// t.Path.Name = "jjdjdjlk"
+	// t.Path.FromTerminal.Name = "kjdkdkdkk"
+	// t.Origin = "Tehran"
+	// t.Destination = "Mashhad"
+	// t.Path.ToTerminalID = 2
+	// t.Path.FromTerminalID = 1
+	// t.Path.ToTerminal.Name = "central"
+	// t.Path.Type = "rail"
+	// t.TripType = trip.TripType(t.Path.Type)
+	// t.TripType = "rail"
+	// t.Path.DistanceKM = 220
 	pp, err := s.pathClient.GetFullPathByID(uint32(t.PathID))
 	if err != nil {
 		return err
