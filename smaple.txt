@@ -1,0 +1,69 @@
+INSERT INTO trips (
+    created_at,
+    updated_at,
+    deleted_at,
+    transport_company_id,
+    trip_type,
+    user_release_date,
+    tour_release_date,
+    user_price,
+    agency_price,
+    path_id,
+    from_country,
+    to_country,
+    origin,
+    from_terminal_name,
+    to_terminal_name,
+    destination,
+    path_name,
+    path_distance_km,
+    status,
+    min_passengers,
+    tech_team_id,
+    vehicle_request_id,
+    sold_tickets,
+    trip_cancelling_penalty_id,
+    max_tickets,
+    vehicle_id,
+    vehicle_name,
+    is_canceled,
+    is_finished,
+    is_confirmed,
+    start_date,
+    end_date,
+    profit
+) VALUES (
+    NOW(),                -- created_at
+    NOW(),                -- updated_at
+    NULL,                 -- deleted_at (assuming the record is not deleted)
+    1,                    -- transport_company_id (reference to an existing TransportCompany ID)
+    'Regular',            -- trip_type
+    '2024-07-01 10:00:00', -- user_release_date
+    '2024-07-02 10:00:00', -- tour_release_date
+    500.00,               -- user_price
+    550.00,               -- agency_price
+    2,                    -- path_id (reference to an existing Path ID)
+    'CountryA',           -- from_country
+    'CountryB',           -- to_country
+    'CityA',              -- origin
+    'TerminalA',          -- from_terminal_name
+    'TerminalB',          -- to_terminal_name
+    'DestinationCity',   -- destination
+    'PathNameExample',    -- path_name
+    120.50,               -- path_distance_km
+    'pending',            -- status
+    10,                   -- min_passengers
+    3,                    -- tech_team_id (reference to an existing TechTeam ID)
+    5,                    -- vehicle_request_id (reference to an existing VehicleRequest ID)
+    0,                    -- sold_tickets
+    NULL,                 -- trip_cancelling_penalty_id (assuming no penalty)
+    100,                  -- max_tickets
+    6,                    -- vehicle_id (reference to an existing Vehicle ID)
+    'VehicleNameExample', -- vehicle_name
+    FALSE,                -- is_canceled
+    FALSE,                -- is_finished
+    TRUE,                 -- is_confirmed
+    '2024-08-10 09:00:00', -- start_date
+    '2024-08-10 18:00:00', -- end_date (calculated based on vehicle speed and path distance)
+    1000.00               -- profit
+);

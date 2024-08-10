@@ -1,24 +1,16 @@
 package handlers
 
 import (
-	"hotel/api/http/handlers/presenter"
-	"hotel/service"
-	"strconv"
+	"errors"
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
+	"hotel/api/http/handlers/presenter"
+	"hotel/internal/bank"
+	"hotel/service"
+	"strconv"
 )
 
-// CreateReservation creates a new reservation
-// @Summary Create a new reservation
-// @Description Create a new reservation
-// @Tags reservations
-// @Accept json
-// @Produce json
-// @Param reservation body presenter.ReservationCreateReq true "Reservation to create"
-// @Success 201 {object} presenter.ReservationResp
-// @Failure 400 {object} presenter.Response "error: bad request"
-// @Failure 500 {object} presenter.Response "error: internal server error"
-// @Router /reservations [post]
+
 func CreateReservation(reservationService *service.ReservationService) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		var req presenter.ReservationCreateReq
@@ -29,6 +21,9 @@ func CreateReservation(reservationService *service.ReservationService) fiber.Han
 		reservation := presenter.ReservationReqToReservationDomain(&req)
 		err := reservationService.CreateReservation(c.UserContext(), reservation)
 		if err != nil {
+			if errors.Is(err, bank.ErrNotEnoughMoney) {
+				return presenter.BadRequest(c, err)
+			}
 			return presenter.InternalServerError(c, err)
 		}
 

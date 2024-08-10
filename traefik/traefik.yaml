@@ -1,0 +1,24 @@
+global:
+  checkNewVersion: true
+  sendAnonymousUsage: true
+
+entryPoints:
+  web:
+    address: ":80"
+
+api:
+  dashboard: true
+  insecure: true
+
+providers:
+  consulCatalog:
+    endpoint:
+#      warning: change it for development mode: loclhost:8500
+      address: "consul:8500"
+
+log:
+  level: "DEBUG"
+  filePath: "logs/traefik.log"
+
+accessLog:
+  filePath: "logs/access.log"

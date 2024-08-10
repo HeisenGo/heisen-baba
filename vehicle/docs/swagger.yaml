@@ -1,0 +1,413 @@
+basePath: /api/v1
+definitions:
+  presenter.CreateVehicleReq:
+    properties:
+      capacity:
+        example: 25
+        type: integer
+      is_active:
+        example: true
+        type: boolean
+      is_blocked:
+        example: false
+        type: boolean
+      is_confirmed_by_admin:
+        example: true
+        type: boolean
+      min_required_tech_person:
+        example: 4
+        type: integer
+      motornumber:
+        example: aba3b-e3d8-4403-9751-1f04287c9d65
+        type: string
+      name:
+        example: Volvo RG
+        type: string
+      owner_id:
+        example: aba3b3ed-e3d8-4403-9751-1f04287c9d65
+        type: string
+      priceperhour:
+        example: 250
+        type: number
+      productionyear:
+        example: 1998
+        type: integer
+      speed:
+        example: 60
+        type: number
+      type:
+        description: rail, road, air, sailing
+        example: road
+        type: string
+    type: object
+  presenter.CreateVehicleResponse:
+    properties:
+      capacity:
+        type: integer
+      is_active:
+        type: boolean
+      is_blocked:
+        type: boolean
+      is_confirmed_by_admin:
+        type: boolean
+      min_required_tech_person:
+        type: integer
+      motornumber:
+        type: string
+      name:
+        type: string
+      owner_id:
+        type: string
+      priceperhour:
+        type: number
+      productionyear:
+        type: integer
+      speed:
+        type: number
+      type:
+        description: rail, road, air, sailing
+        type: string
+    type: object
+  presenter.FullVehicleResponse:
+    properties:
+      capacity:
+        example: 25
+        type: integer
+      is_active:
+        example: true
+        type: boolean
+      is_blocked:
+        example: false
+        type: boolean
+      is_confirmed_by_admin:
+        example: true
+        type: boolean
+      min_required_tech_person:
+        example: 4
+        type: integer
+      motornumber:
+        example: aba3b-e3d8-4403-9751-1f04287c9d65
+        type: string
+      name:
+        example: Volvo RG
+        type: string
+      owner_id:
+        example: aba3b3ed-e3d8-4403-9751-1f04287c9d65
+        type: string
+      priceperhour:
+        example: 250
+        type: number
+      productionyear:
+        example: 1998
+        type: integer
+      speed:
+        example: 60
+        type: number
+      type:
+        description: rail, road, air, sailing
+        example: road
+        type: string
+    type: object
+  presenter.Response:
+    properties:
+      data: {}
+      error:
+        type: string
+      message:
+        type: string
+      success:
+        type: boolean
+    type: object
+  presenter.UpdateVehicleReq:
+    properties:
+      capacity:
+        example: 25
+        type: integer
+      is_active:
+        example: true
+        type: boolean
+      is_blocked:
+        example: false
+        type: boolean
+      is_confirmed_by_admin:
+        example: true
+        type: boolean
+      min_required_tech_person:
+        example: 4
+        type: integer
+      motornumber:
+        example: aba3b-e3d8-4403-9751-1f04287c9d65
+        type: string
+      name:
+        example: Volvo RG
+        type: string
+      owner_id:
+        example: aba3b3ed-e3d8-4403-9751-1f04287c9d65
+        type: string
+      priceperhour:
+        example: 250
+        type: number
+      productionyear:
+        example: 1998
+        type: integer
+      speed:
+        example: 60
+        type: number
+      type:
+        description: rail, road, air, sailing
+        example: road
+        type: string
+    type: object
+host: localhost:8081
+info:
+  contact:
+    name: HeisenGo
+    url: https://github.com/HeisenGo
+  description: Vehicle Registeration & Reservaiton Domain
+  title: heisenbaba-VehicleDomain
+  version: "1.0"
+paths:
+  /vehicles:
+    get:
+      description: Get paginated list of vehicles with filters
+      parameters:
+      - description: Vehicle type
+        in: query
+        name: type
+        type: string
+      - description: Capacity
+        in: query
+        name: capacity
+        type: integer
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Page size
+        in: query
+        name: page_size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presenter.FullVehicleResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/presenter.Response'
+      summary: Get vehicles
+      tags:
+      - vehicles
+    post:
+      consumes:
+      - application/json
+      description: Create a new vehicle
+      parameters:
+      - description: Vehicle to create
+        in: body
+        name: vehicle
+        required: true
+        schema:
+          $ref: '#/definitions/presenter.CreateVehicleReq'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/presenter.CreateVehicleResponse'
+        "400":
+          description: 'error: bad request'
+          schema:
+            $ref: '#/definitions/presenter.Response'
+        "500":
+          description: 'error: internal server error'
+          schema:
+            $ref: '#/definitions/presenter.Response'
+      summary: Create a new vehicle
+      tags:
+      - vehicles
+  /vehicles/{id}:
+    delete:
+      description: Delete a vehicle by ID
+      parameters:
+      - description: Vehicle ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: 'error: bad request'
+          schema:
+            $ref: '#/definitions/presenter.Response'
+        "500":
+          description: 'error: internal server error'
+          schema:
+            $ref: '#/definitions/presenter.Response'
+      summary: Delete a vehicle by ID
+      tags:
+      - vehicles
+    put:
+      consumes:
+      - application/json
+      description: Update a vehicle by ID
+      parameters:
+      - description: Vehicle ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Vehicle to update
+        in: body
+        name: vehicle
+        required: true
+        schema:
+          $ref: '#/definitions/presenter.UpdateVehicleReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presenter.FullVehicleResponse'
+        "400":
+          description: 'error: bad request'
+          schema:
+            $ref: '#/definitions/presenter.Response'
+        "500":
+          description: 'error: internal server error'
+          schema:
+            $ref: '#/definitions/presenter.Response'
+      summary: Update a vehicle by ID
+      tags:
+      - vehicles
+  /vehicles/{id}/approve:
+    post:
+      description: Approve a vehicle by ID
+      parameters:
+      - description: Vehicle ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Vehicle approved successfully
+          schema:
+            $ref: '#/definitions/presenter.Response'
+        "400":
+          description: 'error: bad request'
+          schema:
+            $ref: '#/definitions/presenter.Response'
+        "500":
+          description: 'error: internal server error'
+          schema:
+            $ref: '#/definitions/presenter.Response'
+      summary: Approve a vehicle by ID
+      tags:
+      - vehicles
+  /vehicles/{id}/status:
+    patch:
+      consumes:
+      - application/json
+      description: Set the active status of a vehicle by ID
+      parameters:
+      - description: Vehicle ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Status to set
+        in: body
+        name: status
+        required: true
+        schema:
+          $ref: '#/definitions/presenter.UpdateVehicleReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Vehicle status updated successfully
+          schema:
+            $ref: '#/definitions/presenter.Response'
+        "400":
+          description: 'error: bad request'
+          schema:
+            $ref: '#/definitions/presenter.Response'
+        "500":
+          description: 'error: internal server error'
+          schema:
+            $ref: '#/definitions/presenter.Response'
+      summary: Set vehicle status by ID
+      tags:
+      - vehicles
+  /vehicles/owner:
+    get:
+      description: Get vehicles by owner ID
+      parameters:
+      - description: Owner ID
+        in: query
+        name: owner_id
+        required: true
+        type: string
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Page size
+        in: query
+        name: page_size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presenter.FullVehicleResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/presenter.Response'
+      summary: Get vehicles by owner ID
+      tags:
+      - vehicles
+  /vehicles/select:
+    get:
+      description: Select vehicles that match the criteria for passengers and cost
+      parameters:
+      - description: Number of passengers
+        in: query
+        name: num_passengers
+        required: true
+        type: integer
+      - description: Maximum cost
+        in: query
+        name: cost
+        required: true
+        type: number
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presenter.FullVehicleResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/presenter.Response'
+      summary: Select vehicles based on criteria
+      tags:
+      - vehicles
+swagger: "2.0"

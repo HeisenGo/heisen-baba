@@ -2,7 +2,6 @@ package reservation
 
 import (
 	"context"
-
 	"github.com/google/uuid"
 )
 
@@ -15,9 +14,10 @@ func NewOps(repo Repo) *Ops {
 }
 
 func (o *Ops) Create(ctx context.Context, reservation *Reservation) error {
-	if err := ValidateReservationStatus(reservation.Status); err != nil {
-		return err
-	}
+	reservation.Status = "pending"
+	// if err := ValidateReservationStatus(reservation.Status); err != nil {
+	// 	return err
+	// }
 
 	if err := ValidateAmount(reservation.TotalPrice); err != nil {
 		return err
@@ -26,6 +26,9 @@ func (o *Ops) Create(ctx context.Context, reservation *Reservation) error {
 	if err := ValidateDates(reservation.CheckIn, reservation.CheckOut); err != nil {
 		return err
 	}
+
+
+
 
 	return o.repo.CreateReservation(ctx, reservation)
 }

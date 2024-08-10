@@ -13,7 +13,6 @@ type ReservationCreateReq struct {
 	UserID     uuid.UUID `json:"user_id" validate:"required" example:"aba3b3ed-e3d8-4403-9751-1f04287c9d65"`
 	CheckIn    time.Time `json:"check_in" validate:"required" example:"2024-08-01T00:00:00Z"`
 	CheckOut   time.Time `json:"check_out" validate:"required" example:"2024-08-05T00:00:00Z"`
-	TotalPrice uint64    `json:"total_price" validate:"required" example:"50000"`
 }
 
 type ReservationResp struct {
@@ -44,7 +43,6 @@ func ReservationReqToReservationDomain(req *ReservationCreateReq) *reservation.R
 		UserID:     req.UserID,
 		CheckIn:    req.CheckIn,
 		CheckOut:   req.CheckOut,
-		TotalPrice: req.TotalPrice,
 	}
 }
 

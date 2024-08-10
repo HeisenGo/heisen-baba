@@ -1,0 +1,405 @@
+{
+	"info": {
+		"_postman_id": "39f3401b-e730-4881-b1bf-d2bdb65f2f8d",
+		"name": "trip_company",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
+		"_exporter_id": "36011393",
+		"_collection_link": "https://crimson-crater-930062.postman.co/workspace/My-Workspace~c6b8c913-7831-426c-8f7d-6b953b2d163d/collection/36011393-39f3401b-e730-4881-b1bf-d2bdb65f2f8d?action=share&source=collection_link&creator=36011393"
+	},
+	"item": [
+		{
+			"name": "company",
+			"item": [
+				{
+					"name": "company",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\"name\": \"sima\" ,\n\"desc\": \"we support air and road\",\n\"owner_id\": 3 ,\n\"address\": \"Iran Co\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "localhost:2245/api/v1/companies"
+					},
+					"response": []
+				},
+				{
+					"name": "all companies",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "localhost:2245/api/v1/companies"
+					},
+					"response": []
+				},
+				{
+					"name": "my companies",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "localhost:2245/api/v1/companies/my-companies/1"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete company",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": "localhost:2245/api/v1/companies/my-companies/2"
+					},
+					"response": []
+				},
+				{
+					"name": "update company",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"desc\":\"khdkhkdfhk jlsjjsfj\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "localhost:2245/api/v1/companies/my-companies/1"
+					},
+					"response": []
+				},
+				{
+					"name": "Block",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"is_blocked\":false\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "localhost:2245/api/v1/companies/block/1"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "techteam",
+			"item": [
+				{
+					"name": "get tech teams of a company",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "localhost:2245/api/v1/companies/tech-teams/1"
+					},
+					"response": []
+				},
+				{
+					"name": "new tech team",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\":\"sabalan\",\n    \"desc\":\"rail tech team\",\n    \"type\": \"rail\",\n    \"company_id\":1\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "localhost:2245/api/v1/companies/tech-teams"
+					},
+					"response": []
+				},
+				{
+					"name": "delete team",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\":\"sabalan\",\n    \"desc\":\"rail tech team\",\n    \"type\": \"rail\",\n    \"company_id\":1\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "localhost:2245/api/v1/companies/tech-teams/1"
+					},
+					"response": []
+				},
+				{
+					"name": "new memeber",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"team_id\": 2,\n    \"user_id\": 5,\n    \"email\": \"zahra4@gmail.com\",\n    \"role\": \"techiition\" \n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "localhost:2245/api/v1/companies/tech-members"
+					},
+					"response": []
+				},
+				{
+					"name": "confirm trip",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"is_confirmed\":true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "localhost:2245/api/v1/companies/confirm-trip/1"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Trip",
+			"item": [
+				{
+					"name": "new trip",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"company_id\": 1,\n  \"user_date\": \"2024-07-30 23:27:09\",\n  \"tour_date\": \"2024-07-25 23:27:09\",\n  \"user_price\": 90000,\n  \"agency_price\": 30000,\n  \"path_id\": 2,\n  \"min_pass\": 20,\n  //\"tech_team_id\": 1,\n  \"max_tickets\": 23,\n  \"start_date\": \"2024-08-09 23:27:09\",\n  \"penalty\": {\n    \"first_days\": 4,\n    \"first_percentage\": 10,\n    \"second_days\": 3,\n    \"second_percentage\": 20,\n    \"third_days\": 1,\n    \"third_percentage\": 30\n  }\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "localhost:2245/api/v1/companies/trips"
+					},
+					"response": []
+				},
+				{
+					"name": "trips get",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "localhost:2245/api/v1/companies/trips"
+					},
+					"response": []
+				},
+				{
+					"name": "trips agency",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "localhost:2245/api/v1/companies/agency-trips"
+					},
+					"response": []
+				},
+				{
+					"name": "company trips",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "localhost:2245/api/v1/companies/company-trips/1"
+					},
+					"response": []
+				},
+				{
+					"name": "one trip",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"is_confirmed\" : true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "localhost:2245/api/v1/companies/confirm-trip/1"
+					},
+					"response": []
+				},
+				{
+					"name": "set team",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"team_id\":2\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "localhost:2245/api/v1/companies/set-team/6"
+					},
+					"response": []
+				},
+				{
+					"name": "get one trip",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "localhost:2245/api/v1/companies/one-trip/1"
+					},
+					"response": []
+				},
+				{
+					"name": "finish trip",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"is_finished\":true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "localhost:2245/api/v1/companies/finish-trip/1"
+					},
+					"response": []
+				},
+				{
+					"name": "cancel_trip",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"is_canceled\":true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "localhost:2245/api/v1/companies/cancel-trip/6"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Ticket",
+			"item": [
+				{
+					"name": "Buy",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"trip_id\":6,\n    \"user_id\":7,\n    \"quantity\":6\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "localhost:2245/api/v1/companies/buy"
+					},
+					"response": []
+				},
+				{
+					"name": "cancel",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "localhost:2245/api/v1/companies/cancel-ticket/3"
+					},
+					"response": []
+				},
+				{
+					"name": "tickets",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "localhost:2245/api/v1/companies/user-tickets"
+					},
+					"response": []
+				},
+				{
+					"name": "agency tickets",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "localhost:2245/api/v1/companies/agency-tickets/1"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Vehicle Req",
+			"item": [
+				{
+					"name": "Create",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"trip_id\":1,\n    \"min_capacity\": 20,\n    \"Product_year\": 2019\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "localhost:2245/api/v1/companies/vehicle-req"
+					},
+					"response": []
+				},
+				{
+					"name": "del vr",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": "localhost:2245/api/v1/companies/vehicle-req/1"
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}

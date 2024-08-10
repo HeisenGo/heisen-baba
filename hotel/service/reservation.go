@@ -4,8 +4,6 @@ import (
 	"context"
 	"hotel/internal/invoice"
 	"hotel/internal/reservation"
-	"time"
-
 	"github.com/google/uuid"
 )
 
@@ -23,27 +21,8 @@ func NewReservationService(reservationOps *reservation.Ops, invoiceOps *invoice.
 
 func (s *ReservationService) CreateReservation(ctx context.Context, res *reservation.Reservation) error {
 	// Create the reservation
-	err := s.reservationOps.Create(ctx, res)
-	if err != nil {
-		return err
-	}
 
-	// Create the invoice for the reservation
-	inv := &invoice.Invoice{
-		ReservationID: res.ID,
-		IssueDate:     time.Now(),
-		Amount:        res.TotalPrice,
-		UserID:        res.UserID,
-		OwnerID:       res.OwnerID,
-		Paid:          false,
-	}
-
-	err = s.invoiceOps.Create(ctx, inv)
-	if err != nil {
-		return err
-	}
-	// TO DO : Check the Paid status of invoice
-	return nil
+	return s.reservationOps.Create(ctx,res)
 }
 
 func (s *ReservationService) GetReservationsByHotelOwner(ctx context.Context, ownerID uuid.UUID, page, pageSize int) ([]reservation.Reservation, int, error) {

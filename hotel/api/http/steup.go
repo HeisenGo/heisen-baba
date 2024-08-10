@@ -17,12 +17,21 @@ import (
 func Run(cfg config.Config, app *service.AppContainer) {
 	fiberApp := fiber.New()
 	api := fiberApp.Group("/api/v1", middlewares.SetUserContext())
+	registerGlobalRoutes(api)
+	api.Use(middlewares.Auth(app.AuthClient()))
 	registerHotelRoutes(api, app)
 	registerRoomRoutes(api, app)
 	registerReservationRoutes(api, app)
 	fiberApp.Get("/swagger/*", fiberSwagger.WrapHandler)
 
-	log.Fatal(fiberApp.Listen(fmt.Sprintf("%s:%d", cfg.Server.Host, cfg.Server.HttpPort)))
+	log.Fatal(fiberApp.Listen(fmt.Sprintf("%s:%d", cfg.Server.Host, cfg.Server.HTTPPort)))
+}
+
+func registerGlobalRoutes(router fiber.Router) {
+	// Setup a simple health check route
+	router.Get("/health", func(c *fiber.Ctx) error {
+		return c.SendString("Service is up and running")
+	})
 }
 
 func registerHotelRoutes(router fiber.Router, app *service.AppContainer) {
@@ -78,10 +87,10 @@ func registerRoomRoutes(router fiber.Router, app *service.AppContainer) {
 }
 
 func registerReservationRoutes(router fiber.Router, app *service.AppContainer) {
-	router = router.Group("/reservations")
+	router = router.Group("/hotels/reservations")
 	router.Post("",
 		middlewares.SetTransaction(adapters.NewGormCommitter(app.RawDBConnection())),
-		handlers.CreateReservation(app.ReservationService()),
+		handlers.CreateRoomReservation(app.RoomService()),
 	)
 	router.Get("/hotel",
 		middlewares.SetTransaction(adapters.NewGormCommitter(app.RawDBConnection())),

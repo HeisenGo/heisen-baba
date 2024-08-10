@@ -1,0 +1,843 @@
+{
+	"info": {
+		"_postman_id": "2243fb64-8f78-4138-be96-943e58185a60",
+		"name": "heisen-baba",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "37232773"
+	},
+	"item": [
+		{
+			"name": "terminals",
+			"item": [
+				{
+					"name": "paths",
+					"item": [
+						{
+							"name": "create",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\n  \"from_terminal_id\":1,\n\n\t\"to_terminal_id\":6,\n\n\"distance_km\":120, \n\n\"code\":\"ZT1R\",\n\n\"name\":\"zanjan tehran road\"\n}\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "localhost/api/v1/terminals/paths",
+									"host": [
+										"localhost"
+									],
+									"path": [
+										"api",
+										"v1",
+										"terminals",
+										"paths"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "get by id",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "localhost/api/v1/terminals/paths/1",
+									"host": [
+										"localhost"
+									],
+									"path": [
+										"api",
+										"v1",
+										"terminals",
+										"paths",
+										"1"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "get list",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "localhost/api/v1/terminals/paths?from=Tehran",
+									"host": [
+										"localhost"
+									],
+									"path": [
+										"api",
+										"v1",
+										"terminals",
+										"paths"
+									],
+									"query": [
+										{
+											"key": "from",
+											"value": "Tehran"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "update",
+							"request": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"city\": \"tehran\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "localhost/api/v1/terminals/4",
+									"host": [
+										"localhost"
+									],
+									"path": [
+										"api",
+										"v1",
+										"terminals",
+										"4"
+									],
+									"query": [
+										{
+											"key": "type",
+											"value": "air",
+											"disabled": true
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "delete",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "localhost/api/v1/terminals/4",
+									"host": [
+										"localhost"
+									],
+									"path": [
+										"api",
+										"v1",
+										"terminals",
+										"4"
+									],
+									"query": [
+										{
+											"key": "type",
+											"value": "air",
+											"disabled": true
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "terminals",
+					"item": [
+						{
+							"name": "create",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"name\": \"West Terminal\",\n  \n   \"type\": \"road\",\n \n   \"city\": \"Tehran\",\n \n   \"country\": \"Iran\"\n \n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "localhost/api/v1/terminals",
+									"host": [
+										"localhost"
+									],
+									"path": [
+										"api",
+										"v1",
+										"terminals"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "get",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "localhost/api/v1/terminals?country=Iran&city=Tehrann",
+									"host": [
+										"localhost"
+									],
+									"path": [
+										"api",
+										"v1",
+										"terminals"
+									],
+									"query": [
+										{
+											"key": "country",
+											"value": "Iran"
+										},
+										{
+											"key": "city",
+											"value": "Tehrann"
+										},
+										{
+											"key": "type",
+											"value": "air",
+											"disabled": true
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "update terminal",
+							"request": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"city\": \"tehran\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "localhost/api/v1/terminals/4",
+									"host": [
+										"localhost"
+									],
+									"path": [
+										"api",
+										"v1",
+										"terminals",
+										"4"
+									],
+									"query": [
+										{
+											"key": "type",
+											"value": "air",
+											"disabled": true
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "delete terminal",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "localhost/api/v1/terminals/4",
+									"host": [
+										"localhost"
+									],
+									"path": [
+										"api",
+										"v1",
+										"terminals",
+										"4"
+									],
+									"query": [
+										{
+											"key": "type",
+											"value": "air",
+											"disabled": true
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "bank",
+			"item": [
+				{
+					"name": "add card to wallet",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"number\": \"eifygudc\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "0.0.0.0:8084/api/v1/bank/wallets/add-card",
+							"host": [
+								"0",
+								"0",
+								"0",
+								"0"
+							],
+							"port": "8084",
+							"path": [
+								"api",
+								"v1",
+								"bank",
+								"wallets",
+								"add-card"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "cards",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "0.0.0.0:8084/api/v1/bank/cards",
+							"host": [
+								"0",
+								"0",
+								"0",
+								"0"
+							],
+							"port": "8084",
+							"path": [
+								"api",
+								"v1",
+								"bank",
+								"cards"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "deposit",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"card_number\": \"4532015112830369\",\n    \"amount\": 100000\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "0.0.0.0:8084/api/v1/bank/deposit",
+							"host": [
+								"0",
+								"0",
+								"0",
+								"0"
+							],
+							"port": "8084",
+							"path": [
+								"api",
+								"v1",
+								"bank",
+								"deposit"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "withdraw",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MjI0NjE0NzAsIlVzZXJJRCI6IjMxMDg3YTIzLWRiYzctNGVkNC05MGUxLWYzMzY3M2FhNDBmMyIsIklzQWRtaW4iOmZhbHNlLCJSb2xlcyI6WyJ1c2VyIl0sIlNlY3Rpb25zIjpudWxsfQ.RC_zsqV7wwtNIiiDcX3uknkt0n2dXqQZk8oOtx7Iv9JplPcYvS6F5-K1fROKpHJyxQyr4R0-QiWUglDAPa5rjA",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"card_number\": \"4532015112830369\",\n    \"amount\": -1000\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "0.0.0.0:8084/api/v1/bank/withdraw",
+							"host": [
+								"0",
+								"0",
+								"0",
+								"0"
+							],
+							"port": "8084",
+							"path": [
+								"api",
+								"v1",
+								"bank",
+								"withdraw"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "my-wallet",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MjI0NjE0NzAsIlVzZXJJRCI6IjMxMDg3YTIzLWRiYzctNGVkNC05MGUxLWYzMzY3M2FhNDBmMyIsIklzQWRtaW4iOmZhbHNlLCJSb2xlcyI6WyJ1c2VyIl0sIlNlY3Rpb25zIjpudWxsfQ.RC_zsqV7wwtNIiiDcX3uknkt0n2dXqQZk8oOtx7Iv9JplPcYvS6F5-K1fROKpHJyxQyr4R0-QiWUglDAPa5rjA",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "0.0.0.0:8084/api/v1/bank/my-wallet",
+							"host": [
+								"0",
+								"0",
+								"0",
+								"0"
+							],
+							"port": "8084",
+							"path": [
+								"api",
+								"v1",
+								"bank",
+								"my-wallet"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"auth": {
+				"type": "bearer",
+				"bearer": [
+					{
+						"key": "token",
+						"value": "eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MjMwNjgzMDAsIlVzZXJJRCI6ImVjZmU0YTc3LWExYzMtNGRkOS1hYmZjLTMzNDliZDRiOWRiMiIsIklzQWRtaW4iOmZhbHNlLCJSb2xlcyI6WyJ1c2VyIl0sIlNlY3Rpb25zIjpudWxsfQ.J-YsLGUKeC1-1zoqgqLm7cGp8vUdQNGIN6qBT7gE4Zgb_S8t-1NkDvsx9aoCV9iTimywqpMqev9F_2O_ku6sIg",
+						"type": "string"
+					}
+				]
+			},
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "auth",
+			"item": [
+				{
+					"name": "register",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"kiarash@gmail.com\",\n    \"password\": \"Ki@rash1\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "0.0.0.0:8989/api/v1/auth/register",
+							"host": [
+								"0",
+								"0",
+								"0",
+								"0"
+							],
+							"port": "8989",
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "login",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "0.0.0.0:8989/api/v1/auth/login",
+							"host": [
+								"0",
+								"0",
+								"0",
+								"0"
+							],
+							"port": "8989",
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "hotel",
+			"item": [
+				{
+					"name": "room",
+					"item": [
+						{
+							"name": "create",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"hotel_id\": 1,\n  \"name\": \"Deluxe Suite\",\n  \"agency_price\": 15000,\n  \"user_price\": 20000,\n  \"facilities\": \"WiFi, TV, Minibar\",\n  \"capacity\": 2,\n  \"is_available\": true\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "localhost/api/v1/hotels/rooms",
+									"host": [
+										"localhost"
+									],
+									"path": [
+										"api",
+										"v1",
+										"hotels",
+										"rooms"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "create",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MjMwNjMzNDYsIlVzZXJJRCI6IjEyMGRlYTE3LTRjY2YtNDgzNC04MTMxLTA2NWYxM2VkYzdiZCIsIklzQWRtaW4iOmZhbHNlLCJSb2xlcyI6WyJ1c2VyIl0sIlNlY3Rpb25zIjpudWxsfQ.DG5bOhWCueCBu-fxDh9djD6n-XmR_iJ8iE2Ykr4_6OLnrcd9pIwCmklppC_FpsGHx4E556MxCWxfSIaeb2FZrw",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Grand Hotel\",\n  \"city\": \"New York\",\n  \"country\": \"USA\",\n  \"details\": \"A luxurious hotel in the heart of the city.\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost/api/v1/hotels/",
+							"host": [
+								"localhost"
+							],
+							"path": [
+								"api",
+								"v1",
+								"hotels",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MjMwNjMzNDYsIlVzZXJJRCI6IjEyMGRlYTE3LTRjY2YtNDgzNC04MTMxLTA2NWYxM2VkYzdiZCIsIklzQWRtaW4iOmZhbHNlLCJSb2xlcyI6WyJ1c2VyIl0sIlNlY3Rpb25zIjpudWxsfQ.DG5bOhWCueCBu-fxDh9djD6n-XmR_iJ8iE2Ykr4_6OLnrcd9pIwCmklppC_FpsGHx4E556MxCWxfSIaeb2FZrw",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"mamad Hotel\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost/api/v1/hotels/1",
+							"host": [
+								"localhost"
+							],
+							"path": [
+								"api",
+								"v1",
+								"hotels",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MjMwNjMzNDYsIlVzZXJJRCI6IjEyMGRlYTE3LTRjY2YtNDgzNC04MTMxLTA2NWYxM2VkYzdiZCIsIklzQWRtaW4iOmZhbHNlLCJSb2xlcyI6WyJ1c2VyIl0sIlNlY3Rpb25zIjpudWxsfQ.DG5bOhWCueCBu-fxDh9djD6n-XmR_iJ8iE2Ykr4_6OLnrcd9pIwCmklppC_FpsGHx4E556MxCWxfSIaeb2FZrw",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"mamad Hotel\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost/api/v1/hotels/",
+							"host": [
+								"localhost"
+							],
+							"path": [
+								"api",
+								"v1",
+								"hotels",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "reserv",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"check_in\": \"2024-08-01T00:00:00Z\",\n  \"check_out\": \"2024-08-05T00:00:00Z\",\n  \"room_id\": 1,\n  \"status\": \"booked\",\n  \"total_price\": 50000,\n  \"user_id\": \"aba3b3ed-e3d8-4403-9751-1f04287c9d65\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost/api/v1/hotels/reservations",
+							"host": [
+								"localhost"
+							],
+							"path": [
+								"api",
+								"v1",
+								"hotels",
+								"reservations"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"auth": {
+				"type": "bearer",
+				"bearer": [
+					{
+						"key": "token",
+						"value": "eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MjMwNjgzMDAsIlVzZXJJRCI6ImVjZmU0YTc3LWExYzMtNGRkOS1hYmZjLTMzNDliZDRiOWRiMiIsIklzQWRtaW4iOmZhbHNlLCJSb2xlcyI6WyJ1c2VyIl0sIlNlY3Rpb25zIjpudWxsfQ.J-YsLGUKeC1-1zoqgqLm7cGp8vUdQNGIN6qBT7gE4Zgb_S8t-1NkDvsx9aoCV9iTimywqpMqev9F_2O_ku6sIg",
+						"type": "string"
+					}
+				]
+			},
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		}
+	]
+}
